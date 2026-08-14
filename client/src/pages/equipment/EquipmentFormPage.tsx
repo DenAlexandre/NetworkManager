@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createEquipment, getEquipment, updateEquipment } from "../../api/equipment";
-import { getRoom } from "../../api/rooms";
+import { listRooms } from "../../api/rooms";
+import type { Room } from "../../api/rooms";
 import { listDeviceTypes } from "../../api/deviceTypes";
 import type { DeviceType } from "../../api/deviceTypes";
 import { listHardwareModels } from "../../api/hardwareModels";
@@ -10,15 +11,14 @@ import type { HardwareModel } from "../../api/hardwareModels";
 import { ApiError } from "../../api/client";
 
 export function EquipmentFormPage() {
-  const { siteId, zoneId, roomId, equipmentId } = useParams();
-  const isEdit = Boolean(equipmentId);
+  const { id } = useParams();
+  const isEdit = Boolean(id);
   const navigate = useNavigate();
 
-  const [roomName, setRoomName] = useState("");
-  const [zoneName, setZoneName] = useState("");
-  const [siteName, setSiteName] = useState("");
+  const [rooms, setRooms] = useState<Room[]>([]);
   const [deviceTypes, setDeviceTypes] = useState<DeviceType[]>([]);
   const [hardwareModels, setHardwareModels] = useState<HardwareModel[]>([]);
+  const [roomId, setRoomId] = useState<number | "">("");
   const [deviceTypeId, setDeviceTypeId] = useState<number | "">("");
   const [hardwareModelId, setHardwareModelId] = useState<number | "">("");
   const [name, setName] = useState("");
@@ -28,22 +28,22 @@ export function EquipmentFormPage() {
 
   useEffect(() => {
     async function load() {
-      const [{ room }, { deviceTypes: dt }, { hardwareModels: hm }] = await Promise.all([
-        getRoom(Number(roomId)),
+      const [{ rooms: r }, { deviceTypes: dt }, { hardwareModels: hm }] = await Promise.all([
+        listRooms(),
         listDeviceTypes(),
         listHardwareModels(),
       ]);
-      setRoomName(room.name);
-      setZoneName(room.zoneName);
-      setSiteName(room.siteName);
+      setRooms(r);
       setDeviceTypes(dt);
       setHardwareModels(hm);
       if (isEdit) {
-        const { equipment } = await getEquipment(Number(equipmentId));
+        const { equipment } = await getEquipment(Number(id));
+        setRoomId(equipment.roomId);
         setDeviceTypeId(equipment.deviceTypeId);
         setHardwareModelId(equipment.hardwareModelId);
         setName(equipment.name);
       } else {
+        if (r.length > 0) setRoomId(r[0].id);
         if (dt.length > 0) setDeviceTypeId(dt[0].id);
         if (hm.length > 0) setHardwareModelId(hm[0].id);
       }
@@ -53,11 +53,11 @@ export function EquipmentFormPage() {
       setError(err instanceof ApiError ? err.message : "Erreur de chargement.");
       setLoading(false);
     });
-  }, [roomId, equipmentId, isEdit]);
+  }, [id, isEdit]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (deviceTypeId === "" || hardwareModelId === "") return;
+    if (roomId === "" || deviceTypeId === "" || hardwareModelId === "") return;
     setError(null);
     setSubmitting(true);
     try {
@@ -68,11 +68,11 @@ export function EquipmentFormPage() {
         name,
       };
       if (isEdit) {
-        await updateEquipment(Number(equipmentId), input);
+        await updateEquipment(Number(id), input);
       } else {
         await createEquipment(input);
       }
-      navigate(`/sites/${siteId}/zones/${zoneId}/rooms/${roomId}`);
+      navigate("/equipment");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Erreur lors de l'enregistrement.");
     } finally {
@@ -85,13 +85,20 @@ export function EquipmentFormPage() {
   return (
     <div className="form-page">
       <h1>{isEdit ? "Modifier le matériel" : "Ajouter du matériel"}</h1>
-      <p className="muted">
-        {siteName} / {zoneName} / {roomName}
-      </p>
       <form onSubmit={handleSubmit}>
         <label>
           Nom
           <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+        </label>
+        <label>
+          Salle
+          <select value={roomId} onChange={(e) => setRoomId(Number(e.target.value))} required>
+            {rooms.map((room) => (
+              <option key={room.id} value={room.id}>
+                {room.siteName} / {room.zoneName} / {room.name}
+              </option>
+            ))}
+          </select>
         </label>
         <label>
           Type de matériel
@@ -118,11 +125,7 @@ export function EquipmentFormPage() {
           <button type="submit" disabled={submitting}>
             Enregistrer
           </button>
-          <button
-            type="button"
-            className="btn-outline"
-            onClick={() => navigate(`/sites/${siteId}/zones/${zoneId}/rooms/${roomId}`)}
-          >
+          <button type="button" className="btn-outline" onClick={() => navigate("/equipment")}>
             Annuler
           </button>
         </div>

@@ -22,7 +22,10 @@ import { ZoneFormPage } from "./pages/sites/ZoneFormPage";
 import { ZoneDetailPage } from "./pages/sites/ZoneDetailPage";
 import { RoomFormPage } from "./pages/sites/RoomFormPage";
 import { RoomDetailPage } from "./pages/sites/RoomDetailPage";
-import { EquipmentFormPage } from "./pages/sites/EquipmentFormPage";
+import { EquipmentLayout } from "./pages/equipment/EquipmentLayout";
+import { EquipmentListPage } from "./pages/equipment/EquipmentListPage";
+import { EquipmentFormPage } from "./pages/equipment/EquipmentFormPage";
+import { EquipmentLinksPage } from "./pages/equipment/EquipmentLinksPage";
 
 function App() {
   return (
@@ -71,11 +74,19 @@ function App() {
             <Route path=":siteId/zones/:zoneId/rooms/new" element={<RoomFormPage />} />
             <Route path=":siteId/zones/:zoneId/rooms/:roomId/edit" element={<RoomFormPage />} />
             <Route path=":siteId/zones/:zoneId/rooms/:roomId" element={<RoomDetailPage />} />
-            <Route path=":siteId/zones/:zoneId/rooms/:roomId/equipment/new" element={<EquipmentFormPage />} />
-            <Route
-              path=":siteId/zones/:zoneId/rooms/:roomId/equipment/:equipmentId/edit"
-              element={<EquipmentFormPage />}
-            />
+          </Route>
+          <Route
+            path="equipment"
+            element={
+              <AdminRoute>
+                <EquipmentLayout />
+              </AdminRoute>
+            }
+          >
+            <Route index element={<EquipmentListPage />} />
+            <Route path="new" element={<EquipmentFormPage />} />
+            <Route path=":id/edit" element={<EquipmentFormPage />} />
+            <Route path="links" element={<EquipmentLinksPage />} />
           </Route>
         </Route>
       </Routes>
