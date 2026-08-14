@@ -467,6 +467,17 @@ label {
   color: var(--text-h);
 }
 
+.checkbox-field {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkbox-field input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
 input,
 textarea {
   font: inherit;
@@ -537,15 +548,15 @@ textarea {
   font-size: 14px;
 }
 
-/* sites tree */
+/* left tree panel */
 
-.sites-shell {
+.tree-shell {
   display: flex;
   align-items: flex-start;
   gap: 24px;
 }
 
-.sites-tree-panel {
+.tree-panel {
   width: 240px;
   flex-shrink: 0;
   background: var(--surface);
@@ -559,7 +570,7 @@ textarea {
   overflow: auto;
 }
 
-.sites-tree-panel h2 {
+.tree-panel h2 {
   margin: 0 0 10px;
   font-size: 13px;
   text-transform: uppercase;
@@ -639,12 +650,18 @@ textarea {
   padding: 4px 6px;
 }
 
+.tree-via {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-left: 4px;
+}
+
 @media (max-width: 900px) {
-  .sites-shell {
+  .tree-shell {
     flex-direction: column;
   }
 
-  .sites-tree-panel {
+  .tree-panel {
     width: 100%;
     position: static;
     max-height: none;

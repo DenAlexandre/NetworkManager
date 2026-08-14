@@ -4,11 +4,14 @@ export interface HardwareModel {
   id: number;
   brandId: number;
   brandName: string;
+  deviceTypeId: number;
+  deviceType: string;
   name: string;
 }
 
 export interface HardwareModelInput {
   brandId: number;
+  deviceTypeId: number;
   name: string;
 }
 

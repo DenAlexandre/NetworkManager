@@ -26,6 +26,8 @@ import { EquipmentLayout } from "./pages/equipment/EquipmentLayout";
 import { EquipmentListPage } from "./pages/equipment/EquipmentListPage";
 import { EquipmentFormPage } from "./pages/equipment/EquipmentFormPage";
 import { EquipmentLinksPage } from "./pages/equipment/EquipmentLinksPage";
+import { ApisListPage } from "./pages/apis/ApisListPage";
+import { ApiFormPage } from "./pages/apis/ApiFormPage";
 
 function App() {
   return (
@@ -88,6 +90,30 @@ function App() {
             <Route path=":id/edit" element={<EquipmentFormPage />} />
             <Route path="links" element={<EquipmentLinksPage />} />
           </Route>
+          <Route
+            path="apis"
+            element={
+              <AdminRoute>
+                <ApisListPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="apis/new"
+            element={
+              <AdminRoute>
+                <ApiFormPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="apis/:id/edit"
+            element={
+              <AdminRoute>
+                <ApiFormPage />
+              </AdminRoute>
+            }
+          />
         </Route>
       </Routes>
     </AuthProvider>

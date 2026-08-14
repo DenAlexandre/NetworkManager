@@ -49,6 +49,15 @@ CREATE TABLE IF NOT EXISTS hardware_models (
   UNIQUE (brand_id, name)
 );
 
+-- Mise a niveau des bases existantes creees avant l'ajout du type de materiel.
+ALTER TABLE hardware_models ADD COLUMN IF NOT EXISTS device_type_id INTEGER REFERENCES device_types(id);
+
+UPDATE hardware_models
+SET device_type_id = (SELECT id FROM device_types ORDER BY id LIMIT 1)
+WHERE device_type_id IS NULL;
+
+ALTER TABLE hardware_models ALTER COLUMN device_type_id SET NOT NULL;
+
 -- Suppression du module "Materiel reseau" (Equipements/Constructeurs) : plus reference par l'app.
 DROP TABLE IF EXISTS network_equipment;
 DROP TABLE IF EXISTS manufacturers;
@@ -143,6 +152,14 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_equipment_links_parent_port ON equipment_li
 CREATE UNIQUE INDEX IF NOT EXISTS ux_equipment_links_child_port ON equipment_links(child_equipment_id, child_port_id);
 CREATE INDEX IF NOT EXISTS ix_equipment_links_parent ON equipment_links(parent_equipment_id);
 CREATE INDEX IF NOT EXISTS ix_equipment_links_child ON equipment_links(child_equipment_id);
+
+CREATE TABLE IF NOT EXISTS apis (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(200) NOT NULL,
+  migration_date DATE,
+  completed BOOLEAN NOT NULL DEFAULT false,
+  doe_up_to_date BOOLEAN NOT NULL DEFAULT false
+);
 `;
 
 async function migrate() {

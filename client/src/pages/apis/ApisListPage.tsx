@@ -1,26 +1,22 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { deleteHardwareModel, listHardwareModels } from "../../api/hardwareModels";
-import type { HardwareModel } from "../../api/hardwareModels";
-import { listPorts } from "../../api/ports";
+import { deleteApi, listApis } from "../../api/apis";
+import type { Api } from "../../api/apis";
 import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
 import { SortableHeader } from "../../components/SortableHeader";
 
-function searchFields(item: HardwareModel) {
-  return [item.name, item.brandName, item.deviceType];
+function searchFields(item: Api) {
+  return [item.name];
 }
 
-function formatPortCounts(counts: Record<string, number> | undefined) {
-  if (!counts) return "—";
-  const entries = Object.entries(counts);
-  if (entries.length === 0) return "—";
-  return entries.map(([name, count]) => `${name} : ${count}`).join(" · ");
+function formatDate(value: string | null) {
+  if (!value) return "—";
+  return new Date(value).toLocaleDateString("fr-FR");
 }
 
-export function HardwareModelsListPage() {
-  const [items, setItems] = useState<HardwareModel[]>([]);
-  const [portCounts, setPortCounts] = useState<Record<number, Record<string, number>>>({});
+export function ApisListPage() {
+  const [items, setItems] = useState<Api[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { search, setSearch, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, searchFields);
@@ -32,14 +28,8 @@ export function HardwareModelsListPage() {
   async function load() {
     setLoading(true);
     try {
-      const [{ hardwareModels }, { ports }] = await Promise.all([listHardwareModels(), listPorts()]);
-      setItems(hardwareModels);
-      const counts: Record<number, Record<string, number>> = {};
-      for (const port of ports) {
-        const byType = (counts[port.hardwareModelId] ??= {});
-        byType[port.portType] = (byType[port.portType] || 0) + 1;
-      }
-      setPortCounts(counts);
+      const { apis } = await listApis();
+      setItems(apis);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Erreur de chargement.");
     } finally {
@@ -48,9 +38,9 @@ export function HardwareModelsListPage() {
   }
 
   async function handleDelete(id: number) {
-    if (!window.confirm("Supprimer ce matériel ?")) return;
+    if (!window.confirm("Supprimer cette API ?")) return;
     try {
-      await deleteHardwareModel(id);
+      await deleteApi(id);
       setItems((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
       alert(err instanceof ApiError ? err.message : "Erreur lors de la suppression.");
@@ -62,8 +52,8 @@ export function HardwareModelsListPage() {
   return (
     <div className="card">
       <div className="page-header">
-        <h2>Matériel</h2>
-        <Link to="/data-types/hardware-models/new" className="btn">
+        <h1>Gestion des API</h1>
+        <Link to="/apis/new" className="btn">
           Ajouter
         </Link>
       </div>
@@ -81,20 +71,14 @@ export function HardwareModelsListPage() {
           <tr>
             <SortableHeader label="Nom" field="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
             <SortableHeader
-              label="Constructeur"
-              field="brandName"
+              label="Date de migration"
+              field="migrationDate"
               sortKey={sortKey}
               sortDir={sortDir}
               onSort={toggleSort}
             />
-            <SortableHeader
-              label="Type"
-              field="deviceType"
-              sortKey={sortKey}
-              sortDir={sortDir}
-              onSort={toggleSort}
-            />
-            <th>Ports</th>
+            <th>Terminé</th>
+            <th>DOE à jour</th>
             <th></th>
           </tr>
         </thead>
@@ -102,11 +86,11 @@ export function HardwareModelsListPage() {
           {rows.map((item) => (
             <tr key={item.id}>
               <td>{item.name}</td>
-              <td>{item.brandName}</td>
-              <td>{item.deviceType}</td>
-              <td>{formatPortCounts(portCounts[item.id])}</td>
+              <td>{formatDate(item.migrationDate)}</td>
+              <td>{item.completed ? "Oui" : "Non"}</td>
+              <td>{item.doeUpToDate ? "Oui" : "Non"}</td>
               <td className="table-actions">
-                <Link to={`/data-types/hardware-models/${item.id}/edit`}>Modifier</Link>
+                <Link to={`/apis/${item.id}/edit`}>Modifier</Link>
                 <button className="danger" onClick={() => handleDelete(item.id)}>
                   Supprimer
                 </button>
@@ -115,7 +99,7 @@ export function HardwareModelsListPage() {
           ))}
         </tbody>
       </table>
-      {rows.length === 0 && <p className="muted">Aucun matériel enregistré.</p>}
+      {rows.length === 0 && <p className="muted">Aucune API enregistrée.</p>}
     </div>
   );
 }

@@ -14,6 +14,7 @@ import zoneRoutes from "./routes/zones";
 import roomRoutes from "./routes/rooms";
 import equipmentRoutes from "./routes/equipment";
 import equipmentLinkRoutes from "./routes/equipmentLinks";
+import apiRoutes from "./routes/apis";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -34,6 +35,7 @@ app.use("/api/zones", zoneRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/equipment", equipmentRoutes);
 app.use("/api/equipment-links", equipmentLinkRoutes);
+app.use("/api/apis", apiRoutes);
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

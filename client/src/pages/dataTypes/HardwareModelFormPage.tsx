@@ -8,6 +8,8 @@ import {
 } from "../../api/hardwareModels";
 import { listBrands } from "../../api/brands";
 import type { Brand } from "../../api/brands";
+import { listDeviceTypes } from "../../api/deviceTypes";
+import type { DeviceType } from "../../api/deviceTypes";
 import { bulkCreatePorts, deletePort, listPorts } from "../../api/ports";
 import type { Port } from "../../api/ports";
 import { listLinkTypes } from "../../api/linkTypes";
@@ -21,6 +23,8 @@ export function HardwareModelFormPage() {
 
   const [brands, setBrands] = useState<Brand[]>([]);
   const [brandId, setBrandId] = useState<number | "">("");
+  const [deviceTypes, setDeviceTypes] = useState<DeviceType[]>([]);
+  const [deviceTypeId, setDeviceTypeId] = useState<number | "">("");
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,18 +39,21 @@ export function HardwareModelFormPage() {
 
   useEffect(() => {
     async function load() {
-      const { brands: list } = await listBrands();
+      const [{ brands: list }, { deviceTypes: dtList }] = await Promise.all([listBrands(), listDeviceTypes()]);
       setBrands(list);
+      setDeviceTypes(dtList);
       if (isEdit) {
         const { hardwareModel } = await getHardwareModel(Number(id));
         setBrandId(hardwareModel.brandId);
+        setDeviceTypeId(hardwareModel.deviceTypeId);
         setName(hardwareModel.name);
         await loadPorts();
         const { linkTypes: ltList } = await listLinkTypes();
         setLinkTypes(ltList);
         if (ltList.length > 0) setBulkLinkTypeId(ltList[0].id);
-      } else if (list.length > 0) {
-        setBrandId(list[0].id);
+      } else {
+        if (list.length > 0) setBrandId(list[0].id);
+        if (dtList.length > 0) setDeviceTypeId(dtList[0].id);
       }
       setLoading(false);
     }
@@ -63,11 +70,11 @@ export function HardwareModelFormPage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (brandId === "") return;
+    if (brandId === "" || deviceTypeId === "") return;
     setError(null);
     setSubmitting(true);
     try {
-      const input = { brandId: Number(brandId), name };
+      const input = { brandId: Number(brandId), deviceTypeId: Number(deviceTypeId), name };
       if (isEdit) {
         await updateHardwareModel(Number(id), input);
       } else {
@@ -123,6 +130,16 @@ export function HardwareModelFormPage() {
               {brands.map((b) => (
                 <option key={b.id} value={b.id}>
                   {b.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Type de matériel
+            <select value={deviceTypeId} onChange={(e) => setDeviceTypeId(Number(e.target.value))} required>
+              {deviceTypes.map((dt) => (
+                <option key={dt.id} value={dt.id}>
+                  {dt.name}
                 </option>
               ))}
             </select>

@@ -8,18 +8,29 @@ router.use(requireAuth, requireRole("admin"));
 
 const hardwareModelSchema = z.object({
   brandId: z.number().int("Le constructeur est requis."),
+  deviceTypeId: z.number().int("Le type de matériel est requis."),
   name: z.string().min(1, "Le nom est requis."),
 });
 
 const HARDWARE_MODEL_SELECT = `
-  SELECT hm.id, hm.brand_id AS "brandId", b.name AS "brandName", hm.name
+  SELECT hm.id, hm.brand_id AS "brandId", b.name AS "brandName",
+         hm.device_type_id AS "deviceTypeId", dt.name AS "deviceType", hm.name
   FROM hardware_models hm
   JOIN brands b ON b.id = hm.brand_id
+  JOIN device_types dt ON dt.id = hm.device_type_id
 `;
 
 function parseId(raw: string) {
   const id = Number(raw);
   return Number.isInteger(id) ? id : null;
+}
+
+function fkErrorMessage(err: unknown) {
+  const constraint = (err as { constraint?: string }).constraint || "";
+  if (constraint.includes("device_type")) {
+    return "Type de matériel introuvable.";
+  }
+  return "Constructeur introuvable.";
 }
 
 router.get("/", async (_req, res) => {
@@ -45,7 +56,7 @@ router.post("/", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
-  const { brandId, name } = parsed.data;
+  const { brandId, deviceTypeId, name } = parsed.data;
 
   const existing = await pool.query(
     "SELECT id FROM hardware_models WHERE brand_id = $1 AND name = $2",
@@ -57,14 +68,14 @@ router.post("/", async (req, res) => {
 
   try {
     const inserted = await pool.query(
-      "INSERT INTO hardware_models (brand_id, name) VALUES ($1, $2) RETURNING id",
-      [brandId, name]
+      "INSERT INTO hardware_models (brand_id, device_type_id, name) VALUES ($1, $2, $3) RETURNING id",
+      [brandId, deviceTypeId, name]
     );
     const result = await pool.query(`${HARDWARE_MODEL_SELECT} WHERE hm.id = $1`, [inserted.rows[0].id]);
     res.status(201).json({ hardwareModel: result.rows[0] });
   } catch (err) {
     if ((err as { code?: string }).code === "23503") {
-      return res.status(400).json({ error: "Constructeur introuvable." });
+      return res.status(400).json({ error: fkErrorMessage(err) });
     }
     throw err;
   }
@@ -79,7 +90,7 @@ router.put("/:id", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
-  const { brandId, name } = parsed.data;
+  const { brandId, deviceTypeId, name } = parsed.data;
 
   const existing = await pool.query(
     "SELECT id FROM hardware_models WHERE brand_id = $1 AND name = $2 AND id != $3",
@@ -91,8 +102,8 @@ router.put("/:id", async (req, res) => {
 
   try {
     const updated = await pool.query(
-      "UPDATE hardware_models SET brand_id = $1, name = $2 WHERE id = $3 RETURNING id",
-      [brandId, name, id]
+      "UPDATE hardware_models SET brand_id = $1, device_type_id = $2, name = $3 WHERE id = $4 RETURNING id",
+      [brandId, deviceTypeId, name, id]
     );
     if (!updated.rowCount) {
       return res.status(404).json({ error: "Matériel introuvable." });
@@ -101,7 +112,7 @@ router.put("/:id", async (req, res) => {
     res.json({ hardwareModel: result.rows[0] });
   } catch (err) {
     if ((err as { code?: string }).code === "23503") {
-      return res.status(400).json({ error: "Constructeur introuvable." });
+      return res.status(400).json({ error: fkErrorMessage(err) });
     }
     throw err;
   }

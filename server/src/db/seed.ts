@@ -39,12 +39,12 @@ const DEVICE_TYPES = ["Serveur", "Switch", "Firewall", "Automate", "Relais de d√
 const BRANDS = ["DELL", "CISCO", "FORTINET", "HIRSCHMANN", "Schneider Electric"];
 
 const HARDWARE_MODELS = [
-  { brandName: "DELL", name: "Inconnu" },
-  { brandName: "CISCO", name: "CISCO" },
-  { brandName: "HIRSCHMANN", name: "MACH104-20TX-FR" },
-  { brandName: "Schneider Electric", name: "M580" },
-  { brandName: "HIRSCHMANN", name: "BRS30" },
-  { brandName: "HIRSCHMANN", name: "OBR40" },
+  { brandName: "DELL", name: "Inconnu", deviceTypeName: "Serveur" },
+  { brandName: "CISCO", name: "CISCO", deviceTypeName: "Switch" },
+  { brandName: "HIRSCHMANN", name: "MACH104-20TX-FR", deviceTypeName: "Switch" },
+  { brandName: "Schneider Electric", name: "M580", deviceTypeName: "Automate" },
+  { brandName: "HIRSCHMANN", name: "BRS30", deviceTypeName: "Switch" },
+  { brandName: "HIRSCHMANN", name: "OBR40", deviceTypeName: "Relais de d√©rivation optique" },
 ];
 
 const LINK_TYPES = ["Fibre", "TCP/IP", "ModBus"];
@@ -80,11 +80,17 @@ async function seedReferenceData() {
   const brandRows = await pool.query("SELECT id, name FROM brands");
   const brandIdByName = new Map<string, number>(brandRows.rows.map((row) => [row.name, row.id]));
 
+  const deviceTypeRows = await pool.query("SELECT id, name FROM device_types");
+  const deviceTypeIdByName = new Map<string, number>(deviceTypeRows.rows.map((row) => [row.name, row.id]));
+
   for (const hm of HARDWARE_MODELS) {
     const brandId = brandIdByName.get(hm.brandName);
+    const deviceTypeId = deviceTypeIdByName.get(hm.deviceTypeName);
     await pool.query(
-      `INSERT INTO hardware_models (brand_id, name) VALUES ($1, $2) ON CONFLICT (brand_id, name) DO NOTHING`,
-      [brandId, hm.name]
+      `INSERT INTO hardware_models (brand_id, device_type_id, name)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (brand_id, name) DO UPDATE SET device_type_id = EXCLUDED.device_type_id`,
+      [brandId, deviceTypeId, hm.name]
     );
   }
 
