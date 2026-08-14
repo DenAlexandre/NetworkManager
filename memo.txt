@@ -1,0 +1,7 @@
+
+http://localhost:5173/
+
+admin
+admin123
+
+
