@@ -39,9 +39,14 @@ export function Layout() {
             Accueil
           </NavLink>
           {user?.role === "admin" && (
-            <NavLink to="/data-types" className="sidebar-link">
-              Type des données
-            </NavLink>
+            <>
+              <NavLink to="/data-types" className="sidebar-link">
+                Type des données
+              </NavLink>
+              <NavLink to="/sites" className="sidebar-link">
+                Sites
+              </NavLink>
+            </>
           )}
         </aside>
         <main className="content">

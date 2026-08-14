@@ -84,6 +84,65 @@ ALTER TABLE hardware_model_ports ALTER COLUMN link_type_id SET NOT NULL;
 ALTER TABLE hardware_model_ports DROP COLUMN IF EXISTS port_type;
 
 CREATE INDEX IF NOT EXISTS ix_hardware_model_ports_hardware_model ON hardware_model_ports(hardware_model_id);
+
+CREATE TABLE IF NOT EXISTS sites (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(150) UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS zones (
+  id SERIAL PRIMARY KEY,
+  site_id INTEGER NOT NULL REFERENCES sites(id),
+  name VARCHAR(150) NOT NULL,
+  UNIQUE (site_id, name)
+);
+
+CREATE TABLE IF NOT EXISTS rooms (
+  id SERIAL PRIMARY KEY,
+  zone_id INTEGER NOT NULL REFERENCES zones(id),
+  name VARCHAR(150) NOT NULL,
+  UNIQUE (zone_id, name)
+);
+CREATE INDEX IF NOT EXISTS ix_rooms_zone ON rooms(zone_id);
+
+CREATE TABLE IF NOT EXISTS equipment (
+  id SERIAL PRIMARY KEY,
+  device_type_id INTEGER NOT NULL REFERENCES device_types(id),
+  hardware_model_id INTEGER NOT NULL REFERENCES hardware_models(id),
+  name VARCHAR(200) NOT NULL
+);
+
+-- Mise a niveau des bases existantes creees avant l'introduction des salles : le materiel
+-- etait directement rattache a une zone, il passe maintenant par une salle.
+ALTER TABLE equipment ADD COLUMN IF NOT EXISTS zone_id INTEGER REFERENCES zones(id);
+ALTER TABLE equipment ADD COLUMN IF NOT EXISTS room_id INTEGER REFERENCES rooms(id);
+
+INSERT INTO rooms (zone_id, name)
+SELECT DISTINCT zone_id, 'Salle par défaut' FROM equipment WHERE zone_id IS NOT NULL AND room_id IS NULL
+ON CONFLICT (zone_id, name) DO NOTHING;
+
+UPDATE equipment e
+SET room_id = r.id
+FROM rooms r
+WHERE e.room_id IS NULL AND e.zone_id IS NOT NULL AND e.zone_id = r.zone_id AND r.name = 'Salle par défaut';
+
+ALTER TABLE equipment ALTER COLUMN room_id SET NOT NULL;
+ALTER TABLE equipment DROP COLUMN IF EXISTS zone_id;
+
+CREATE INDEX IF NOT EXISTS ix_equipment_room ON equipment(room_id);
+
+CREATE TABLE IF NOT EXISTS equipment_links (
+  id SERIAL PRIMARY KEY,
+  parent_equipment_id INTEGER NOT NULL REFERENCES equipment(id) ON DELETE CASCADE,
+  parent_port_id INTEGER NOT NULL REFERENCES hardware_model_ports(id),
+  child_equipment_id INTEGER NOT NULL REFERENCES equipment(id) ON DELETE CASCADE,
+  child_port_id INTEGER NOT NULL REFERENCES hardware_model_ports(id),
+  CHECK (parent_equipment_id != child_equipment_id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_equipment_links_parent_port ON equipment_links(parent_equipment_id, parent_port_id);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_equipment_links_child_port ON equipment_links(child_equipment_id, child_port_id);
+CREATE INDEX IF NOT EXISTS ix_equipment_links_parent ON equipment_links(parent_equipment_id);
+CREATE INDEX IF NOT EXISTS ix_equipment_links_child ON equipment_links(child_equipment_id);
 `;
 
 async function migrate() {

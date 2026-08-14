@@ -6,7 +6,7 @@ import { requireAuth, requireRole } from "../middleware/auth";
 const router = Router();
 router.use(requireAuth, requireRole("admin"));
 
-const deviceTypeSchema = z.object({
+const siteSchema = z.object({
   name: z.string().min(1, "Le nom est requis."),
 });
 
@@ -16,8 +16,8 @@ function parseId(raw: string) {
 }
 
 router.get("/", async (_req, res) => {
-  const result = await pool.query("SELECT id, name FROM device_types ORDER BY id");
-  res.json({ deviceTypes: result.rows });
+  const result = await pool.query("SELECT id, name FROM sites ORDER BY id");
+  res.json({ sites: result.rows });
 });
 
 router.get("/:id", async (req, res) => {
@@ -25,30 +25,30 @@ router.get("/:id", async (req, res) => {
   if (id === null) {
     return res.status(400).json({ error: "Identifiant invalide." });
   }
-  const result = await pool.query("SELECT id, name FROM device_types WHERE id = $1", [id]);
-  const deviceType = result.rows[0];
-  if (!deviceType) {
-    return res.status(404).json({ error: "Type de matériel introuvable." });
+  const result = await pool.query("SELECT id, name FROM sites WHERE id = $1", [id]);
+  const site = result.rows[0];
+  if (!site) {
+    return res.status(404).json({ error: "Site introuvable." });
   }
-  res.json({ deviceType });
+  res.json({ site });
 });
 
 router.post("/", async (req, res) => {
-  const parsed = deviceTypeSchema.safeParse(req.body);
+  const parsed = siteSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
 
-  const existing = await pool.query("SELECT id FROM device_types WHERE name = $1", [parsed.data.name]);
+  const existing = await pool.query("SELECT id FROM sites WHERE name = $1", [parsed.data.name]);
   if (existing.rowCount) {
-    return res.status(409).json({ error: "Ce type de matériel existe déjà." });
+    return res.status(409).json({ error: "Ce site existe déjà." });
   }
 
   const result = await pool.query(
-    "INSERT INTO device_types (name) VALUES ($1) RETURNING id, name",
+    "INSERT INTO sites (name) VALUES ($1) RETURNING id, name",
     [parsed.data.name]
   );
-  res.status(201).json({ deviceType: result.rows[0] });
+  res.status(201).json({ site: result.rows[0] });
 });
 
 router.put("/:id", async (req, res) => {
@@ -56,28 +56,28 @@ router.put("/:id", async (req, res) => {
   if (id === null) {
     return res.status(400).json({ error: "Identifiant invalide." });
   }
-  const parsed = deviceTypeSchema.safeParse(req.body);
+  const parsed = siteSchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
 
   const existing = await pool.query(
-    "SELECT id FROM device_types WHERE name = $1 AND id != $2",
+    "SELECT id FROM sites WHERE name = $1 AND id != $2",
     [parsed.data.name, id]
   );
   if (existing.rowCount) {
-    return res.status(409).json({ error: "Ce type de matériel existe déjà." });
+    return res.status(409).json({ error: "Ce site existe déjà." });
   }
 
   const result = await pool.query(
-    "UPDATE device_types SET name = $1 WHERE id = $2 RETURNING id, name",
+    "UPDATE sites SET name = $1 WHERE id = $2 RETURNING id, name",
     [parsed.data.name, id]
   );
   const updated = result.rows[0];
   if (!updated) {
-    return res.status(404).json({ error: "Type de matériel introuvable." });
+    return res.status(404).json({ error: "Site introuvable." });
   }
-  res.json({ deviceType: updated });
+  res.json({ site: updated });
 });
 
 router.delete("/:id", async (req, res) => {
@@ -86,15 +86,15 @@ router.delete("/:id", async (req, res) => {
     return res.status(400).json({ error: "Identifiant invalide." });
   }
   try {
-    const result = await pool.query("DELETE FROM device_types WHERE id = $1", [id]);
+    const result = await pool.query("DELETE FROM sites WHERE id = $1", [id]);
     if (!result.rowCount) {
-      return res.status(404).json({ error: "Type de matériel introuvable." });
+      return res.status(404).json({ error: "Site introuvable." });
     }
     res.status(204).send();
   } catch (err) {
     if ((err as { code?: string }).code === "23503") {
       return res.status(409).json({
-        error: "Ce type de matériel est utilisé par du matériel de zone et ne peut pas être supprimé.",
+        error: "Ce site contient des zones et ne peut pas être supprimé.",
       });
     }
     throw err;

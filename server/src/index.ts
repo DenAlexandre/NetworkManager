@@ -9,6 +9,11 @@ import linkTypeRoutes from "./routes/linkTypes";
 import brandRoutes from "./routes/brands";
 import hardwareModelRoutes from "./routes/hardwareModels";
 import portRoutes from "./routes/ports";
+import siteRoutes from "./routes/sites";
+import zoneRoutes from "./routes/zones";
+import roomRoutes from "./routes/rooms";
+import equipmentRoutes from "./routes/equipment";
+import equipmentLinkRoutes from "./routes/equipmentLinks";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -24,6 +29,11 @@ app.use("/api/link-types", linkTypeRoutes);
 app.use("/api/brands", brandRoutes);
 app.use("/api/hardware-models", hardwareModelRoutes);
 app.use("/api/ports", portRoutes);
+app.use("/api/sites", siteRoutes);
+app.use("/api/zones", zoneRoutes);
+app.use("/api/rooms", roomRoutes);
+app.use("/api/equipment", equipmentRoutes);
+app.use("/api/equipment-links", equipmentLinkRoutes);
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

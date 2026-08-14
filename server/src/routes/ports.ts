@@ -154,11 +154,20 @@ router.delete("/:id", async (req, res) => {
   if (id === null) {
     return res.status(400).json({ error: "Identifiant invalide." });
   }
-  const result = await pool.query("DELETE FROM hardware_model_ports WHERE id = $1", [id]);
-  if (!result.rowCount) {
-    return res.status(404).json({ error: "Entrée/sortie introuvable." });
+  try {
+    const result = await pool.query("DELETE FROM hardware_model_ports WHERE id = $1", [id]);
+    if (!result.rowCount) {
+      return res.status(404).json({ error: "Entrée/sortie introuvable." });
+    }
+    res.status(204).send();
+  } catch (err) {
+    if ((err as { code?: string }).code === "23503") {
+      return res.status(409).json({
+        error: "Ce port est utilisé par une liaison et ne peut pas être supprimé.",
+      });
+    }
+    throw err;
   }
-  res.status(204).send();
 });
 
 export default router;

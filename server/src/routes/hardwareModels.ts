@@ -121,7 +121,7 @@ router.delete("/:id", async (req, res) => {
   } catch (err) {
     if ((err as { code?: string }).code === "23503") {
       return res.status(409).json({
-        error: "Ce matériel est utilisé par des constructeurs et ne peut pas être supprimé.",
+        error: "Ce matériel est utilisé par du matériel de zone et ne peut pas être supprimé.",
       });
     }
     throw err;
