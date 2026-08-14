@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { listEquipment } from "../api/equipment";
-import { listManufacturers } from "../api/manufacturers";
-import { listPorts } from "../api/ports";
+import { listDeviceTypes } from "../api/deviceTypes";
+import { listLinkTypes } from "../api/linkTypes";
+import { listBrands } from "../api/brands";
+import { listHardwareModels } from "../api/hardwareModels";
 
 interface Stats {
-  equipment: number;
-  manufacturers: number;
-  ports: number;
+  deviceTypes: number;
+  linkTypes: number;
+  brands: number;
+  hardwareModels: number;
 }
 
 export function HomePage() {
@@ -17,9 +19,14 @@ export function HomePage() {
 
   useEffect(() => {
     if (user?.role !== "admin") return;
-    Promise.all([listEquipment(), listManufacturers(), listPorts()])
-      .then(([{ equipment }, { manufacturers }, { ports }]) => {
-        setStats({ equipment: equipment.length, manufacturers: manufacturers.length, ports: ports.length });
+    Promise.all([listDeviceTypes(), listLinkTypes(), listBrands(), listHardwareModels()])
+      .then(([{ deviceTypes }, { linkTypes }, { brands }, { hardwareModels }]) => {
+        setStats({
+          deviceTypes: deviceTypes.length,
+          linkTypes: linkTypes.length,
+          brands: brands.length,
+          hardwareModels: hardwareModels.length,
+        });
       })
       .catch(() => setStats(null));
   }, [user]);
@@ -47,17 +54,21 @@ export function HomePage() {
     <div>
       {stats && (
         <div className="stats-grid">
-          <Link to="/equipment" className="stat-card">
-            <span className="stat-value">{stats.equipment}</span>
-            <span className="stat-label">Équipements</span>
+          <Link to="/data-types" className="stat-card">
+            <span className="stat-value">{stats.deviceTypes}</span>
+            <span className="stat-label">Types de matériel</span>
           </Link>
-          <Link to="/equipment/manufacturers" className="stat-card">
-            <span className="stat-value">{stats.manufacturers}</span>
+          <Link to="/data-types/link-types" className="stat-card">
+            <span className="stat-value">{stats.linkTypes}</span>
+            <span className="stat-label">Types de liaison</span>
+          </Link>
+          <Link to="/data-types/brands" className="stat-card">
+            <span className="stat-value">{stats.brands}</span>
             <span className="stat-label">Constructeurs</span>
           </Link>
-          <Link to="/equipment/ports" className="stat-card">
-            <span className="stat-value">{stats.ports}</span>
-            <span className="stat-label">Entrées / Sorties</span>
+          <Link to="/data-types/hardware-models" className="stat-card">
+            <span className="stat-value">{stats.hardwareModels}</span>
+            <span className="stat-label">Matériel</span>
           </Link>
         </div>
       )}

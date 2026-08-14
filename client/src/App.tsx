@@ -5,13 +5,6 @@ import { AdminRoute } from "./components/ProtectedRoute";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
-import { EquipmentLayout } from "./pages/equipment/EquipmentLayout";
-import { EquipmentListPage } from "./pages/equipment/EquipmentListPage";
-import { EquipmentFormPage } from "./pages/equipment/EquipmentFormPage";
-import { ManufacturersListPage } from "./pages/equipment/ManufacturersListPage";
-import { ManufacturerFormPage } from "./pages/equipment/ManufacturerFormPage";
-import { PortsListPage } from "./pages/equipment/PortsListPage";
-import { PortFormPage } from "./pages/equipment/PortFormPage";
 import { DataTypesLayout } from "./pages/dataTypes/DataTypesLayout";
 import { DeviceTypesListPage } from "./pages/dataTypes/DeviceTypesListPage";
 import { DeviceTypeFormPage } from "./pages/dataTypes/DeviceTypeFormPage";
@@ -50,24 +43,6 @@ function App() {
             <Route path="hardware-models" element={<HardwareModelsListPage />} />
             <Route path="hardware-models/new" element={<HardwareModelFormPage />} />
             <Route path="hardware-models/:id/edit" element={<HardwareModelFormPage />} />
-          </Route>
-          <Route
-            path="equipment"
-            element={
-              <AdminRoute>
-                <EquipmentLayout />
-              </AdminRoute>
-            }
-          >
-            <Route index element={<EquipmentListPage />} />
-            <Route path="new" element={<EquipmentFormPage />} />
-            <Route path=":id/edit" element={<EquipmentFormPage />} />
-            <Route path="manufacturers" element={<ManufacturersListPage />} />
-            <Route path="manufacturers/new" element={<ManufacturerFormPage />} />
-            <Route path="manufacturers/:id/edit" element={<ManufacturerFormPage />} />
-            <Route path="ports" element={<PortsListPage />} />
-            <Route path="ports/new" element={<PortFormPage />} />
-            <Route path="ports/:id/edit" element={<PortFormPage />} />
           </Route>
         </Route>
       </Routes>
