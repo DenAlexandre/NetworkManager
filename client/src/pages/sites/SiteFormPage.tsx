@@ -3,11 +3,13 @@ import type { FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createSite, getSite, updateSite } from "../../api/sites";
 import { ApiError } from "../../api/client";
+import { useSitesTree } from "../../context/SitesTreeContext";
 
 export function SiteFormPage() {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
+  const { refresh } = useSitesTree();
 
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +34,7 @@ export function SiteFormPage() {
       } else {
         await createSite({ name });
       }
+      refresh();
       navigate("/sites");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Erreur lors de l'enregistrement.");

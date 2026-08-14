@@ -14,6 +14,7 @@ import { BrandsListPage } from "./pages/dataTypes/BrandsListPage";
 import { BrandFormPage } from "./pages/dataTypes/BrandFormPage";
 import { HardwareModelsListPage } from "./pages/dataTypes/HardwareModelsListPage";
 import { HardwareModelFormPage } from "./pages/dataTypes/HardwareModelFormPage";
+import { SitesLayout } from "./pages/sites/SitesLayout";
 import { SitesListPage } from "./pages/sites/SitesListPage";
 import { SiteFormPage } from "./pages/sites/SiteFormPage";
 import { SiteDetailPage } from "./pages/sites/SiteDetailPage";
@@ -56,98 +57,26 @@ function App() {
             path="sites"
             element={
               <AdminRoute>
-                <SitesListPage />
+                <SitesLayout />
               </AdminRoute>
             }
-          />
-          <Route
-            path="sites/new"
-            element={
-              <AdminRoute>
-                <SiteFormPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="sites/:id/edit"
-            element={
-              <AdminRoute>
-                <SiteFormPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="sites/:siteId"
-            element={
-              <AdminRoute>
-                <SiteDetailPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="sites/:siteId/zones/new"
-            element={
-              <AdminRoute>
-                <ZoneFormPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="sites/:siteId/zones/:zoneId/edit"
-            element={
-              <AdminRoute>
-                <ZoneFormPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="sites/:siteId/zones/:zoneId"
-            element={
-              <AdminRoute>
-                <ZoneDetailPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="sites/:siteId/zones/:zoneId/rooms/new"
-            element={
-              <AdminRoute>
-                <RoomFormPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="sites/:siteId/zones/:zoneId/rooms/:roomId/edit"
-            element={
-              <AdminRoute>
-                <RoomFormPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="sites/:siteId/zones/:zoneId/rooms/:roomId"
-            element={
-              <AdminRoute>
-                <RoomDetailPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="sites/:siteId/zones/:zoneId/rooms/:roomId/equipment/new"
-            element={
-              <AdminRoute>
-                <EquipmentFormPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="sites/:siteId/zones/:zoneId/rooms/:roomId/equipment/:equipmentId/edit"
-            element={
-              <AdminRoute>
-                <EquipmentFormPage />
-              </AdminRoute>
-            }
-          />
+          >
+            <Route index element={<SitesListPage />} />
+            <Route path="new" element={<SiteFormPage />} />
+            <Route path=":id/edit" element={<SiteFormPage />} />
+            <Route path=":siteId" element={<SiteDetailPage />} />
+            <Route path=":siteId/zones/new" element={<ZoneFormPage />} />
+            <Route path=":siteId/zones/:zoneId/edit" element={<ZoneFormPage />} />
+            <Route path=":siteId/zones/:zoneId" element={<ZoneDetailPage />} />
+            <Route path=":siteId/zones/:zoneId/rooms/new" element={<RoomFormPage />} />
+            <Route path=":siteId/zones/:zoneId/rooms/:roomId/edit" element={<RoomFormPage />} />
+            <Route path=":siteId/zones/:zoneId/rooms/:roomId" element={<RoomDetailPage />} />
+            <Route path=":siteId/zones/:zoneId/rooms/:roomId/equipment/new" element={<EquipmentFormPage />} />
+            <Route
+              path=":siteId/zones/:zoneId/rooms/:roomId/equipment/:equipmentId/edit"
+              element={<EquipmentFormPage />}
+            />
+          </Route>
         </Route>
       </Routes>
     </AuthProvider>

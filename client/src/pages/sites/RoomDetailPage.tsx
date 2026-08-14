@@ -134,10 +134,6 @@ export function RoomDetailPage() {
 
   return (
     <div>
-      <p className="muted">
-        <Link to={`/sites/${siteId}/zones/${zoneId}`}>← Retour à {room.zoneName}</Link>
-      </p>
-
       <div className="card">
         <div className="page-header">
           <h1>{room.name}</h1>
@@ -145,6 +141,9 @@ export function RoomDetailPage() {
             Ajouter du matériel
           </Link>
         </div>
+        <p className="muted">
+          {room.siteName} / {room.zoneName}
+        </p>
         <table className="table">
           <thead>
             <tr>

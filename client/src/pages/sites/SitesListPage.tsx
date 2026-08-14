@@ -5,6 +5,7 @@ import type { Site } from "../../api/sites";
 import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
 import { SortableHeader } from "../../components/SortableHeader";
+import { useSitesTree } from "../../context/SitesTreeContext";
 
 function searchFields(item: Site) {
   return [item.name];
@@ -15,6 +16,7 @@ export function SitesListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { search, setSearch, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, searchFields);
+  const { refresh } = useSitesTree();
 
   useEffect(() => {
     load();
@@ -37,6 +39,7 @@ export function SitesListPage() {
     try {
       await deleteSite(id);
       setItems((prev) => prev.filter((item) => item.id !== id));
+      refresh();
     } catch (err) {
       alert(err instanceof ApiError ? err.message : "Erreur lors de la suppression.");
     }
@@ -47,7 +50,7 @@ export function SitesListPage() {
   return (
     <div className="card">
       <div className="page-header">
-        <h1>Sites</h1>
+        <h1>Gestion des Sites</h1>
         <Link to="/sites/new" className="btn">
           Ajouter
         </Link>

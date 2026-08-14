@@ -5,6 +5,7 @@ import type { Zone } from "../../api/zones";
 import { deleteRoom, listRooms } from "../../api/rooms";
 import type { Room } from "../../api/rooms";
 import { ApiError } from "../../api/client";
+import { useSitesTree } from "../../context/SitesTreeContext";
 
 export function ZoneDetailPage() {
   const { siteId, zoneId } = useParams();
@@ -12,6 +13,7 @@ export function ZoneDetailPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { refresh } = useSitesTree();
 
   useEffect(() => {
     load();
@@ -38,6 +40,7 @@ export function ZoneDetailPage() {
     try {
       await deleteRoom(id);
       setRooms((prev) => prev.filter((r) => r.id !== id));
+      refresh();
     } catch (err) {
       alert(err instanceof ApiError ? err.message : "Erreur lors de la suppression.");
     }
@@ -55,9 +58,7 @@ export function ZoneDetailPage() {
           Ajouter une salle
         </Link>
       </div>
-      <p className="muted">
-        <Link to={`/sites/${siteId}`}>← Retour à {zone.siteName}</Link>
-      </p>
+      <p className="muted">{zone.siteName}</p>
       <table className="table">
         <thead>
           <tr>

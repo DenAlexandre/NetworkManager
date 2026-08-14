@@ -5,6 +5,7 @@ import type { Site } from "../../api/sites";
 import { deleteZone, listZones } from "../../api/zones";
 import type { Zone } from "../../api/zones";
 import { ApiError } from "../../api/client";
+import { useSitesTree } from "../../context/SitesTreeContext";
 
 export function SiteDetailPage() {
   const { siteId } = useParams();
@@ -12,6 +13,7 @@ export function SiteDetailPage() {
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { refresh } = useSitesTree();
 
   useEffect(() => {
     load();
@@ -38,6 +40,7 @@ export function SiteDetailPage() {
     try {
       await deleteZone(id);
       setZones((prev) => prev.filter((z) => z.id !== id));
+      refresh();
     } catch (err) {
       alert(err instanceof ApiError ? err.message : "Erreur lors de la suppression.");
     }
@@ -55,9 +58,6 @@ export function SiteDetailPage() {
           Ajouter une zone
         </Link>
       </div>
-      <p className="muted">
-        <Link to="/sites">← Retour aux sites</Link>
-      </p>
       <table className="table">
         <thead>
           <tr>

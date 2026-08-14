@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createEquipment, getEquipment, updateEquipment } from "../../api/equipment";
+import { getRoom } from "../../api/rooms";
 import { listDeviceTypes } from "../../api/deviceTypes";
 import type { DeviceType } from "../../api/deviceTypes";
 import { listHardwareModels } from "../../api/hardwareModels";
@@ -13,6 +14,9 @@ export function EquipmentFormPage() {
   const isEdit = Boolean(equipmentId);
   const navigate = useNavigate();
 
+  const [roomName, setRoomName] = useState("");
+  const [zoneName, setZoneName] = useState("");
+  const [siteName, setSiteName] = useState("");
   const [deviceTypes, setDeviceTypes] = useState<DeviceType[]>([]);
   const [hardwareModels, setHardwareModels] = useState<HardwareModel[]>([]);
   const [deviceTypeId, setDeviceTypeId] = useState<number | "">("");
@@ -24,10 +28,14 @@ export function EquipmentFormPage() {
 
   useEffect(() => {
     async function load() {
-      const [{ deviceTypes: dt }, { hardwareModels: hm }] = await Promise.all([
+      const [{ room }, { deviceTypes: dt }, { hardwareModels: hm }] = await Promise.all([
+        getRoom(Number(roomId)),
         listDeviceTypes(),
         listHardwareModels(),
       ]);
+      setRoomName(room.name);
+      setZoneName(room.zoneName);
+      setSiteName(room.siteName);
       setDeviceTypes(dt);
       setHardwareModels(hm);
       if (isEdit) {
@@ -45,7 +53,7 @@ export function EquipmentFormPage() {
       setError(err instanceof ApiError ? err.message : "Erreur de chargement.");
       setLoading(false);
     });
-  }, [equipmentId, isEdit]);
+  }, [roomId, equipmentId, isEdit]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -77,6 +85,9 @@ export function EquipmentFormPage() {
   return (
     <div className="form-page">
       <h1>{isEdit ? "Modifier le matériel" : "Ajouter du matériel"}</h1>
+      <p className="muted">
+        {siteName} / {zoneName} / {roomName}
+      </p>
       <form onSubmit={handleSubmit}>
         <label>
           Nom

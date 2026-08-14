@@ -44,7 +44,7 @@ export function Layout() {
                 Type des données
               </NavLink>
               <NavLink to="/sites" className="sidebar-link">
-                Sites
+                Gestion des Sites
               </NavLink>
             </>
           )}

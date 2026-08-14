@@ -2,25 +2,35 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createZone, getZone, updateZone } from "../../api/zones";
+import { getSite } from "../../api/sites";
 import { ApiError } from "../../api/client";
+import { useSitesTree } from "../../context/SitesTreeContext";
 
 export function ZoneFormPage() {
   const { siteId, zoneId } = useParams();
   const isEdit = Boolean(zoneId);
   const navigate = useNavigate();
+  const { refresh } = useSitesTree();
 
+  const [siteName, setSiteName] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(isEdit);
+  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!isEdit) return;
-    getZone(Number(zoneId))
-      .then(({ zone }) => setName(zone.name))
+    async function load() {
+      const { site } = await getSite(Number(siteId));
+      setSiteName(site.name);
+      if (isEdit) {
+        const { zone } = await getZone(Number(zoneId));
+        setName(zone.name);
+      }
+    }
+    load()
       .catch((err) => setError(err instanceof ApiError ? err.message : "Erreur de chargement."))
       .finally(() => setLoading(false));
-  }, [zoneId, isEdit]);
+  }, [siteId, zoneId, isEdit]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -33,6 +43,7 @@ export function ZoneFormPage() {
       } else {
         await createZone(input);
       }
+      refresh();
       navigate(`/sites/${siteId}`);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Erreur lors de l'enregistrement.");
@@ -46,6 +57,7 @@ export function ZoneFormPage() {
   return (
     <div className="form-page">
       <h1>{isEdit ? "Modifier la zone" : "Ajouter une zone"}</h1>
+      <p className="muted">{siteName}</p>
       <form onSubmit={handleSubmit}>
         <label>
           Nom
