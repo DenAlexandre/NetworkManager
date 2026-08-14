@@ -14,12 +14,10 @@ export function Layout() {
     <div className="app">
       <header className="navbar">
         <Link to="/" className="brand">
-          🍲 Cuisine
+          Mon compte
         </Link>
         <nav>
-          <NavLink to="/">Recettes</NavLink>
-          {user && <NavLink to="/mes-recettes">Mes recettes</NavLink>}
-          {user?.role === "admin" && <NavLink to="/admin">Administration</NavLink>}
+          <NavLink to="/">Accueil</NavLink>
         </nav>
         <div className="auth-actions">
           {user ? (
