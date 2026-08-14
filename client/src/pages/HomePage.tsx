@@ -1,8 +1,28 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { listEquipment } from "../api/equipment";
+import { listManufacturers } from "../api/manufacturers";
+import { listPorts } from "../api/ports";
+
+interface Stats {
+  equipment: number;
+  manufacturers: number;
+  ports: number;
+}
 
 export function HomePage() {
   const { user, loading } = useAuth();
+  const [stats, setStats] = useState<Stats | null>(null);
+
+  useEffect(() => {
+    if (user?.role !== "admin") return;
+    Promise.all([listEquipment(), listManufacturers(), listPorts()])
+      .then(([{ equipment }, { manufacturers }, { ports }]) => {
+        setStats({ equipment: equipment.length, manufacturers: manufacturers.length, ports: ports.length });
+      })
+      .catch(() => setStats(null));
+  }, [user]);
 
   if (loading) return <p>Chargement...</p>;
 
@@ -24,20 +44,23 @@ export function HomePage() {
   }
 
   return (
-    <div className="card">
-      <h1>Mon compte</h1>
-      <dl className="account-info">
-        <dt>Pseudo</dt>
-        <dd>{user.username}</dd>
-        <dt>Nom</dt>
-        <dd>
-          {user.firstName} {user.lastName}
-        </dd>
-        <dt>Email</dt>
-        <dd>{user.email}</dd>
-        <dt>Téléphone</dt>
-        <dd>{user.phone}</dd>
-      </dl>
+    <div>
+      {stats && (
+        <div className="stats-grid">
+          <Link to="/equipment" className="stat-card">
+            <span className="stat-value">{stats.equipment}</span>
+            <span className="stat-label">Équipements</span>
+          </Link>
+          <Link to="/equipment/manufacturers" className="stat-card">
+            <span className="stat-value">{stats.manufacturers}</span>
+            <span className="stat-label">Constructeurs</span>
+          </Link>
+          <Link to="/equipment/ports" className="stat-card">
+            <span className="stat-value">{stats.ports}</span>
+            <span className="stat-label">Entrées / Sorties</span>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

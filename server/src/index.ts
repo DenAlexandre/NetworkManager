@@ -4,6 +4,13 @@ import "express-async-errors";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth";
+import deviceTypeRoutes from "./routes/deviceTypes";
+import linkTypeRoutes from "./routes/linkTypes";
+import brandRoutes from "./routes/brands";
+import hardwareModelRoutes from "./routes/hardwareModels";
+import manufacturerRoutes from "./routes/manufacturers";
+import equipmentRoutes from "./routes/equipment";
+import portRoutes from "./routes/ports";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -14,6 +21,13 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/device-types", deviceTypeRoutes);
+app.use("/api/link-types", linkTypeRoutes);
+app.use("/api/brands", brandRoutes);
+app.use("/api/hardware-models", hardwareModelRoutes);
+app.use("/api/manufacturers", manufacturerRoutes);
+app.use("/api/equipment", equipmentRoutes);
+app.use("/api/ports", portRoutes);
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

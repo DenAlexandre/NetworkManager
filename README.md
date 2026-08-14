@@ -23,7 +23,7 @@ Le plus simple : lancer PostgreSQL via Docker avec le script fourni (idempotent,
 ./scripts/start-db.ps1
 ```
 
-Sinon, créez manuellement une base PostgreSQL (ex: `cuisine`), puis dans `server/` :
+Sinon, créez manuellement une base PostgreSQL (ex: `networkmanager`), puis dans `server/` :
 
 ```bash
 cd server

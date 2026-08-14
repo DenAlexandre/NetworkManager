@@ -24,10 +24,10 @@
 #>
 
 param(
-    [string]$ContainerName = "cuisine-db",
+    [string]$ContainerName = "networkmanager-db",
     [int]$Port = 5432,
     [string]$Password = "postgres",
-    [string]$Database = "cuisine"
+    [string]$Database = "networkmanager"
 )
 
 $ErrorActionPreference = "Stop"

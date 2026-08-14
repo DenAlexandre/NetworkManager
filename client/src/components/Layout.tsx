@@ -15,12 +15,9 @@ export function Layout() {
       <header className="navbar">
         <div className="navbar-inner">
           <Link to="/" className="brand">
-            <span className="brand-mark">C</span>
-            Mon compte
+            <span className="brand-mark">N</span>
+            NetworkManager
           </Link>
-          <nav>
-            <NavLink to="/">Accueil</NavLink>
-          </nav>
           <div className="auth-actions">
             {user ? (
               <>
@@ -36,8 +33,23 @@ export function Layout() {
           </div>
         </div>
       </header>
-      <div className="app">
-        <main>
+      <div className="shell">
+        <aside className="sidebar">
+          <NavLink to="/" end className="sidebar-link">
+            Accueil
+          </NavLink>
+          {user?.role === "admin" && (
+            <>
+              <NavLink to="/data-types" className="sidebar-link">
+                Type des données
+              </NavLink>
+              <NavLink to="/equipment" className="sidebar-link">
+                Matériel réseau
+              </NavLink>
+            </>
+          )}
+        </aside>
+        <main className="content">
           <Outlet />
         </main>
       </div>
