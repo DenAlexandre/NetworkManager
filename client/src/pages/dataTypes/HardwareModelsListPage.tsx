@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { deleteHardwareModel, listHardwareModels } from "../../api/hardwareModels";
 import type { HardwareModel } from "../../api/hardwareModels";
 import { listPorts } from "../../api/ports";
 import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
 import { SortableHeader } from "../../components/SortableHeader";
+import { HardwareModelFormModal } from "./HardwareModelFormModal";
 
 function searchFields(item: HardwareModel) {
   return [item.name, item.brandName, item.deviceType];
@@ -24,6 +24,9 @@ export function HardwareModelsListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { search, setSearch, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, searchFields);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   useEffect(() => {
     load();
@@ -57,15 +60,30 @@ export function HardwareModelsListPage() {
     }
   }
 
+  function openCreateModal() {
+    setEditingId(null);
+    setModalOpen(true);
+  }
+
+  function openEditModal(id: number) {
+    setEditingId(id);
+    setModalOpen(true);
+  }
+
+  function handleSaved() {
+    setModalOpen(false);
+    load();
+  }
+
   if (loading) return <p>Chargement...</p>;
 
   return (
     <div className="card">
       <div className="page-header">
         <h2>Matériel</h2>
-        <Link to="/data-types/hardware-models/new" className="btn">
+        <button type="button" className="btn" onClick={openCreateModal}>
           Ajouter
-        </Link>
+        </button>
       </div>
       {error && <p className="error">{error}</p>}
       <div className="table-toolbar">
@@ -106,7 +124,9 @@ export function HardwareModelsListPage() {
               <td>{item.deviceType}</td>
               <td>{formatPortCounts(portCounts[item.id])}</td>
               <td className="table-actions">
-                <Link to={`/data-types/hardware-models/${item.id}/edit`}>Modifier</Link>
+                <button type="button" className="link" onClick={() => openEditModal(item.id)}>
+                  Modifier
+                </button>
                 <button className="danger" onClick={() => handleDelete(item.id)}>
                   Supprimer
                 </button>
@@ -116,6 +136,9 @@ export function HardwareModelsListPage() {
         </tbody>
       </table>
       {rows.length === 0 && <p className="muted">Aucun matériel enregistré.</p>}
+      {modalOpen && (
+        <HardwareModelFormModal hardwareModelId={editingId} onClose={() => setModalOpen(false)} onSaved={handleSaved} />
+      )}
     </div>
   );
 }

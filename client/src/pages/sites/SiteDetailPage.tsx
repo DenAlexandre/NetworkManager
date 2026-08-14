@@ -6,6 +6,7 @@ import { deleteZone, listZones } from "../../api/zones";
 import type { Zone } from "../../api/zones";
 import { ApiError } from "../../api/client";
 import { useSitesTree } from "../../context/SitesTreeContext";
+import { ZoneFormModal } from "./ZoneFormModal";
 
 export function SiteDetailPage() {
   const { siteId } = useParams();
@@ -14,6 +15,9 @@ export function SiteDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { refresh } = useSitesTree();
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   useEffect(() => {
     load();
@@ -46,6 +50,21 @@ export function SiteDetailPage() {
     }
   }
 
+  function openCreateModal() {
+    setEditingId(null);
+    setModalOpen(true);
+  }
+
+  function openEditModal(id: number) {
+    setEditingId(id);
+    setModalOpen(true);
+  }
+
+  function handleSaved() {
+    setModalOpen(false);
+    load();
+  }
+
   if (loading) return <p>Chargement...</p>;
   if (error) return <p className="error">{error}</p>;
   if (!site) return null;
@@ -54,9 +73,9 @@ export function SiteDetailPage() {
     <div className="card">
       <div className="page-header">
         <h1>{site.name}</h1>
-        <Link to={`/sites/${site.id}/zones/new`} className="btn">
+        <button type="button" className="btn" onClick={openCreateModal}>
           Ajouter une zone
-        </Link>
+        </button>
       </div>
       <table className="table">
         <thead>
@@ -72,7 +91,9 @@ export function SiteDetailPage() {
                 <Link to={`/sites/${site.id}/zones/${zone.id}`}>{zone.name}</Link>
               </td>
               <td className="table-actions">
-                <Link to={`/sites/${site.id}/zones/${zone.id}/edit`}>Modifier</Link>
+                <button type="button" className="link" onClick={() => openEditModal(zone.id)}>
+                  Modifier
+                </button>
                 <button className="danger" onClick={() => handleDelete(zone.id)}>
                   Supprimer
                 </button>
@@ -82,6 +103,15 @@ export function SiteDetailPage() {
         </tbody>
       </table>
       {zones.length === 0 && <p className="muted">Aucune zone pour ce site.</p>}
+      {modalOpen && (
+        <ZoneFormModal
+          siteId={site.id}
+          siteName={site.name}
+          zoneId={editingId}
+          onClose={() => setModalOpen(false)}
+          onSaved={handleSaved}
+        />
+      )}
     </div>
   );
 }

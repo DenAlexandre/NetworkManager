@@ -250,10 +250,14 @@ a {
 /* tables */
 
 .table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 16px;
 }
 
-.table-toolbar input {
+.table-toolbar input,
+.table-toolbar select {
   max-width: 280px;
 }
 
@@ -321,6 +325,24 @@ a {
 .table-actions button {
   padding: 6px 12px;
   font-size: 13px;
+}
+
+.table-actions button.link {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  color: var(--accent-dark);
+  font-weight: 600;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.table-actions button.link:hover {
+  background: none;
+  box-shadow: none;
+  transform: none;
+  text-decoration: underline;
 }
 
 /* buttons */
@@ -414,6 +436,59 @@ button:disabled {
   gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+/* modal */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(21, 17, 31, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.modal-dialog {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 32px;
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.modal-header h2 {
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 4px;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  background: none;
+  box-shadow: none;
+  transform: none;
+  color: var(--accent-dark);
 }
 
 /* forms */

@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate, useParams } from "react-router-dom";
 import { createSite, getSite, updateSite } from "../../api/sites";
 import { ApiError } from "../../api/client";
 import { useSitesTree } from "../../context/SitesTreeContext";
+import { Modal } from "../../components/Modal";
 
-export function SiteFormPage() {
-  const { id } = useParams();
-  const isEdit = Boolean(id);
-  const navigate = useNavigate();
+interface SiteFormModalProps {
+  siteId: number | null;
+  onClose: () => void;
+  onSaved: () => void;
+}
+
+export function SiteFormModal({ siteId, onClose, onSaved }: SiteFormModalProps) {
+  const isEdit = siteId !== null;
   const { refresh } = useSitesTree();
 
   const [name, setName] = useState("");
@@ -18,11 +22,11 @@ export function SiteFormPage() {
 
   useEffect(() => {
     if (!isEdit) return;
-    getSite(Number(id))
+    getSite(Number(siteId))
       .then(({ site }) => setName(site.name))
       .catch((err) => setError(err instanceof ApiError ? err.message : "Erreur de chargement."))
       .finally(() => setLoading(false));
-  }, [id, isEdit]);
+  }, [siteId, isEdit]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -30,12 +34,12 @@ export function SiteFormPage() {
     setSubmitting(true);
     try {
       if (isEdit) {
-        await updateSite(Number(id), { name });
+        await updateSite(Number(siteId), { name });
       } else {
         await createSite({ name });
       }
       refresh();
-      navigate("/sites");
+      onSaved();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Erreur lors de l'enregistrement.");
     } finally {
@@ -43,26 +47,27 @@ export function SiteFormPage() {
     }
   }
 
-  if (loading) return <p>Chargement...</p>;
-
   return (
-    <div className="form-page">
-      <h1>{isEdit ? "Modifier le site" : "Ajouter un site"}</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Nom
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
-        </label>
-        {error && <p className="error">{error}</p>}
-        <div className="form-actions">
-          <button type="submit" disabled={submitting}>
-            Enregistrer
-          </button>
-          <button type="button" className="btn-outline" onClick={() => navigate("/sites")}>
-            Annuler
-          </button>
-        </div>
-      </form>
-    </div>
+    <Modal title={isEdit ? "Modifier le site" : "Ajouter un site"} onClose={onClose}>
+      {loading ? (
+        <p>Chargement...</p>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <label>
+            Nom
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+          </label>
+          {error && <p className="error">{error}</p>}
+          <div className="form-actions">
+            <button type="submit" disabled={submitting}>
+              Enregistrer
+            </button>
+            <button type="button" className="btn-outline" onClick={onClose}>
+              Annuler
+            </button>
+          </div>
+        </form>
+      )}
+    </Modal>
   );
 }

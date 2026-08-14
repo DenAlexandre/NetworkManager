@@ -10,6 +10,7 @@ const equipmentSchema = z.object({
   roomId: z.number().int("La salle est requise."),
   deviceTypeId: z.number().int("Le type de matériel est requis."),
   hardwareModelId: z.number().int("Le matériel est requis."),
+  apiId: z.number().int().nullable().optional(),
   name: z.string().min(1, "Le nom est requis."),
 });
 
@@ -18,7 +19,8 @@ const EQUIPMENT_SELECT = `
          e.room_id AS "roomId", r.name AS "roomName",
          r.zone_id AS "zoneId", z.name AS "zoneName", z.site_id AS "siteId", s.name AS "siteName",
          e.device_type_id AS "deviceTypeId", dt.name AS "deviceType",
-         e.hardware_model_id AS "hardwareModelId", hm.name AS "hardwareModel", b.name AS "brandName"
+         e.hardware_model_id AS "hardwareModelId", hm.name AS "hardwareModel", b.name AS "brandName",
+         e.api_id AS "apiId", a.name AS "apiName"
   FROM equipment e
   JOIN rooms r ON r.id = e.room_id
   JOIN zones z ON z.id = r.zone_id
@@ -26,6 +28,7 @@ const EQUIPMENT_SELECT = `
   JOIN device_types dt ON dt.id = e.device_type_id
   JOIN hardware_models hm ON hm.id = e.hardware_model_id
   JOIN brands b ON b.id = hm.brand_id
+  LEFT JOIN apis a ON a.id = e.api_id
 `;
 
 function parseId(raw: string) {
@@ -40,6 +43,9 @@ function fkErrorMessage(err: unknown) {
   }
   if (constraint.includes("hardware_model")) {
     return "Matériel introuvable.";
+  }
+  if (constraint.includes("api")) {
+    return "API introuvable.";
   }
   return "Salle introuvable.";
 }
@@ -72,14 +78,14 @@ router.post("/", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
-  const { roomId, deviceTypeId, hardwareModelId, name } = parsed.data;
+  const { roomId, deviceTypeId, hardwareModelId, apiId, name } = parsed.data;
 
   try {
     const inserted = await pool.query(
-      `INSERT INTO equipment (room_id, device_type_id, hardware_model_id, name)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO equipment (room_id, device_type_id, hardware_model_id, api_id, name)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING id`,
-      [roomId, deviceTypeId, hardwareModelId, name]
+      [roomId, deviceTypeId, hardwareModelId, apiId ?? null, name]
     );
     const result = await pool.query(`${EQUIPMENT_SELECT} WHERE e.id = $1`, [inserted.rows[0].id]);
     res.status(201).json({ equipment: result.rows[0] });
@@ -100,15 +106,15 @@ router.put("/:id", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
-  const { roomId, deviceTypeId, hardwareModelId, name } = parsed.data;
+  const { roomId, deviceTypeId, hardwareModelId, apiId, name } = parsed.data;
 
   try {
     const updated = await pool.query(
       `UPDATE equipment
-       SET room_id = $1, device_type_id = $2, hardware_model_id = $3, name = $4
-       WHERE id = $5
+       SET room_id = $1, device_type_id = $2, hardware_model_id = $3, api_id = $4, name = $5
+       WHERE id = $6
        RETURNING id`,
-      [roomId, deviceTypeId, hardwareModelId, name, id]
+      [roomId, deviceTypeId, hardwareModelId, apiId ?? null, name, id]
     );
     if (!updated.rowCount) {
       return res.status(404).json({ error: "Matériel introuvable." });

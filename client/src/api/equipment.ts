@@ -14,12 +14,15 @@ export interface Equipment {
   hardwareModelId: number;
   hardwareModel: string;
   brandName: string;
+  apiId: number | null;
+  apiName: string | null;
 }
 
 export interface EquipmentInput {
   roomId: number;
   deviceTypeId: number;
   hardwareModelId: number;
+  apiId: number | null;
   name: string;
 }
 

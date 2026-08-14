@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { listSites } from "../../api/sites";
 import type { Site } from "../../api/sites";
@@ -16,121 +16,127 @@ export function SitesTree() {
   const { version } = useSitesTree();
 
   const [sites, setSites] = useState<Site[]>([]);
-  const [zonesBySite, setZonesBySite] = useState<Record<number, Zone[]>>({});
-  const [roomsByZone, setRoomsByZone] = useState<Record<number, Room[]>>({});
-  const [expandedSites, setExpandedSites] = useState<Set<number>>(new Set());
-  const [expandedZones, setExpandedZones] = useState<Set<number>>(new Set());
+  const [zones, setZones] = useState<Zone[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [collapsedSites, setCollapsedSites] = useState<Set<number>>(new Set());
+  const [collapsedZones, setCollapsedZones] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    listSites().then(({ sites }) => setSites(sites));
-    expandedSites.forEach((id) => loadZones(id, true));
-    expandedZones.forEach((id) => loadRooms(id, true));
+    Promise.all([listSites(), listZones(), listRooms()]).then(([{ sites: s }, { zones: z }, { rooms: r }]) => {
+      setSites(s);
+      setZones(z);
+      setRooms(r);
+    });
   }, [version]);
 
-  useEffect(() => {
-    if (!activeSiteId) return;
-    setExpandedSites((prev) => new Set(prev).add(activeSiteId));
-    loadZones(activeSiteId);
-  }, [activeSiteId]);
+  const zonesBySite = useMemo(() => {
+    const map = new Map<number, Zone[]>();
+    for (const zone of zones) {
+      const list = map.get(zone.siteId) ?? [];
+      list.push(zone);
+      map.set(zone.siteId, list);
+    }
+    return map;
+  }, [zones]);
 
-  useEffect(() => {
-    if (!activeZoneId) return;
-    setExpandedZones((prev) => new Set(prev).add(activeZoneId));
-    loadRooms(activeZoneId);
-  }, [activeZoneId]);
-
-  function loadZones(siteId: number, force = false) {
-    setZonesBySite((prev) => {
-      if (!force && prev[siteId]) return prev;
-      listZones(siteId).then(({ zones }) => setZonesBySite((p) => ({ ...p, [siteId]: zones })));
-      return prev;
-    });
-  }
-
-  function loadRooms(zoneId: number, force = false) {
-    setRoomsByZone((prev) => {
-      if (!force && prev[zoneId]) return prev;
-      listRooms(zoneId).then(({ rooms }) => setRoomsByZone((p) => ({ ...p, [zoneId]: rooms })));
-      return prev;
-    });
-  }
+  const roomsByZone = useMemo(() => {
+    const map = new Map<number, Room[]>();
+    for (const room of rooms) {
+      const list = map.get(room.zoneId) ?? [];
+      list.push(room);
+      map.set(room.zoneId, list);
+    }
+    return map;
+  }, [rooms]);
 
   function toggleSite(siteId: number) {
-    setExpandedSites((prev) => {
+    setCollapsedSites((prev) => {
       const next = new Set(prev);
       if (next.has(siteId)) next.delete(siteId);
       else next.add(siteId);
       return next;
     });
-    loadZones(siteId);
   }
 
   function toggleZone(zoneId: number) {
-    setExpandedZones((prev) => {
+    setCollapsedZones((prev) => {
       const next = new Set(prev);
       if (next.has(zoneId)) next.delete(zoneId);
       else next.add(zoneId);
       return next;
     });
-    loadRooms(zoneId);
   }
 
   return (
     <nav className="tree">
       <ul>
-        {sites.map((site) => (
-          <li key={site.id}>
-            <div className={`tree-node${site.id === activeSiteId ? " active" : ""}`}>
-              <button
-                type="button"
-                className="tree-toggle"
-                onClick={() => toggleSite(site.id)}
-                aria-label={expandedSites.has(site.id) ? "Réduire" : "Développer"}
-              >
-                {expandedSites.has(site.id) ? "▾" : "▸"}
-              </button>
-              <Link to={`/sites/${site.id}`}>{site.name}</Link>
-            </div>
-            {expandedSites.has(site.id) && (
-              <ul>
-                {(zonesBySite[site.id] ?? []).map((zone) => (
-                  <li key={zone.id}>
-                    <div className={`tree-node${zone.id === activeZoneId ? " active" : ""}`}>
-                      <button
-                        type="button"
-                        className="tree-toggle"
-                        onClick={() => toggleZone(zone.id)}
-                        aria-label={expandedZones.has(zone.id) ? "Réduire" : "Développer"}
-                      >
-                        {expandedZones.has(zone.id) ? "▾" : "▸"}
-                      </button>
-                      <Link to={`/sites/${site.id}/zones/${zone.id}`}>{zone.name}</Link>
-                    </div>
-                    {expandedZones.has(zone.id) && (
-                      <ul>
-                        {(roomsByZone[zone.id] ?? []).map((room) => (
-                          <li key={room.id}>
-                            <div className="tree-node tree-leaf">
-                              <span className="tree-toggle-spacer" />
-                              <Link
-                                className={room.id === activeRoomId ? "active" : ""}
-                                to={`/sites/${site.id}/zones/${zone.id}/rooms/${room.id}`}
-                              >
-                                {room.name}
-                              </Link>
-                            </div>
-                          </li>
-                        ))}
-                        {roomsByZone[zone.id]?.length === 0 && <li className="tree-empty">Aucune salle</li>}
-                      </ul>
-                    )}
-                  </li>
-                ))}
-                {zonesBySite[site.id]?.length === 0 && <li className="tree-empty">Aucune zone</li>}
-              </ul>
-            )}
-          </li>
-        ))}
+        {sites.map((site) => {
+          const siteZones = zonesBySite.get(site.id) ?? [];
+          const expanded = !collapsedSites.has(site.id);
+          return (
+            <li key={site.id}>
+              <div className={`tree-node${site.id === activeSiteId ? " active" : ""}`}>
+                {siteZones.length > 0 ? (
+                  <button
+                    type="button"
+                    className="tree-toggle"
+                    onClick={() => toggleSite(site.id)}
+                    aria-label={expanded ? "Réduire" : "Développer"}
+                  >
+                    {expanded ? "▾" : "▸"}
+                  </button>
+                ) : (
+                  <span className="tree-toggle-spacer" />
+                )}
+                <Link to={`/sites/${site.id}`}>{site.name}</Link>
+              </div>
+              {expanded && siteZones.length > 0 && (
+                <ul>
+                  {siteZones.map((zone) => {
+                    const zoneRooms = roomsByZone.get(zone.id) ?? [];
+                    const zoneExpanded = !collapsedZones.has(zone.id);
+                    return (
+                      <li key={zone.id}>
+                        <div className={`tree-node${zone.id === activeZoneId ? " active" : ""}`}>
+                          {zoneRooms.length > 0 ? (
+                            <button
+                              type="button"
+                              className="tree-toggle"
+                              onClick={() => toggleZone(zone.id)}
+                              aria-label={zoneExpanded ? "Réduire" : "Développer"}
+                            >
+                              {zoneExpanded ? "▾" : "▸"}
+                            </button>
+                          ) : (
+                            <span className="tree-toggle-spacer" />
+                          )}
+                          <Link to={`/sites/${site.id}/zones/${zone.id}`}>{zone.name}</Link>
+                        </div>
+                        {zoneExpanded && zoneRooms.length > 0 && (
+                          <ul>
+                            {zoneRooms.map((room) => (
+                              <li key={room.id}>
+                                <div className="tree-node tree-leaf">
+                                  <span className="tree-toggle-spacer" />
+                                  <Link
+                                    className={room.id === activeRoomId ? "active" : ""}
+                                    to={`/sites/${site.id}/zones/${zone.id}/rooms/${room.id}`}
+                                  >
+                                    {room.name}
+                                  </Link>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </li>
+          );
+        })}
       </ul>
       {sites.length === 0 && <p className="tree-empty">Aucun site.</p>}
     </nav>

@@ -160,6 +160,9 @@ CREATE TABLE IF NOT EXISTS apis (
   completed BOOLEAN NOT NULL DEFAULT false,
   doe_up_to_date BOOLEAN NOT NULL DEFAULT false
 );
+
+ALTER TABLE equipment ADD COLUMN IF NOT EXISTS api_id INTEGER REFERENCES apis(id);
+CREATE INDEX IF NOT EXISTS ix_equipment_api ON equipment(api_id);
 `;
 
 async function migrate() {

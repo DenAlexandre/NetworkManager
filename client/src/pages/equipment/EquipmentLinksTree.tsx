@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { listEquipment } from "../../api/equipment";
 import type { Equipment } from "../../api/equipment";
 import { listEquipmentLinks } from "../../api/equipmentLinks";
@@ -11,12 +11,9 @@ interface ChildEdge {
 }
 
 export function EquipmentLinksTree() {
-  const { id } = useParams();
-  const activeId = Number(id) || null;
-
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [links, setLinks] = useState<EquipmentLink[]>([]);
-  const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  const [collapsed, setCollapsed] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     Promise.all([listEquipment(), listEquipmentLinks()]).then(([{ equipment: eq }, { links: lk }]) => {
@@ -43,7 +40,7 @@ export function EquipmentLinksTree() {
   const roots = useMemo(() => equipment.filter((e) => !childIds.has(e.id)), [equipment, childIds]);
 
   function toggle(nodeId: number) {
-    setExpanded((prev) => {
+    setCollapsed((prev) => {
       const next = new Set(prev);
       if (next.has(nodeId)) next.delete(nodeId);
       else next.add(nodeId);
@@ -56,11 +53,11 @@ export function EquipmentLinksTree() {
     const isCycle = path.includes(item.id);
     const edges = isCycle ? [] : childrenByParent.get(item.id) ?? [];
     const canExpand = edges.length > 0;
-    const isExpanded = expanded.has(item.id);
+    const isExpanded = canExpand && !collapsed.has(item.id);
 
     return (
       <li key={key}>
-        <div className={`tree-node${item.id === activeId ? " active" : ""}`}>
+        <div className="tree-node">
           {canExpand ? (
             <button
               type="button"
@@ -73,9 +70,7 @@ export function EquipmentLinksTree() {
           ) : (
             <span className="tree-toggle-spacer" />
           )}
-          <Link className={item.id === activeId ? "active" : ""} to={`/equipment/${item.id}/edit`}>
-            {item.name}
-          </Link>
+          <Link to={`/equipment?edit=${item.id}`}>{item.name}</Link>
           {viaLabel && <span className="tree-via">{viaLabel}</span>}
         </div>
         {canExpand && isExpanded && (

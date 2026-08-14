@@ -6,6 +6,7 @@ import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
 import { SortableHeader } from "../../components/SortableHeader";
 import { useSitesTree } from "../../context/SitesTreeContext";
+import { SiteFormModal } from "./SiteFormModal";
 
 function searchFields(item: Site) {
   return [item.name];
@@ -17,6 +18,9 @@ export function SitesListPage() {
   const [error, setError] = useState<string | null>(null);
   const { search, setSearch, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, searchFields);
   const { refresh } = useSitesTree();
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   useEffect(() => {
     load();
@@ -45,15 +49,30 @@ export function SitesListPage() {
     }
   }
 
+  function openCreateModal() {
+    setEditingId(null);
+    setModalOpen(true);
+  }
+
+  function openEditModal(id: number) {
+    setEditingId(id);
+    setModalOpen(true);
+  }
+
+  function handleSaved() {
+    setModalOpen(false);
+    load();
+  }
+
   if (loading) return <p>Chargement...</p>;
 
   return (
     <div className="card">
       <div className="page-header">
         <h1>Gestion des Sites</h1>
-        <Link to="/sites/new" className="btn">
+        <button type="button" className="btn" onClick={openCreateModal}>
           Ajouter
-        </Link>
+        </button>
       </div>
       {error && <p className="error">{error}</p>}
       <div className="table-toolbar">
@@ -78,7 +97,9 @@ export function SitesListPage() {
                 <Link to={`/sites/${item.id}`}>{item.name}</Link>
               </td>
               <td className="table-actions">
-                <Link to={`/sites/${item.id}/edit`}>Modifier</Link>
+                <button type="button" className="link" onClick={() => openEditModal(item.id)}>
+                  Modifier
+                </button>
                 <button className="danger" onClick={() => handleDelete(item.id)}>
                   Supprimer
                 </button>
@@ -88,6 +109,9 @@ export function SitesListPage() {
         </tbody>
       </table>
       {rows.length === 0 && <p className="muted">Aucun site enregistré.</p>}
+      {modalOpen && (
+        <SiteFormModal siteId={editingId} onClose={() => setModalOpen(false)} onSaved={handleSaved} />
+      )}
     </div>
   );
 }
