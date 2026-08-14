@@ -8,20 +8,25 @@ export function HomePage() {
 
   if (!user) {
     return (
-      <div>
+      <div className="card hero-card">
         <h1>Bienvenue</h1>
-        <p>
-          <Link to="/login">Connecte-toi</Link> ou{" "}
-          <Link to="/register">crée un compte</Link> pour continuer.
-        </p>
+        <p>Connecte-toi ou crée un compte pour accéder à ton espace.</p>
+        <div className="hero-actions">
+          <Link to="/login" className="btn btn-outline">
+            Connecte-toi
+          </Link>
+          <Link to="/register" className="btn">
+            Crée un compte
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="card">
       <h1>Mon compte</h1>
-      <dl>
+      <dl className="account-info">
         <dt>Pseudo</dt>
         <dd>{user.username}</dd>
         <dt>Nom</dt>

@@ -11,31 +11,36 @@ export function Layout() {
   }
 
   return (
-    <div className="app">
+    <>
       <header className="navbar">
-        <Link to="/" className="brand">
-          Mon compte
-        </Link>
-        <nav>
-          <NavLink to="/">Accueil</NavLink>
-        </nav>
-        <div className="auth-actions">
-          {user ? (
-            <>
-              <span>{user.username}</span>
-              <button onClick={handleLogout}>Déconnexion</button>
-            </>
-          ) : (
-            <>
-              <Link to="/login">Connexion</Link>
-              <Link to="/register">Inscription</Link>
-            </>
-          )}
+        <div className="navbar-inner">
+          <Link to="/" className="brand">
+            <span className="brand-mark">C</span>
+            Mon compte
+          </Link>
+          <nav>
+            <NavLink to="/">Accueil</NavLink>
+          </nav>
+          <div className="auth-actions">
+            {user ? (
+              <>
+                <span className="username">{user.username}</span>
+                <button onClick={handleLogout}>Déconnexion</button>
+              </>
+            ) : (
+              <>
+                <Link to="/login">Connexion</Link>
+                <Link to="/register">Inscription</Link>
+              </>
+            )}
+          </div>
         </div>
       </header>
-      <main>
-        <Outlet />
-      </main>
-    </div>
+      <div className="app">
+        <main>
+          <Outlet />
+        </main>
+      </div>
+    </>
   );
 }
