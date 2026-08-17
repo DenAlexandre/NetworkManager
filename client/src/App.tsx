@@ -20,6 +20,7 @@ import { EquipmentLayout } from "./pages/equipment/EquipmentLayout";
 import { EquipmentListPage } from "./pages/equipment/EquipmentListPage";
 import { EquipmentLinksPage } from "./pages/equipment/EquipmentLinksPage";
 import { ApisListPage } from "./pages/apis/ApisListPage";
+import { AddressingPage } from "./pages/addressing/AddressingPage";
 import { DesignPage } from "./pages/plans/DesignPage";
 import { SystemLayout } from "./pages/system/SystemLayout";
 import { DatabasePage } from "./pages/system/DatabasePage";
@@ -76,6 +77,14 @@ function App() {
             element={
               <AdminRoute>
                 <ApisListPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="addressing"
+            element={
+              <AdminRoute>
+                <AddressingPage />
               </AdminRoute>
             }
           />

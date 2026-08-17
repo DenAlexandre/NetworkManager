@@ -176,6 +176,20 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_equipment_links_child_port ON equipment_lin
 CREATE INDEX IF NOT EXISTS ix_equipment_links_parent ON equipment_links(parent_equipment_id);
 CREATE INDEX IF NOT EXISTS ix_equipment_links_child ON equipment_links(child_equipment_id);
 
+-- Reglages d'adressage par instance de materiel pour chaque port de son modele : adresse
+-- ModBus pour les ports ModBus, VLAN/IP/passerelle/masque pour les ports TCP/IP.
+CREATE TABLE IF NOT EXISTS equipment_port_settings (
+  id SERIAL PRIMARY KEY,
+  equipment_id INTEGER NOT NULL REFERENCES equipment(id) ON DELETE CASCADE,
+  hardware_model_port_id INTEGER NOT NULL REFERENCES hardware_model_ports(id) ON DELETE CASCADE,
+  modbus_address VARCHAR(50),
+  vlan VARCHAR(50),
+  ip_address VARCHAR(45),
+  gateway VARCHAR(45),
+  subnet_mask VARCHAR(45),
+  UNIQUE (equipment_id, hardware_model_port_id)
+);
+
 CREATE TABLE IF NOT EXISTS apis (
   id SERIAL PRIMARY KEY,
   name VARCHAR(200) NOT NULL,
