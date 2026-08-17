@@ -15,6 +15,10 @@ export interface DesignSchema {
   updatedAt: string;
 }
 
+export function listDesignSchemas() {
+  return apiFetch<{ schemas: DesignSchema[] }>("/design-schemas");
+}
+
 export function getDesignSchema(apiId: number) {
   return apiFetch<{ schema: DesignSchema | null }>(`/design-schemas/${apiId}`);
 }

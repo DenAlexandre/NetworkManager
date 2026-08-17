@@ -285,6 +285,35 @@ a {
   color: var(--text-muted);
 }
 
+.stats-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+}
+
+.stats-grid + .stats-section-title {
+  margin-top: 28px;
+}
+
+.stat-card-chart {
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat-card-chart-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.donut-chart {
+  flex-shrink: 0;
+}
+
 /* tables */
 
 .table-toolbar {
@@ -1268,6 +1297,7 @@ textarea {
   box-shadow: none;
   border-color: transparent;
 }
+
 
 @media (max-width: 900px) {
   .shell {

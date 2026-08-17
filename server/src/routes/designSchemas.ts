@@ -45,6 +45,11 @@ function parseId(raw: string) {
   return Number.isInteger(id) ? id : null;
 }
 
+router.get("/", async (_req, res) => {
+  const result = await pool.query(`${SCHEMA_SELECT} ORDER BY id`);
+  res.json({ schemas: result.rows });
+});
+
 router.get("/:apiId", async (req, res) => {
   const apiId = parseId(req.params.apiId);
   if (apiId === null) {
