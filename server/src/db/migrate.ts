@@ -81,6 +81,9 @@ WHERE color IS NULL;
 ALTER TABLE link_types ALTER COLUMN color SET DEFAULT '#8b5cf6';
 ALTER TABLE link_types ALTER COLUMN color SET NOT NULL;
 
+-- Indique si ce type de liaison ne peut relier que deux equipements (un seul lien par port).
+ALTER TABLE link_types ADD COLUMN IF NOT EXISTS point_to_point BOOLEAN NOT NULL DEFAULT false;
+
 ALTER TABLE IF EXISTS manufacturer_ports RENAME TO hardware_model_ports;
 
 CREATE TABLE IF NOT EXISTS hardware_model_ports (

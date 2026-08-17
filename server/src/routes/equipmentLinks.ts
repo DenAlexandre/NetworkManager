@@ -70,18 +70,33 @@ async function findPortInUse(
   childPortId: number,
   excludeId: number | null
 ) {
-  const result = await pool.query(
-    `SELECT id FROM equipment_links
-     WHERE id != COALESCE($5, 0)
-       AND (
-         (parent_equipment_id = $1 AND parent_port_id = $2)
-         OR (child_equipment_id = $1 AND child_port_id = $2)
-         OR (parent_equipment_id = $3 AND parent_port_id = $4)
-         OR (child_equipment_id = $3 AND child_port_id = $4)
-       )`,
+  const typeResult = await pool.query(
+    `SELECT
+       (SELECT lt.point_to_point FROM hardware_model_ports p JOIN link_types lt ON lt.id = p.link_type_id WHERE p.id = $1) AS "parentPointToPoint",
+       (SELECT lt.point_to_point FROM hardware_model_ports p JOIN link_types lt ON lt.id = p.link_type_id WHERE p.id = $2) AS "childPointToPoint"`,
+    [parentPortId, childPortId]
+  );
+  const { parentPointToPoint, childPointToPoint } = typeResult.rows[0];
+
+  const usageResult = await pool.query(
+    `SELECT
+       EXISTS(SELECT 1 FROM equipment_links WHERE id != COALESCE($5, 0) AND parent_equipment_id = $1 AND parent_port_id = $2) AS "parentAsParent",
+       EXISTS(SELECT 1 FROM equipment_links WHERE id != COALESCE($5, 0) AND child_equipment_id = $1 AND child_port_id = $2) AS "parentAsChild",
+       EXISTS(SELECT 1 FROM equipment_links WHERE id != COALESCE($5, 0) AND parent_equipment_id = $3 AND parent_port_id = $4) AS "childAsParent",
+       EXISTS(SELECT 1 FROM equipment_links WHERE id != COALESCE($5, 0) AND child_equipment_id = $3 AND child_port_id = $4) AS "childAsChild"`,
     [parentEquipmentId, parentPortId, childEquipmentId, childPortId, excludeId]
   );
-  return result.rowCount ? true : false;
+  const usage = usageResult.rows[0];
+
+  // A port already used in its own role is always a conflict. A non-"point à point" port
+  // may additionally hold one link in the other role (e.g. pass-through wiring); a
+  // "point à point" port is restricted to a single link total, so mixing roles also conflicts.
+  if (usage.parentAsParent) return true;
+  if (parentPointToPoint && usage.parentAsChild) return true;
+  if (usage.childAsChild) return true;
+  if (childPointToPoint && usage.childAsParent) return true;
+
+  return false;
 }
 
 router.get("/", async (req, res) => {

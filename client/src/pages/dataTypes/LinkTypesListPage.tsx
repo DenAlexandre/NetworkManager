@@ -84,6 +84,7 @@ export function LinkTypesListPage() {
           <tr>
             <SortableHeader label="Nom" field="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
             <th>Trait</th>
+            <th>Point à point</th>
             <th></th>
           </tr>
         </thead>
@@ -104,6 +105,7 @@ export function LinkTypesListPage() {
                   />
                 </svg>
               </td>
+              <td>{item.pointToPoint ? "Oui" : "Non"}</td>
               <td className="table-actions">
                 <button type="button" className="link" onClick={() => openEditModal(item.id)}>
                   Modifier

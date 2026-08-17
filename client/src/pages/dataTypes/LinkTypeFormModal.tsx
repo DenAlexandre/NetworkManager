@@ -19,6 +19,7 @@ export function LinkTypeFormModal({ linkTypeId, onClose, onSaved }: LinkTypeForm
   const [name, setName] = useState("");
   const [color, setColor] = useState(DEFAULT_COLOR);
   const [strokeWidth, setStrokeWidth] = useState(DEFAULT_STROKE_WIDTH);
+  const [pointToPoint, setPointToPoint] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(isEdit);
   const [submitting, setSubmitting] = useState(false);
@@ -30,6 +31,7 @@ export function LinkTypeFormModal({ linkTypeId, onClose, onSaved }: LinkTypeForm
         setName(linkType.name);
         setColor(linkType.color);
         setStrokeWidth(linkType.strokeWidth);
+        setPointToPoint(linkType.pointToPoint);
       })
       .catch((err) => setError(err instanceof ApiError ? err.message : "Erreur de chargement."))
       .finally(() => setLoading(false));
@@ -40,7 +42,7 @@ export function LinkTypeFormModal({ linkTypeId, onClose, onSaved }: LinkTypeForm
     setError(null);
     setSubmitting(true);
     try {
-      const input = { name, color, strokeWidth };
+      const input = { name, color, strokeWidth, pointToPoint };
       if (isEdit) {
         await updateLinkType(Number(linkTypeId), input);
       } else {
@@ -79,6 +81,10 @@ export function LinkTypeFormModal({ linkTypeId, onClose, onSaved }: LinkTypeForm
               onChange={(e) => setStrokeWidth(Number(e.target.value))}
               required
             />
+          </label>
+          <label className="checkbox-field">
+            <input type="checkbox" checked={pointToPoint} onChange={(e) => setPointToPoint(e.target.checked)} />
+            Point à point
           </label>
           {error && <p className="error">{error}</p>}
           <div className="form-actions">

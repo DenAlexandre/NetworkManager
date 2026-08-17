@@ -10,9 +10,10 @@ const linkTypeSchema = z.object({
   name: z.string().min(1, "Le nom est requis."),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Couleur invalide."),
   strokeWidth: z.number().min(1, "L'épaisseur doit être au moins 1.").max(20, "Épaisseur trop grande (max 20)."),
+  pointToPoint: z.boolean(),
 });
 
-const LINK_TYPE_SELECT = `SELECT id, name, color, stroke_width AS "strokeWidth" FROM link_types`;
+const LINK_TYPE_SELECT = `SELECT id, name, color, stroke_width AS "strokeWidth", point_to_point AS "pointToPoint" FROM link_types`;
 
 function parseId(raw: string) {
   const id = Number(raw);
@@ -42,7 +43,7 @@ router.post("/", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
-  const { name, color, strokeWidth } = parsed.data;
+  const { name, color, strokeWidth, pointToPoint } = parsed.data;
 
   const existing = await pool.query("SELECT id FROM link_types WHERE name = $1", [name]);
   if (existing.rowCount) {
@@ -50,8 +51,8 @@ router.post("/", async (req, res) => {
   }
 
   const inserted = await pool.query(
-    "INSERT INTO link_types (name, color, stroke_width) VALUES ($1, $2, $3) RETURNING id",
-    [name, color, strokeWidth]
+    "INSERT INTO link_types (name, color, stroke_width, point_to_point) VALUES ($1, $2, $3, $4) RETURNING id",
+    [name, color, strokeWidth, pointToPoint]
   );
   const result = await pool.query(`${LINK_TYPE_SELECT} WHERE id = $1`, [inserted.rows[0].id]);
   res.status(201).json({ linkType: result.rows[0] });
@@ -66,7 +67,7 @@ router.put("/:id", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
-  const { name, color, strokeWidth } = parsed.data;
+  const { name, color, strokeWidth, pointToPoint } = parsed.data;
 
   const existing = await pool.query(
     "SELECT id FROM link_types WHERE name = $1 AND id != $2",
@@ -77,8 +78,8 @@ router.put("/:id", async (req, res) => {
   }
 
   const updated = await pool.query(
-    "UPDATE link_types SET name = $1, color = $2, stroke_width = $3 WHERE id = $4 RETURNING id",
-    [name, color, strokeWidth, id]
+    "UPDATE link_types SET name = $1, color = $2, stroke_width = $3, point_to_point = $4 WHERE id = $5 RETURNING id",
+    [name, color, strokeWidth, pointToPoint, id]
   );
   if (!updated.rowCount) {
     return res.status(404).json({ error: "Type de liaison introuvable." });

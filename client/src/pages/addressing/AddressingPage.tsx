@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { listAddressing } from "../../api/equipmentPortSettings";
-import type { AddressingEquipment } from "../../api/equipmentPortSettings";
+import type { AddressingEquipment, AddressingPort } from "../../api/equipmentPortSettings";
 import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
 import { SortableHeader } from "../../components/SortableHeader";
@@ -8,6 +8,10 @@ import { AddressingConfigModal } from "./AddressingConfigModal";
 
 function searchFields(item: AddressingEquipment) {
   return [item.equipmentName, item.deviceType, item.brandName, item.hardwareModel, item.siteName, item.zoneName, item.roomName];
+}
+
+function isPortConfigured(port: AddressingPort) {
+  return Boolean(port.modbusAddress || port.vlan || port.ipAddress || port.gateway || port.subnetMask);
 }
 
 export function AddressingPage() {
@@ -107,7 +111,7 @@ export function AddressingPage() {
             <SortableHeader label="Type" field="deviceType" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
             <th>Matériel</th>
             <th>Emplacement</th>
-            <th>Ports</th>
+            <th>Ports configurés</th>
             <th></th>
           </tr>
         </thead>
@@ -122,7 +126,9 @@ export function AddressingPage() {
               <td>
                 {item.siteName} / {item.zoneName} / {item.roomName}
               </td>
-              <td>{item.ports.length}</td>
+              <td>
+                {item.ports.filter(isPortConfigured).length} / {item.ports.length}
+              </td>
               <td className="table-actions">
                 <button type="button" className="link" onClick={() => setSelectedId(item.equipmentId)}>
                   Adresser

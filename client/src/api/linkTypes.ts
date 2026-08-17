@@ -5,12 +5,14 @@ export interface LinkType {
   name: string;
   color: string;
   strokeWidth: number;
+  pointToPoint: boolean;
 }
 
 export interface LinkTypeInput {
   name: string;
   color: string;
   strokeWidth: number;
+  pointToPoint: boolean;
 }
 
 export function listLinkTypes() {
