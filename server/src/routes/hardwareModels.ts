@@ -18,7 +18,7 @@ const hardwareModelSchema = z.object({
 const HARDWARE_MODEL_SELECT = `
   SELECT hm.id, hm.brand_id AS "brandId", b.name AS "brandName",
          hm.device_type_id AS "deviceTypeId", dt.name AS "deviceType", hm.name,
-         hm.image_path AS "imagePath"
+         hm.image_path AS "imagePath", hm.datasheet_path AS "datasheetPath"
   FROM hardware_models hm
   JOIN brands b ON b.id = hm.brand_id
   JOIN device_types dt ON dt.id = hm.device_type_id
@@ -56,6 +56,38 @@ const imageUpload = multer({
 function deleteImageFile(imagePath: string | null | undefined) {
   if (!imagePath) return;
   const filePath = path.join(IMAGE_UPLOAD_DIR, path.basename(imagePath));
+  fs.rm(filePath, { force: true }, () => {});
+}
+
+const DATASHEET_UPLOAD_DIR = path.resolve(process.cwd(), "uploads", "hardware-model-datasheets");
+const DATASHEET_MIME_EXTENSIONS: Record<string, string> = {
+  "application/pdf": ".pdf",
+};
+
+const datasheetUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => {
+      fs.mkdirSync(DATASHEET_UPLOAD_DIR, { recursive: true });
+      cb(null, DATASHEET_UPLOAD_DIR);
+    },
+    filename: (req, file, cb) => {
+      const ext = DATASHEET_MIME_EXTENSIONS[file.mimetype];
+      cb(null, `${req.params.id}-${Date.now()}${ext}`);
+    },
+  }),
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (!DATASHEET_MIME_EXTENSIONS[file.mimetype]) {
+      cb(new Error("Format de fichier non supporté (PDF uniquement)."));
+      return;
+    }
+    cb(null, true);
+  },
+});
+
+function deleteDatasheetFile(datasheetPath: string | null | undefined) {
+  if (!datasheetPath) return;
+  const filePath = path.join(DATASHEET_UPLOAD_DIR, path.basename(datasheetPath));
   fs.rm(filePath, { force: true }, () => {});
 }
 
@@ -196,18 +228,58 @@ router.delete("/:id/image", async (req, res) => {
   res.json({ hardwareModel: result.rows[0] });
 });
 
+router.post("/:id/datasheet", (req, res, next) => {
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ error: "Identifiant invalide." });
+  }
+  datasheetUpload.single("datasheet")(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || "Erreur lors du téléversement." });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: "Aucun fichier fourni." });
+    }
+    const existing = await pool.query("SELECT datasheet_path FROM hardware_models WHERE id = $1", [id]);
+    if (!existing.rowCount) {
+      deleteDatasheetFile(req.file.filename);
+      return res.status(404).json({ error: "Matériel introuvable." });
+    }
+    await pool.query("UPDATE hardware_models SET datasheet_path = $1 WHERE id = $2", [req.file.filename, id]);
+    deleteDatasheetFile(existing.rows[0].datasheet_path);
+    const result = await pool.query(`${HARDWARE_MODEL_SELECT} WHERE hm.id = $1`, [id]);
+    res.json({ hardwareModel: result.rows[0] });
+  });
+});
+
+router.delete("/:id/datasheet", async (req, res) => {
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ error: "Identifiant invalide." });
+  }
+  const existing = await pool.query("SELECT datasheet_path FROM hardware_models WHERE id = $1", [id]);
+  if (!existing.rowCount) {
+    return res.status(404).json({ error: "Matériel introuvable." });
+  }
+  await pool.query("UPDATE hardware_models SET datasheet_path = NULL WHERE id = $1", [id]);
+  deleteDatasheetFile(existing.rows[0].datasheet_path);
+  const result = await pool.query(`${HARDWARE_MODEL_SELECT} WHERE hm.id = $1`, [id]);
+  res.json({ hardwareModel: result.rows[0] });
+});
+
 router.delete("/:id", async (req, res) => {
   const id = parseId(req.params.id);
   if (id === null) {
     return res.status(400).json({ error: "Identifiant invalide." });
   }
   try {
-    const existing = await pool.query("SELECT image_path FROM hardware_models WHERE id = $1", [id]);
+    const existing = await pool.query("SELECT image_path, datasheet_path FROM hardware_models WHERE id = $1", [id]);
     const result = await pool.query("DELETE FROM hardware_models WHERE id = $1", [id]);
     if (!result.rowCount) {
       return res.status(404).json({ error: "Matériel introuvable." });
     }
     deleteImageFile(existing.rows[0]?.image_path);
+    deleteDatasheetFile(existing.rows[0]?.datasheet_path);
     res.status(204).send();
   } catch (err) {
     if ((err as { code?: string }).code === "23503") {

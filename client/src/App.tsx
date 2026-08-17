@@ -10,6 +10,7 @@ import { DeviceTypesListPage } from "./pages/dataTypes/DeviceTypesListPage";
 import { LinkTypesListPage } from "./pages/dataTypes/LinkTypesListPage";
 import { BrandsListPage } from "./pages/dataTypes/BrandsListPage";
 import { HardwareModelsListPage } from "./pages/dataTypes/HardwareModelsListPage";
+import { PortsDesignerPage } from "./pages/dataTypes/PortsDesignerPage";
 import { SitesLayout } from "./pages/sites/SitesLayout";
 import { SitesListPage } from "./pages/sites/SitesListPage";
 import { SiteDetailPage } from "./pages/sites/SiteDetailPage";
@@ -19,8 +20,6 @@ import { EquipmentLayout } from "./pages/equipment/EquipmentLayout";
 import { EquipmentListPage } from "./pages/equipment/EquipmentListPage";
 import { EquipmentLinksPage } from "./pages/equipment/EquipmentLinksPage";
 import { ApisListPage } from "./pages/apis/ApisListPage";
-import { PlansLayout } from "./pages/plans/PlansLayout";
-import { PortsDesignerPage } from "./pages/plans/PortsDesignerPage";
 import { DesignPage } from "./pages/plans/DesignPage";
 
 function App() {
@@ -43,6 +42,7 @@ function App() {
             <Route path="link-types" element={<LinkTypesListPage />} />
             <Route path="brands" element={<BrandsListPage />} />
             <Route path="hardware-models" element={<HardwareModelsListPage />} />
+            <Route path="ports" element={<PortsDesignerPage />} />
           </Route>
           <Route
             path="sites"
@@ -80,13 +80,10 @@ function App() {
             path="plans"
             element={
               <AdminRoute>
-                <PlansLayout />
+                <DesignPage />
               </AdminRoute>
             }
-          >
-            <Route index element={<PortsDesignerPage />} />
-            <Route path="design" element={<DesignPage />} />
-          </Route>
+          />
         </Route>
       </Routes>
     </AuthProvider>

@@ -17,6 +17,9 @@ export function DataTypesLayout() {
         <NavLink to="/data-types/hardware-models" className="tab">
           Matériel
         </NavLink>
+        <NavLink to="/data-types/ports" className="tab">
+          Gestion des ports
+        </NavLink>
       </nav>
       <Outlet />
     </div>

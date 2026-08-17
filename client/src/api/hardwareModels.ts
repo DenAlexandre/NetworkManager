@@ -8,10 +8,15 @@ export interface HardwareModel {
   deviceType: string;
   name: string;
   imagePath: string | null;
+  datasheetPath: string | null;
 }
 
 export function hardwareModelImageUrl(imagePath: string) {
   return `${API_ORIGIN}/uploads/hardware-models/${imagePath}`;
+}
+
+export function hardwareModelDatasheetUrl(datasheetPath: string) {
+  return `${API_ORIGIN}/uploads/hardware-model-datasheets/${datasheetPath}`;
 }
 
 export interface HardwareModelInput {
@@ -54,4 +59,14 @@ export function uploadHardwareModelImage(id: number, file: File) {
 
 export function deleteHardwareModelImage(id: number) {
   return apiFetch<{ hardwareModel: HardwareModel }>(`/hardware-models/${id}/image`, { method: "DELETE" });
+}
+
+export function uploadHardwareModelDatasheet(id: number, file: File) {
+  const formData = new FormData();
+  formData.append("datasheet", file);
+  return apiUpload<{ hardwareModel: HardwareModel }>(`/hardware-models/${id}/datasheet`, formData);
+}
+
+export function deleteHardwareModelDatasheet(id: number) {
+  return apiFetch<{ hardwareModel: HardwareModel }>(`/hardware-models/${id}/datasheet`, { method: "DELETE" });
 }

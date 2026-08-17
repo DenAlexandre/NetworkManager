@@ -179,8 +179,18 @@ export function DesignPage() {
       const canvasRect = canvasRef.current?.getBoundingClientRect();
       if (!canvasRect || !bendDrag) return;
       if (Math.abs(e.clientX - bendDrag.startX) > 4) bendMovedRef.current = true;
+      const link = links.find((l) => l.id === bendDrag.linkId);
+      if (!link) return;
+      const from = endpoints[endpointKey(link.parentEquipmentId, link.parentPortId)];
+      const to = endpoints[endpointKey(link.childEquipmentId, link.childPortId)];
+      if (!from || !to) return;
       const x = e.clientX - canvasRect.left;
-      setBendOverrides((prev) => ({ ...prev, [bendDrag.linkId]: x }));
+      // Stored as a ratio between the two endpoints (not an absolute pixel position) so the
+      // bend stays proportionally in place, and the link stays visually identical, when the
+      // canvas is zoomed in/out and the endpoints move. Clamped to [0, 1] so the bend can't be
+      // dragged past either port, which would push the link outside the visible canvas frame.
+      const ratio = to.x === from.x ? 0.5 : clamp((x - from.x) / (to.x - from.x), 0, 1);
+      setBendOverrides((prev) => ({ ...prev, [bendDrag.linkId]: ratio }));
     }
     function onUp() {
       if (!bendMovedRef.current && bendDrag) {
@@ -339,7 +349,8 @@ export function DesignPage() {
         const to = endpoints[endpointKey(l.childEquipmentId, l.childPortId)];
         if (!from || !to) return null;
         const parentPort = portsById.get(l.parentPortId);
-        const midX = bendOverrides[l.id] ?? (from.x + to.x) / 2;
+        const bendRatio = bendOverrides[l.id] ?? 0.5;
+        const midX = from.x + bendRatio * (to.x - from.x);
         return {
           link: l,
           from,

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import { deleteEquipment, listEquipment } from "../../api/equipment";
 import type { Equipment } from "../../api/equipment";
 import { ApiError } from "../../api/client";
@@ -57,19 +56,10 @@ export function EquipmentListPage() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     load();
   }, []);
-
-  useEffect(() => {
-    const editParam = searchParams.get("edit");
-    if (!editParam) return;
-    setEditingId(Number(editParam));
-    setModalOpen(true);
-    setSearchParams({}, { replace: true });
-  }, [searchParams, setSearchParams]);
 
   async function load() {
     setLoading(true);

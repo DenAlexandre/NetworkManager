@@ -2,20 +2,18 @@ import { useEffect, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import {
   createHardwareModel,
+  deleteHardwareModelDatasheet,
   deleteHardwareModelImage,
   getHardwareModel,
   hardwareModelImageUrl,
   updateHardwareModel,
+  uploadHardwareModelDatasheet,
   uploadHardwareModelImage,
 } from "../../api/hardwareModels";
 import { listBrands } from "../../api/brands";
 import type { Brand } from "../../api/brands";
 import { listDeviceTypes } from "../../api/deviceTypes";
 import type { DeviceType } from "../../api/deviceTypes";
-import { bulkCreatePorts, deletePort, listPorts, updatePort } from "../../api/ports";
-import type { Port } from "../../api/ports";
-import { listLinkTypes } from "../../api/linkTypes";
-import type { LinkType } from "../../api/linkTypes";
 import { ApiError } from "../../api/client";
 import { Modal } from "../../components/Modal";
 
@@ -41,16 +39,9 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
   const [imageError, setImageError] = useState<string | null>(null);
   const [imageUploading, setImageUploading] = useState(false);
 
-  const [ports, setPorts] = useState<Port[]>([]);
-  const [linkTypes, setLinkTypes] = useState<LinkType[]>([]);
-  const [bulkLinkTypeId, setBulkLinkTypeId] = useState<number | "">("");
-  const [bulkQuantity, setBulkQuantity] = useState(1);
-  const [bulkError, setBulkError] = useState<string | null>(null);
-  const [bulkSubmitting, setBulkSubmitting] = useState(false);
-
-  const [editingPortId, setEditingPortId] = useState<number | null>(null);
-  const [editingLabel, setEditingLabel] = useState("");
-  const [editLabelError, setEditLabelError] = useState<string | null>(null);
+  const [datasheetPath, setDatasheetPath] = useState<string | null>(null);
+  const [datasheetError, setDatasheetError] = useState<string | null>(null);
+  const [datasheetUploading, setDatasheetUploading] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -63,10 +54,7 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
         setDeviceTypeId(hardwareModel.deviceTypeId);
         setName(hardwareModel.name);
         setImagePath(hardwareModel.imagePath);
-        await loadPorts();
-        const { linkTypes: ltList } = await listLinkTypes();
-        setLinkTypes(ltList);
-        if (ltList.length > 0) setBulkLinkTypeId(ltList[0].id);
+        setDatasheetPath(hardwareModel.datasheetPath);
       } else {
         if (list.length > 0) setBrandId(list[0].id);
         if (dtList.length > 0) setDeviceTypeId(dtList[0].id);
@@ -78,11 +66,6 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
       setLoading(false);
     });
   }, [hardwareModelId, isEdit]);
-
-  async function loadPorts() {
-    const { ports: all } = await listPorts();
-    setPorts(all.filter((p) => p.hardwareModelId === Number(hardwareModelId)));
-  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -101,25 +84,6 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
       setError(err instanceof ApiError ? err.message : "Erreur lors de l'enregistrement.");
     } finally {
       setSubmitting(false);
-    }
-  }
-
-  async function handleGeneratePorts(e: FormEvent) {
-    e.preventDefault();
-    if (bulkLinkTypeId === "") return;
-    setBulkError(null);
-    setBulkSubmitting(true);
-    try {
-      await bulkCreatePorts({
-        hardwareModelId: Number(hardwareModelId),
-        linkTypeId: Number(bulkLinkTypeId),
-        quantity: bulkQuantity,
-      });
-      await loadPorts();
-    } catch (err) {
-      setBulkError(err instanceof ApiError ? err.message : "Erreur lors de la génération.");
-    } finally {
-      setBulkSubmitting(false);
     }
   }
 
@@ -167,40 +131,30 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
     }
   }
 
-  function startEditLabel(port: Port) {
-    setEditingPortId(port.id);
-    setEditingLabel(port.label);
-    setEditLabelError(null);
-  }
-
-  function cancelEditLabel() {
-    setEditingPortId(null);
-  }
-
-  async function handleSaveLabel(port: Port) {
-    const label = editingLabel.trim();
-    if (!label) return;
-    setEditLabelError(null);
+  async function handleDatasheetChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.currentTarget.files?.[0];
+    e.currentTarget.value = "";
+    if (!file) return;
+    setDatasheetError(null);
+    setDatasheetUploading(true);
     try {
-      const { port: updated } = await updatePort(port.id, {
-        hardwareModelId: port.hardwareModelId,
-        linkTypeId: port.linkTypeId,
-        label,
-      });
-      setPorts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
-      setEditingPortId(null);
+      const { hardwareModel } = await uploadHardwareModelDatasheet(Number(hardwareModelId), file);
+      setDatasheetPath(hardwareModel.datasheetPath);
     } catch (err) {
-      setEditLabelError(err instanceof ApiError ? err.message : "Erreur lors de la modification.");
+      setDatasheetError(err instanceof ApiError ? err.message : "Erreur lors du téléversement.");
+    } finally {
+      setDatasheetUploading(false);
     }
   }
 
-  async function handleDeletePort(portId: number) {
-    if (!window.confirm("Supprimer ce port ?")) return;
+  async function handleRemoveDatasheet() {
+    if (!window.confirm("Supprimer ce PDF ?")) return;
+    setDatasheetError(null);
     try {
-      await deletePort(portId);
-      setPorts((prev) => prev.filter((p) => p.id !== portId));
+      const { hardwareModel } = await deleteHardwareModelDatasheet(Number(hardwareModelId));
+      setDatasheetPath(hardwareModel.datasheetPath);
     } catch (err) {
-      alert(err instanceof ApiError ? err.message : "Erreur lors de la suppression.");
+      setDatasheetError(err instanceof ApiError ? err.message : "Erreur lors de la suppression.");
     }
   }
 
@@ -263,97 +217,24 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
 
           {isEdit && (
             <div className="card card-compact-top">
-              <h2>Ports</h2>
-              <form className="inline-form" onSubmit={handleGeneratePorts}>
+              <h2>Documentation constructeur</h2>
+              <div className="inline-form">
                 <label>
-                  Type de liaison
-                  <select
-                    value={bulkLinkTypeId}
-                    onChange={(e) => setBulkLinkTypeId(Number(e.target.value))}
-                    required
-                  >
-                    {linkTypes.map((lt) => (
-                      <option key={lt.id} value={lt.id}>
-                        {lt.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Quantité
+                  {datasheetPath ? "Remplacer le PDF" : "Ajouter un PDF"}
                   <input
-                    type="number"
-                    min={1}
-                    max={200}
-                    value={bulkQuantity}
-                    onChange={(e) => setBulkQuantity(Number(e.target.value))}
-                    required
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handleDatasheetChange}
+                    disabled={datasheetUploading}
                   />
                 </label>
-                <button type="submit" disabled={bulkSubmitting}>
-                  Générer
-                </button>
-              </form>
-              {bulkError && <p className="error">{bulkError}</p>}
-              {editLabelError && <p className="error">{editLabelError}</p>}
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Type de liaison</th>
-                    <th>Label</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ports.map((p) => (
-                    <tr key={p.id}>
-                      <td>{p.portType}</td>
-                      <td>
-                        {editingPortId === p.id ? (
-                          <input
-                            type="text"
-                            value={editingLabel}
-                            onChange={(e) => setEditingLabel(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                e.preventDefault();
-                                handleSaveLabel(p);
-                              } else if (e.key === "Escape") {
-                                cancelEditLabel();
-                              }
-                            }}
-                            autoFocus
-                          />
-                        ) : (
-                          p.label
-                        )}
-                      </td>
-                      <td className="table-actions">
-                        {editingPortId === p.id ? (
-                          <>
-                            <button type="button" className="link" onClick={() => handleSaveLabel(p)}>
-                              Enregistrer
-                            </button>
-                            <button type="button" className="link" onClick={cancelEditLabel}>
-                              Annuler
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button type="button" className="link" onClick={() => startEditLabel(p)}>
-                              Modifier
-                            </button>
-                            <button className="danger" onClick={() => handleDeletePort(p.id)}>
-                              Supprimer
-                            </button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {ports.length === 0 && <p className="muted">Aucun port configuré.</p>}
+                {datasheetPath && (
+                  <button type="button" className="danger" onClick={handleRemoveDatasheet}>
+                    Supprimer le PDF
+                  </button>
+                )}
+              </div>
+              {datasheetError && <p className="error">{datasheetError}</p>}
             </div>
           )}
 
