@@ -20,6 +20,7 @@ const EQUIPMENT_SELECT = `
          r.zone_id AS "zoneId", z.name AS "zoneName", z.site_id AS "siteId", s.name AS "siteName",
          e.device_type_id AS "deviceTypeId", dt.name AS "deviceType",
          e.hardware_model_id AS "hardwareModelId", hm.name AS "hardwareModel", b.name AS "brandName",
+         hm.image_path AS "hardwareModelImagePath",
          e.api_id AS "apiId", a.name AS "apiName"
   FROM equipment e
   JOIN rooms r ON r.id = e.room_id

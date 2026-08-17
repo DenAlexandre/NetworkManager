@@ -8,7 +8,11 @@ router.use(requireAuth, requireRole("admin"));
 
 const linkTypeSchema = z.object({
   name: z.string().min(1, "Le nom est requis."),
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Couleur invalide."),
+  strokeWidth: z.number().min(1, "L'épaisseur doit être au moins 1.").max(20, "Épaisseur trop grande (max 20)."),
 });
+
+const LINK_TYPE_SELECT = `SELECT id, name, color, stroke_width AS "strokeWidth" FROM link_types`;
 
 function parseId(raw: string) {
   const id = Number(raw);
@@ -16,7 +20,7 @@ function parseId(raw: string) {
 }
 
 router.get("/", async (_req, res) => {
-  const result = await pool.query("SELECT id, name FROM link_types ORDER BY id");
+  const result = await pool.query(`${LINK_TYPE_SELECT} ORDER BY id`);
   res.json({ linkTypes: result.rows });
 });
 
@@ -25,7 +29,7 @@ router.get("/:id", async (req, res) => {
   if (id === null) {
     return res.status(400).json({ error: "Identifiant invalide." });
   }
-  const result = await pool.query("SELECT id, name FROM link_types WHERE id = $1", [id]);
+  const result = await pool.query(`${LINK_TYPE_SELECT} WHERE id = $1`, [id]);
   const linkType = result.rows[0];
   if (!linkType) {
     return res.status(404).json({ error: "Type de liaison introuvable." });
@@ -38,16 +42,18 @@ router.post("/", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
+  const { name, color, strokeWidth } = parsed.data;
 
-  const existing = await pool.query("SELECT id FROM link_types WHERE name = $1", [parsed.data.name]);
+  const existing = await pool.query("SELECT id FROM link_types WHERE name = $1", [name]);
   if (existing.rowCount) {
     return res.status(409).json({ error: "Ce type de liaison existe déjà." });
   }
 
-  const result = await pool.query(
-    "INSERT INTO link_types (name) VALUES ($1) RETURNING id, name",
-    [parsed.data.name]
+  const inserted = await pool.query(
+    "INSERT INTO link_types (name, color, stroke_width) VALUES ($1, $2, $3) RETURNING id",
+    [name, color, strokeWidth]
   );
+  const result = await pool.query(`${LINK_TYPE_SELECT} WHERE id = $1`, [inserted.rows[0].id]);
   res.status(201).json({ linkType: result.rows[0] });
 });
 
@@ -60,24 +66,25 @@ router.put("/:id", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
+  const { name, color, strokeWidth } = parsed.data;
 
   const existing = await pool.query(
     "SELECT id FROM link_types WHERE name = $1 AND id != $2",
-    [parsed.data.name, id]
+    [name, id]
   );
   if (existing.rowCount) {
     return res.status(409).json({ error: "Ce type de liaison existe déjà." });
   }
 
-  const result = await pool.query(
-    "UPDATE link_types SET name = $1 WHERE id = $2 RETURNING id, name",
-    [parsed.data.name, id]
+  const updated = await pool.query(
+    "UPDATE link_types SET name = $1, color = $2, stroke_width = $3 WHERE id = $4 RETURNING id",
+    [name, color, strokeWidth, id]
   );
-  const updated = result.rows[0];
-  if (!updated) {
+  if (!updated.rowCount) {
     return res.status(404).json({ error: "Type de liaison introuvable." });
   }
-  res.json({ linkType: updated });
+  const result = await pool.query(`${LINK_TYPE_SELECT} WHERE id = $1`, [id]);
+  res.json({ linkType: result.rows[0] });
 });
 
 router.delete("/:id", async (req, res) => {

@@ -14,6 +14,7 @@ export interface Equipment {
   hardwareModelId: number;
   hardwareModel: string;
   brandName: string;
+  hardwareModelImagePath: string | null;
   apiId: number | null;
   apiName: string | null;
 }

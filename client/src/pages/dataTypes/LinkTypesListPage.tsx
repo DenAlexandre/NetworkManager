@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { createLinkType, deleteLinkType, getLinkType, listLinkTypes, updateLinkType } from "../../api/linkTypes";
+import { deleteLinkType, listLinkTypes } from "../../api/linkTypes";
 import type { LinkType } from "../../api/linkTypes";
 import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
 import { SortableHeader } from "../../components/SortableHeader";
-import { SimpleNameFormModal } from "../../components/SimpleNameFormModal";
+import { LinkTypeFormModal } from "./LinkTypeFormModal";
 
 function searchFields(item: LinkType) {
   return [item.name];
@@ -83,6 +83,7 @@ export function LinkTypesListPage() {
         <thead>
           <tr>
             <SortableHeader label="Nom" field="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+            <th>Trait</th>
             <th></th>
           </tr>
         </thead>
@@ -90,6 +91,19 @@ export function LinkTypesListPage() {
           {rows.map((item) => (
             <tr key={item.id}>
               <td>{item.name}</td>
+              <td>
+                <svg width="60" height="16" aria-label={`${item.color}, ${item.strokeWidth}px`}>
+                  <line
+                    x1="4"
+                    y1="8"
+                    x2="56"
+                    y2="8"
+                    stroke={item.color}
+                    strokeWidth={item.strokeWidth}
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </td>
               <td className="table-actions">
                 <button type="button" className="link" onClick={() => openEditModal(item.id)}>
                   Modifier
@@ -103,22 +117,7 @@ export function LinkTypesListPage() {
         </tbody>
       </table>
       {rows.length === 0 && <p className="muted">Aucun type de liaison enregistré.</p>}
-      {modalOpen && (
-        <SimpleNameFormModal
-          title={editingId === null ? "Ajouter un type de liaison" : "Modifier le type de liaison"}
-          itemId={editingId}
-          loadName={async (id) => (await getLinkType(id)).linkType.name}
-          save={async (name) => {
-            if (editingId === null) {
-              await createLinkType({ name });
-            } else {
-              await updateLinkType(editingId, { name });
-            }
-          }}
-          onClose={() => setModalOpen(false)}
-          onSaved={handleSaved}
-        />
-      )}
+      {modalOpen && <LinkTypeFormModal linkTypeId={editingId} onClose={() => setModalOpen(false)} onSaved={handleSaved} />}
     </div>
   );
 }

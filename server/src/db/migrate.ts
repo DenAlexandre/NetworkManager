@@ -69,6 +69,17 @@ CREATE TABLE IF NOT EXISTS link_types (
   name VARCHAR(50) UNIQUE NOT NULL
 );
 
+-- Couleur et epaisseur de trait utilisees pour dessiner ce type de liaison sur le plan.
+ALTER TABLE link_types ADD COLUMN IF NOT EXISTS color VARCHAR(7);
+ALTER TABLE link_types ADD COLUMN IF NOT EXISTS stroke_width REAL NOT NULL DEFAULT 3;
+
+UPDATE link_types
+SET color = (ARRAY['#e63946','#2a9d8f','#457b9d','#f4a261','#8338ec','#ffb703','#06923e','#d62839'])[(id % 8) + 1]
+WHERE color IS NULL;
+
+ALTER TABLE link_types ALTER COLUMN color SET DEFAULT '#8b5cf6';
+ALTER TABLE link_types ALTER COLUMN color SET NOT NULL;
+
 ALTER TABLE IF EXISTS manufacturer_ports RENAME TO hardware_model_ports;
 
 CREATE TABLE IF NOT EXISTS hardware_model_ports (
@@ -95,6 +106,13 @@ ALTER TABLE hardware_model_ports ALTER COLUMN link_type_id SET NOT NULL;
 ALTER TABLE hardware_model_ports DROP COLUMN IF EXISTS port_type;
 
 CREATE INDEX IF NOT EXISTS ix_hardware_model_ports_hardware_model ON hardware_model_ports(hardware_model_id);
+
+-- Zone graphique du port sur l'image du materiel (en pixels, resolution naturelle de
+-- l'image, origine en haut a gauche), pour le plan de cablage.
+ALTER TABLE hardware_model_ports ADD COLUMN IF NOT EXISTS region_x REAL;
+ALTER TABLE hardware_model_ports ADD COLUMN IF NOT EXISTS region_y REAL;
+ALTER TABLE hardware_model_ports ADD COLUMN IF NOT EXISTS region_width REAL;
+ALTER TABLE hardware_model_ports ADD COLUMN IF NOT EXISTS region_height REAL;
 
 CREATE TABLE IF NOT EXISTS sites (
   id SERIAL PRIMARY KEY,
@@ -165,6 +183,16 @@ CREATE TABLE IF NOT EXISTS apis (
 
 ALTER TABLE equipment ADD COLUMN IF NOT EXISTS api_id INTEGER REFERENCES apis(id);
 CREATE INDEX IF NOT EXISTS ix_equipment_api ON equipment(api_id);
+
+-- Schema de cablage (plan Design) enregistre pour une API : disposition des cartes
+-- materiel sur le canevas et courbure des liaisons, un seul schema par API.
+CREATE TABLE IF NOT EXISTS design_schemas (
+  id SERIAL PRIMARY KEY,
+  api_id INTEGER NOT NULL REFERENCES apis(id) ON DELETE CASCADE,
+  layout JSONB NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_design_schemas_api ON design_schemas(api_id);
 `;
 
 async function migrate() {

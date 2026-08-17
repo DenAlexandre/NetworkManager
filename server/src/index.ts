@@ -16,6 +16,7 @@ import roomRoutes from "./routes/rooms";
 import equipmentRoutes from "./routes/equipment";
 import equipmentLinkRoutes from "./routes/equipmentLinks";
 import apiRoutes from "./routes/apis";
+import designSchemaRoutes from "./routes/designSchemas";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -38,6 +39,7 @@ app.use("/api/rooms", roomRoutes);
 app.use("/api/equipment", equipmentRoutes);
 app.use("/api/equipment-links", equipmentLinkRoutes);
 app.use("/api/apis", apiRoutes);
+app.use("/api/design-schemas", designSchemaRoutes);
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

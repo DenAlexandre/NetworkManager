@@ -52,6 +52,9 @@ export function Layout() {
               <NavLink to="/equipment" className="sidebar-link">
                 Gestion du matériel
               </NavLink>
+              <NavLink to="/plans" className="sidebar-link">
+                Gestion des plans
+              </NavLink>
             </>
           )}
         </aside>

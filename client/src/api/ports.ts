@@ -5,9 +5,22 @@ export interface Port {
   hardwareModelId: number;
   linkTypeId: number;
   portType: string;
+  linkTypeColor: string;
+  linkTypeStrokeWidth: number;
   label: string;
   hardwareModelName: string;
   manufacturerName: string;
+  regionX: number | null;
+  regionY: number | null;
+  regionWidth: number | null;
+  regionHeight: number | null;
+}
+
+export interface PortRegionInput {
+  regionX: number;
+  regionY: number;
+  regionWidth: number;
+  regionHeight: number;
 }
 
 export interface PortInput {
@@ -53,4 +66,15 @@ export function updatePort(id: number, input: PortInput) {
 
 export function deletePort(id: number) {
   return apiFetch<void>(`/ports/${id}`, { method: "DELETE" });
+}
+
+export function updatePortRegion(id: number, input: PortRegionInput) {
+  return apiFetch<{ port: Port }>(`/ports/${id}/region`, {
+    method: "PUT",
+    body: JSON.stringify(input),
+  });
+}
+
+export function clearPortRegion(id: number) {
+  return apiFetch<{ port: Port }>(`/ports/${id}/region`, { method: "DELETE" });
 }

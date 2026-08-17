@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { createEquipment, getEquipment, updateEquipment } from "../../api/equipment";
 import { listRooms } from "../../api/rooms";
@@ -55,8 +55,6 @@ export function EquipmentFormModal({ equipmentId, onClose, onSaved }: EquipmentF
         setName(equipment.name);
       } else {
         if (r.length > 0) setRoomId(r[0].id);
-        if (dt.length > 0) setDeviceTypeId(dt[0].id);
-        if (hm.length > 0) setHardwareModelId(hm[0].id);
       }
       setLoading(false);
     }
@@ -65,6 +63,20 @@ export function EquipmentFormModal({ equipmentId, onClose, onSaved }: EquipmentF
       setLoading(false);
     });
   }, [equipmentId, isEdit]);
+
+  const filteredHardwareModels = useMemo(
+    () => (deviceTypeId === "" ? hardwareModels : hardwareModels.filter((hm) => hm.deviceTypeId === deviceTypeId)),
+    [hardwareModels, deviceTypeId]
+  );
+
+  function handleDeviceTypeChange(value: number | "") {
+    setDeviceTypeId(value);
+    setHardwareModelId((prev) => {
+      if (prev === "") return prev;
+      const stillValid = hardwareModels.some((hm) => hm.id === prev && (value === "" || hm.deviceTypeId === value));
+      return stillValid ? prev : "";
+    });
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -114,7 +126,12 @@ export function EquipmentFormModal({ equipmentId, onClose, onSaved }: EquipmentF
           </label>
           <label>
             Type de matériel
-            <select value={deviceTypeId} onChange={(e) => setDeviceTypeId(Number(e.target.value))} required>
+            <select
+              value={deviceTypeId}
+              onChange={(e) => handleDeviceTypeChange(e.target.value ? Number(e.target.value) : "")}
+              required
+            >
+              <option value="">-</option>
               {deviceTypes.map((dt) => (
                 <option key={dt.id} value={dt.id}>
                   {dt.name}
@@ -124,8 +141,13 @@ export function EquipmentFormModal({ equipmentId, onClose, onSaved }: EquipmentF
           </label>
           <label>
             Matériel (catalogue)
-            <select value={hardwareModelId} onChange={(e) => setHardwareModelId(Number(e.target.value))} required>
-              {hardwareModels.map((hm) => (
+            <select
+              value={hardwareModelId}
+              onChange={(e) => setHardwareModelId(e.target.value ? Number(e.target.value) : "")}
+              required
+            >
+              <option value="">-</option>
+              {filteredHardwareModels.map((hm) => (
                 <option key={hm.id} value={hm.id}>
                   {hm.brandName} — {hm.name}
                 </option>

@@ -18,10 +18,20 @@ const bulkPortSchema = z.object({
   quantity: z.number().int().min(1, "La quantité doit être au moins 1.").max(200, "Quantité trop grande (max 200)."),
 });
 
+const regionSchema = z.object({
+  regionX: z.number().min(0),
+  regionY: z.number().min(0),
+  regionWidth: z.number().min(1),
+  regionHeight: z.number().min(1),
+});
+
 const PORT_SELECT = `
   SELECT p.id, p.hardware_model_id AS "hardwareModelId", p.link_type_id AS "linkTypeId",
-         lt.name AS "portType", p.label,
-         hm.name AS "hardwareModelName", b.name AS "manufacturerName"
+         lt.name AS "portType", lt.color AS "linkTypeColor", lt.stroke_width AS "linkTypeStrokeWidth",
+         p.label,
+         hm.name AS "hardwareModelName", b.name AS "manufacturerName",
+         p.region_x AS "regionX", p.region_y AS "regionY",
+         p.region_width AS "regionWidth", p.region_height AS "regionHeight"
   FROM hardware_model_ports p
   JOIN hardware_models hm ON hm.id = p.hardware_model_id
   JOIN brands b ON b.id = hm.brand_id
@@ -147,6 +157,44 @@ router.put("/:id", async (req, res) => {
     }
     throw err;
   }
+});
+
+router.put("/:id/region", async (req, res) => {
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ error: "Identifiant invalide." });
+  }
+  const parsed = regionSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.issues[0].message });
+  }
+  const { regionX, regionY, regionWidth, regionHeight } = parsed.data;
+
+  const updated = await pool.query(
+    `UPDATE hardware_model_ports SET region_x = $1, region_y = $2, region_width = $3, region_height = $4 WHERE id = $5 RETURNING id`,
+    [regionX, regionY, regionWidth, regionHeight, id]
+  );
+  if (!updated.rowCount) {
+    return res.status(404).json({ error: "Entrée/sortie introuvable." });
+  }
+  const result = await pool.query(`${PORT_SELECT} WHERE p.id = $1`, [id]);
+  res.json({ port: result.rows[0] });
+});
+
+router.delete("/:id/region", async (req, res) => {
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ error: "Identifiant invalide." });
+  }
+  const updated = await pool.query(
+    `UPDATE hardware_model_ports SET region_x = NULL, region_y = NULL, region_width = NULL, region_height = NULL WHERE id = $1 RETURNING id`,
+    [id]
+  );
+  if (!updated.rowCount) {
+    return res.status(404).json({ error: "Entrée/sortie introuvable." });
+  }
+  const result = await pool.query(`${PORT_SELECT} WHERE p.id = $1`, [id]);
+  res.json({ port: result.rows[0] });
 });
 
 router.delete("/:id", async (req, res) => {

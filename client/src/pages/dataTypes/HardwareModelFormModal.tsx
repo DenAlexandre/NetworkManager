@@ -12,7 +12,7 @@ import { listBrands } from "../../api/brands";
 import type { Brand } from "../../api/brands";
 import { listDeviceTypes } from "../../api/deviceTypes";
 import type { DeviceType } from "../../api/deviceTypes";
-import { bulkCreatePorts, deletePort, listPorts } from "../../api/ports";
+import { bulkCreatePorts, deletePort, listPorts, updatePort } from "../../api/ports";
 import type { Port } from "../../api/ports";
 import { listLinkTypes } from "../../api/linkTypes";
 import type { LinkType } from "../../api/linkTypes";
@@ -47,6 +47,10 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
   const [bulkQuantity, setBulkQuantity] = useState(1);
   const [bulkError, setBulkError] = useState<string | null>(null);
   const [bulkSubmitting, setBulkSubmitting] = useState(false);
+
+  const [editingPortId, setEditingPortId] = useState<number | null>(null);
+  const [editingLabel, setEditingLabel] = useState("");
+  const [editLabelError, setEditLabelError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -119,10 +123,7 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
     }
   }
 
-  async function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.currentTarget.files?.[0];
-    e.currentTarget.value = "";
-    if (!file) return;
+  async function uploadImageFile(file: File) {
     setImageError(null);
     setImageUploading(true);
     try {
@@ -135,6 +136,26 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
     }
   }
 
+  async function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.currentTarget.files?.[0];
+    e.currentTarget.value = "";
+    if (!file) return;
+    await uploadImageFile(file);
+  }
+
+  useEffect(() => {
+    if (!isEdit) return;
+    function handlePaste(e: ClipboardEvent) {
+      const item = Array.from(e.clipboardData?.items ?? []).find((i) => i.type.startsWith("image/"));
+      const file = item?.getAsFile();
+      if (!file) return;
+      e.preventDefault();
+      uploadImageFile(file);
+    }
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [isEdit, hardwareModelId]);
+
   async function handleRemoveImage() {
     if (!window.confirm("Supprimer cette image ?")) return;
     setImageError(null);
@@ -143,6 +164,33 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
       setImagePath(hardwareModel.imagePath);
     } catch (err) {
       setImageError(err instanceof ApiError ? err.message : "Erreur lors de la suppression.");
+    }
+  }
+
+  function startEditLabel(port: Port) {
+    setEditingPortId(port.id);
+    setEditingLabel(port.label);
+    setEditLabelError(null);
+  }
+
+  function cancelEditLabel() {
+    setEditingPortId(null);
+  }
+
+  async function handleSaveLabel(port: Port) {
+    const label = editingLabel.trim();
+    if (!label) return;
+    setEditLabelError(null);
+    try {
+      const { port: updated } = await updatePort(port.id, {
+        hardwareModelId: port.hardwareModelId,
+        linkTypeId: port.linkTypeId,
+        label,
+      });
+      setPorts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+      setEditingPortId(null);
+    } catch (err) {
+      setEditLabelError(err instanceof ApiError ? err.message : "Erreur lors de la modification.");
     }
   }
 
@@ -208,6 +256,7 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
                   </button>
                 )}
               </div>
+              <p className="muted">Vous pouvez aussi coller une image copiée (Ctrl+V).</p>
               {imageError && <p className="error">{imageError}</p>}
             </div>
           )}
@@ -246,6 +295,7 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
                 </button>
               </form>
               {bulkError && <p className="error">{bulkError}</p>}
+              {editLabelError && <p className="error">{editLabelError}</p>}
               <table className="table">
                 <thead>
                   <tr>
@@ -258,11 +308,46 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
                   {ports.map((p) => (
                     <tr key={p.id}>
                       <td>{p.portType}</td>
-                      <td>{p.label}</td>
+                      <td>
+                        {editingPortId === p.id ? (
+                          <input
+                            type="text"
+                            value={editingLabel}
+                            onChange={(e) => setEditingLabel(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleSaveLabel(p);
+                              } else if (e.key === "Escape") {
+                                cancelEditLabel();
+                              }
+                            }}
+                            autoFocus
+                          />
+                        ) : (
+                          p.label
+                        )}
+                      </td>
                       <td className="table-actions">
-                        <button className="danger" onClick={() => handleDeletePort(p.id)}>
-                          Supprimer
-                        </button>
+                        {editingPortId === p.id ? (
+                          <>
+                            <button type="button" className="link" onClick={() => handleSaveLabel(p)}>
+                              Enregistrer
+                            </button>
+                            <button type="button" className="link" onClick={cancelEditLabel}>
+                              Annuler
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button type="button" className="link" onClick={() => startEditLabel(p)}>
+                              Modifier
+                            </button>
+                            <button className="danger" onClick={() => handleDeletePort(p.id)}>
+                              Supprimer
+                            </button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))}

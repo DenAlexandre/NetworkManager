@@ -19,6 +19,9 @@ import { EquipmentLayout } from "./pages/equipment/EquipmentLayout";
 import { EquipmentListPage } from "./pages/equipment/EquipmentListPage";
 import { EquipmentLinksPage } from "./pages/equipment/EquipmentLinksPage";
 import { ApisListPage } from "./pages/apis/ApisListPage";
+import { PlansLayout } from "./pages/plans/PlansLayout";
+import { PortsDesignerPage } from "./pages/plans/PortsDesignerPage";
+import { DesignPage } from "./pages/plans/DesignPage";
 
 function App() {
   return (
@@ -73,6 +76,17 @@ function App() {
               </AdminRoute>
             }
           />
+          <Route
+            path="plans"
+            element={
+              <AdminRoute>
+                <PlansLayout />
+              </AdminRoute>
+            }
+          >
+            <Route index element={<PortsDesignerPage />} />
+            <Route path="design" element={<DesignPage />} />
+          </Route>
         </Route>
       </Routes>
     </AuthProvider>

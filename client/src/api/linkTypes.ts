@@ -3,10 +3,14 @@ import { apiFetch } from "./client";
 export interface LinkType {
   id: number;
   name: string;
+  color: string;
+  strokeWidth: number;
 }
 
 export interface LinkTypeInput {
   name: string;
+  color: string;
+  strokeWidth: number;
 }
 
 export function listLinkTypes() {
