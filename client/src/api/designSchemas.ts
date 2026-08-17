@@ -1,7 +1,7 @@
 import { apiFetch } from "./client";
 
 export interface DesignSchemaLayout {
-  cards: { equipmentId: number; x: number; y: number }[];
+  cards: { equipmentId: number; x: number; y: number; width?: number }[];
   bends: Record<number, number>;
 }
 

@@ -12,6 +12,7 @@ const layoutSchema = z.object({
       equipmentId: z.number().int(),
       x: z.number(),
       y: z.number(),
+      width: z.number().optional(),
     })
   ),
   bends: z.record(z.string(), z.number()),
