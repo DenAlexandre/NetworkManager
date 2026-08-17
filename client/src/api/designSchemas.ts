@@ -3,6 +3,9 @@ import { apiFetch } from "./client";
 export interface DesignSchemaLayout {
   cards: { equipmentId: number; x: number; y: number; width?: number }[];
   bends: Record<number, number>;
+  bendsY?: Record<number, number>;
+  zoom?: number;
+  textBlocks?: { id: number; x: number; y: number; fontSize: number; text: string }[];
 }
 
 export interface DesignSchema {

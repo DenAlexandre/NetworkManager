@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   deleteHardwareModel,
   hardwareModelDatasheetUrl,
@@ -39,7 +39,23 @@ export function HardwareModelsListPage() {
   const [portCounts, setPortCounts] = useState<Record<number, Record<string, number>>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { search, setSearch, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, searchFields);
+
+  const [deviceTypeFilter, setDeviceTypeFilter] = useState<number | "">("");
+
+  const deviceTypeOptions = useMemo(() => {
+    const map = new Map<number, string>();
+    for (const item of items) {
+      map.set(item.deviceTypeId, item.deviceType);
+    }
+    return [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  }, [items]);
+
+  const filteredItems = useMemo(() => {
+    if (deviceTypeFilter === "") return items;
+    return items.filter((item) => item.deviceTypeId === deviceTypeFilter);
+  }, [items, deviceTypeFilter]);
+
+  const { search, setSearch, sortKey, sortDir, toggleSort, rows } = useTableQuery(filteredItems, searchFields);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -109,6 +125,17 @@ export function HardwareModelsListPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        <select
+          value={deviceTypeFilter}
+          onChange={(e) => setDeviceTypeFilter(e.target.value ? Number(e.target.value) : "")}
+        >
+          <option value="">Tous les types</option>
+          {deviceTypeOptions.map(([id, name]) => (
+            <option key={id} value={id}>
+              {name}
+            </option>
+          ))}
+        </select>
       </div>
       <table className="table">
         <thead>

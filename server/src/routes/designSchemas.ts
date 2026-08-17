@@ -16,6 +16,19 @@ const layoutSchema = z.object({
     })
   ),
   bends: z.record(z.string(), z.number()),
+  bendsY: z.record(z.string(), z.number()).optional(),
+  zoom: z.number().optional(),
+  textBlocks: z
+    .array(
+      z.object({
+        id: z.number(),
+        x: z.number(),
+        y: z.number(),
+        fontSize: z.number(),
+        text: z.string(),
+      })
+    )
+    .optional(),
 });
 
 const schemaBodySchema = z.object({

@@ -26,6 +26,7 @@ const ZOOM_STEP = 0.25;
 
 export function PortsDesignerPage() {
   const [hardwareModelList, setHardwareModelList] = useState<HardwareModel[]>([]);
+  const [deviceTypeFilter, setDeviceTypeFilter] = useState<number | "">("");
   const [selectedHardwareModelId, setSelectedHardwareModelId] = useState<number | "">("");
   const [ports, setPorts] = useState<Port[]>([]);
   const [linkTypes, setLinkTypes] = useState<LinkType[]>([]);
@@ -69,6 +70,31 @@ export function PortsDesignerPage() {
     () => hardwareModelList.find((m) => m.id === selectedHardwareModelId) ?? null,
     [hardwareModelList, selectedHardwareModelId]
   );
+
+  const deviceTypeOptions = useMemo(() => {
+    const map = new Map<number, string>();
+    for (const m of hardwareModelList) {
+      map.set(m.deviceTypeId, m.deviceType);
+    }
+    return [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  }, [hardwareModelList]);
+
+  const filteredHardwareModelList = useMemo(() => {
+    if (deviceTypeFilter === "") return hardwareModelList;
+    return hardwareModelList.filter((m) => m.deviceTypeId === deviceTypeFilter);
+  }, [hardwareModelList, deviceTypeFilter]);
+
+  function handleDeviceTypeFilterChange(value: string) {
+    const deviceTypeId = value ? Number(value) : "";
+    setDeviceTypeFilter(deviceTypeId);
+    if (
+      deviceTypeId !== "" &&
+      selectedHardwareModel &&
+      selectedHardwareModel.deviceTypeId !== deviceTypeId
+    ) {
+      setSelectedHardwareModelId("");
+    }
+  }
 
   useEffect(() => {
     const el = mainRef.current;
@@ -276,13 +302,24 @@ export function PortsDesignerPage() {
       {error && <p className="error">{error}</p>}
       <div className="inline-form">
         <label>
+          Type de matériel
+          <select value={deviceTypeFilter} onChange={(e) => handleDeviceTypeFilterChange(e.target.value)}>
+            <option value="">Tous les types</option>
+            {deviceTypeOptions.map(([id, name]) => (
+              <option key={id} value={id}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
           Matériel
           <select
             value={selectedHardwareModelId}
             onChange={(e) => setSelectedHardwareModelId(e.target.value ? Number(e.target.value) : "")}
           >
             <option value="">Sélectionner...</option>
-            {hardwareModelList.map((m) => (
+            {filteredHardwareModelList.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.brandName} — {m.name}
               </option>
