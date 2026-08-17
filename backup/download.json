@@ -1,0 +1,1381 @@
+{
+  "version": 1,
+  "createdAt": "2026-08-17T13:28:37.775Z",
+  "tables": {
+    "users": [
+      {
+        "id": 5,
+        "username": "e2euser7588",
+        "first_name": "User",
+        "last_name": "Test",
+        "email": "e2euser7588@example.com",
+        "phone": "0102030405",
+        "password_hash": "$2b$10$oIP1sD7sAAb2HnHptyw.K.UF7JwHa/CzeCV6l5JbXhaRoEuhHN9S2",
+        "role": "user",
+        "created_at": "2026-08-14T11:23:27.824Z"
+      },
+      {
+        "id": 1,
+        "username": "admin",
+        "first_name": "Admin",
+        "last_name": "Admin",
+        "email": "admin@example.com",
+        "phone": "0000000000",
+        "password_hash": "$2b$10$F62dviEZO69wsHi21LDBVu7v47/AOtXArcFHWVz9EPiZXobsyj/jm",
+        "role": "admin",
+        "created_at": "2026-08-14T09:41:15.948Z"
+      }
+    ],
+    "device_types": [
+      {
+        "id": 1,
+        "name": "Firewall"
+      },
+      {
+        "id": 2,
+        "name": "Automate"
+      },
+      {
+        "id": 3,
+        "name": "Serveur"
+      },
+      {
+        "id": 4,
+        "name": "Relais de dérivation optique"
+      },
+      {
+        "id": 5,
+        "name": "Switch"
+      },
+      {
+        "id": 6,
+        "name": "Passerelle MOXA"
+      },
+      {
+        "id": 7,
+        "name": "Compteur"
+      },
+      {
+        "id": 8,
+        "name": "Sonde"
+      }
+    ],
+    "brands": [
+      {
+        "id": 1,
+        "name": "FORTINET"
+      },
+      {
+        "id": 2,
+        "name": "Schneider Electric"
+      },
+      {
+        "id": 3,
+        "name": "CISCO"
+      },
+      {
+        "id": 4,
+        "name": "DELL"
+      },
+      {
+        "id": 5,
+        "name": "HIRSCHMANN"
+      },
+      {
+        "id": 6,
+        "name": "WAGO"
+      },
+      {
+        "id": 7,
+        "name": "MOXA"
+      },
+      {
+        "id": 8,
+        "name": "Premasgard"
+      }
+    ],
+    "link_types": [
+      {
+        "id": 1,
+        "name": "TCP/IP",
+        "color": "#0070c0",
+        "stroke_width": 5
+      },
+      {
+        "id": 2,
+        "name": "Fibre",
+        "color": "#00b0f0",
+        "stroke_width": 5
+      },
+      {
+        "id": 4,
+        "name": "ModBus",
+        "color": "#00b050",
+        "stroke_width": 5
+      }
+    ],
+    "hardware_models": [
+      {
+        "id": 8,
+        "brand_id": 2,
+        "name": "M221",
+        "device_type_id": 2,
+        "image_path": "8-1786952974827.png",
+        "datasheet_path": null
+      },
+      {
+        "id": 6,
+        "brand_id": 5,
+        "name": "MACH104-20TX-FR",
+        "device_type_id": 5,
+        "image_path": null,
+        "datasheet_path": null
+      },
+      {
+        "id": 2,
+        "brand_id": 2,
+        "name": "M580",
+        "device_type_id": 2,
+        "image_path": null,
+        "datasheet_path": null
+      },
+      {
+        "id": 5,
+        "brand_id": 5,
+        "name": "OBR40",
+        "device_type_id": 4,
+        "image_path": "5-1786952459404.png",
+        "datasheet_path": "5-1786960995775.pdf"
+      },
+      {
+        "id": 1,
+        "brand_id": 4,
+        "name": "Inconnu",
+        "device_type_id": 3,
+        "image_path": null,
+        "datasheet_path": null
+      },
+      {
+        "id": 3,
+        "brand_id": 5,
+        "name": "BRS30",
+        "device_type_id": 5,
+        "image_path": "3-1786950125171.jpg",
+        "datasheet_path": "3-1786961408384.pdf"
+      },
+      {
+        "id": 9,
+        "brand_id": 6,
+        "name": "750-8210",
+        "device_type_id": 2,
+        "image_path": "9-1786967135943.png",
+        "datasheet_path": null
+      },
+      {
+        "id": 10,
+        "brand_id": 7,
+        "name": "MOXA",
+        "device_type_id": 6,
+        "image_path": "10-1786968687725.png",
+        "datasheet_path": "10-1786968695551.pdf"
+      },
+      {
+        "id": 4,
+        "brand_id": 3,
+        "name": "CISCO",
+        "device_type_id": 5,
+        "image_path": null,
+        "datasheet_path": null
+      },
+      {
+        "id": 11,
+        "brand_id": 8,
+        "name": "Sonde 814 - ModBus",
+        "device_type_id": 8,
+        "image_path": "11-1786971284701.png",
+        "datasheet_path": "11-1786971289675.pdf"
+      },
+      {
+        "id": 7,
+        "brand_id": 6,
+        "name": "PFC200- 750-8212",
+        "device_type_id": 2,
+        "image_path": "7-1786952625516.png",
+        "datasheet_path": null
+      }
+    ],
+    "hardware_model_ports": [
+      {
+        "id": 535,
+        "label": "TCP/IP 11",
+        "link_type_id": 1,
+        "hardware_model_id": 3,
+        "region_x": 126.298584,
+        "region_y": 371.4884,
+        "region_width": 34,
+        "region_height": 50
+      },
+      {
+        "id": 536,
+        "label": "TCP/IP 12",
+        "link_type_id": 1,
+        "hardware_model_id": 3,
+        "region_x": 168.29858,
+        "region_y": 371.4884,
+        "region_width": 36,
+        "region_height": 51
+      },
+      {
+        "id": 20,
+        "label": "IDRAC",
+        "link_type_id": 1,
+        "hardware_model_id": 1,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 537,
+        "label": "Fibre 1",
+        "link_type_id": 2,
+        "hardware_model_id": 5,
+        "region_x": 16.649292,
+        "region_y": 50.281235,
+        "region_width": 11.5,
+        "region_height": 16
+      },
+      {
+        "id": 538,
+        "label": "Fibre 2",
+        "link_type_id": 2,
+        "hardware_model_id": 5,
+        "region_x": 29.630333,
+        "region_y": 49.5898,
+        "region_width": 11.692307,
+        "region_height": 16.608965
+      },
+      {
+        "id": 539,
+        "label": "Fibre 3",
+        "link_type_id": 2,
+        "hardware_model_id": 5,
+        "region_x": 16.707256,
+        "region_y": 75.73354,
+        "region_width": 11.692307,
+        "region_height": 17.531685
+      },
+      {
+        "id": 540,
+        "label": "Fibre 4",
+        "link_type_id": 2,
+        "hardware_model_id": 5,
+        "region_x": 29.630333,
+        "region_y": 76.34869,
+        "region_width": 11.076923,
+        "region_height": 17.839258
+      },
+      {
+        "id": 541,
+        "label": "Fibre 5",
+        "link_type_id": 2,
+        "hardware_model_id": 5,
+        "region_x": 16.399565,
+        "region_y": 101.87728,
+        "region_width": 12.615385,
+        "region_height": 18.146832
+      },
+      {
+        "id": 542,
+        "label": "Fibre 6",
+        "link_type_id": 2,
+        "hardware_model_id": 5,
+        "region_x": 28.707256,
+        "region_y": 101.56971,
+        "region_width": 12,
+        "region_height": 17.531685
+      },
+      {
+        "id": 543,
+        "label": "Fibre 7",
+        "link_type_id": 2,
+        "hardware_model_id": 5,
+        "region_x": 15.168795,
+        "region_y": 129.25131,
+        "region_width": 13.230769,
+        "region_height": 17.839258
+      },
+      {
+        "id": 544,
+        "label": "Fibre 8",
+        "link_type_id": 2,
+        "hardware_model_id": 5,
+        "region_x": 29.01495,
+        "region_y": 129.25131,
+        "region_width": 11.384615,
+        "region_height": 19.069551
+      },
+      {
+        "id": 529,
+        "label": "TCP/IP 5",
+        "link_type_id": 1,
+        "hardware_model_id": 3,
+        "region_x": 123.298584,
+        "region_y": 231.4884,
+        "region_width": 37,
+        "region_height": 47
+      },
+      {
+        "id": 530,
+        "label": "TCP/IP 6",
+        "link_type_id": 1,
+        "hardware_model_id": 3,
+        "region_x": 171.29858,
+        "region_y": 231.4884,
+        "region_width": 37,
+        "region_height": 48
+      },
+      {
+        "id": 531,
+        "label": "TCP/IP 7",
+        "link_type_id": 1,
+        "hardware_model_id": 3,
+        "region_x": 124.298584,
+        "region_y": 279.4884,
+        "region_width": 39,
+        "region_height": 44
+      },
+      {
+        "id": 532,
+        "label": "TCP/IP 8",
+        "link_type_id": 1,
+        "hardware_model_id": 3,
+        "region_x": 171.29858,
+        "region_y": 279.4884,
+        "region_width": 38,
+        "region_height": 48
+      },
+      {
+        "id": 533,
+        "label": "TCP/IP 9",
+        "link_type_id": 1,
+        "hardware_model_id": 3,
+        "region_x": 124.298584,
+        "region_y": 325.4884,
+        "region_width": 35,
+        "region_height": 45
+      },
+      {
+        "id": 534,
+        "label": "TCP/IP 10",
+        "link_type_id": 1,
+        "hardware_model_id": 3,
+        "region_x": 171.29858,
+        "region_y": 325.4884,
+        "region_width": 34,
+        "region_height": 42
+      },
+      {
+        "id": 513,
+        "label": "TCP/IP X1",
+        "link_type_id": 1,
+        "hardware_model_id": 7,
+        "region_x": 6.333313,
+        "region_y": 88.36456,
+        "region_width": 22,
+        "region_height": 26
+      },
+      {
+        "id": 514,
+        "label": "TCP/IP X2",
+        "link_type_id": 1,
+        "hardware_model_id": 7,
+        "region_x": 6.333313,
+        "region_y": 118.36456,
+        "region_width": 22,
+        "region_height": 26
+      },
+      {
+        "id": 547,
+        "label": "TCP/IP X1",
+        "link_type_id": 1,
+        "hardware_model_id": 8,
+        "region_x": 13.298584,
+        "region_y": 120.108765,
+        "region_width": 27,
+        "region_height": 40
+      },
+      {
+        "id": 50,
+        "label": "Port3",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 60,
+        "label": "Port4",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 70,
+        "label": "Port5",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 80,
+        "label": "Port6",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 90,
+        "label": "Port7",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 100,
+        "label": "Port8",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 110,
+        "label": "Port9",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 120,
+        "label": "Port10",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 130,
+        "label": "Port11",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 140,
+        "label": "Port12",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 150,
+        "label": "Port13",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 160,
+        "label": "Port14",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 170,
+        "label": "Port15",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 180,
+        "label": "Port16",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 190,
+        "label": "Port17",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 200,
+        "label": "Port18",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 210,
+        "label": "Port19",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 220,
+        "label": "Port20",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 230,
+        "label": "Port21",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 240,
+        "label": "Port22",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 250,
+        "label": "Port23",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 260,
+        "label": "Port24",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 270,
+        "label": "Port25",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 280,
+        "label": "Port26",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 290,
+        "label": "Port27",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 300,
+        "label": "Port28",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 310,
+        "label": "Port29",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 320,
+        "label": "Port30",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 330,
+        "label": "Port31",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 340,
+        "label": "Port32",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 350,
+        "label": "Port33",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 360,
+        "label": "Port34",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 370,
+        "label": "Port35",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 380,
+        "label": "Port36",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 390,
+        "label": "Port37",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 400,
+        "label": "Port38",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 410,
+        "label": "Port39",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 420,
+        "label": "Port40",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 550,
+        "label": "X1",
+        "link_type_id": 1,
+        "hardware_model_id": 9,
+        "region_x": 6.4666443,
+        "region_y": 17.416656,
+        "region_width": 22,
+        "region_height": 27
+      },
+      {
+        "id": 551,
+        "label": "X2",
+        "link_type_id": 1,
+        "hardware_model_id": 9,
+        "region_x": 7.4666443,
+        "region_y": 48.416656,
+        "region_width": 23,
+        "region_height": 23
+      },
+      {
+        "id": 552,
+        "label": "X11",
+        "link_type_id": 1,
+        "hardware_model_id": 9,
+        "region_x": 6.4666443,
+        "region_y": 92.41666,
+        "region_width": 22,
+        "region_height": 27
+      },
+      {
+        "id": 553,
+        "label": "X12",
+        "link_type_id": 1,
+        "hardware_model_id": 9,
+        "region_x": 6.4666443,
+        "region_y": 120.41666,
+        "region_width": 24,
+        "region_height": 30
+      },
+      {
+        "id": 559,
+        "label": "ModBus 1",
+        "link_type_id": 4,
+        "hardware_model_id": 11,
+        "region_x": 110.298584,
+        "region_y": 389.62036,
+        "region_width": 120,
+        "region_height": 92
+      },
+      {
+        "id": 30,
+        "label": "Port1",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 40,
+        "label": "Port2",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 560,
+        "label": "ModBus 2",
+        "link_type_id": 4,
+        "hardware_model_id": 11,
+        "region_x": 236.29858,
+        "region_y": 380.62036,
+        "region_width": 109,
+        "region_height": 79
+      },
+      {
+        "id": 430,
+        "label": "Port41",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 440,
+        "label": "Port42",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 450,
+        "label": "Port43",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 460,
+        "label": "Port44",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 470,
+        "label": "Port45",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 480,
+        "label": "Port46",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 490,
+        "label": "Port47",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 500,
+        "label": "Port48",
+        "link_type_id": 1,
+        "hardware_model_id": 4,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 554,
+        "label": "TCP/IP 1",
+        "link_type_id": 1,
+        "hardware_model_id": 10,
+        "region_x": 424.29858,
+        "region_y": 37.108765,
+        "region_width": 73,
+        "region_height": 42
+      },
+      {
+        "id": 555,
+        "label": "ModBus 1",
+        "link_type_id": 4,
+        "hardware_model_id": 10,
+        "region_x": 73.298584,
+        "region_y": 321.10876,
+        "region_width": 78,
+        "region_height": 62
+      },
+      {
+        "id": 556,
+        "label": "ModBus 2",
+        "link_type_id": 4,
+        "hardware_model_id": 10,
+        "region_x": 186.29858,
+        "region_y": 321.10876,
+        "region_width": 67,
+        "region_height": 64
+      },
+      {
+        "id": 557,
+        "label": "ModBus 3",
+        "link_type_id": 4,
+        "hardware_model_id": 10,
+        "region_x": 285.29858,
+        "region_y": 319.10876,
+        "region_width": 70,
+        "region_height": 64
+      },
+      {
+        "id": 558,
+        "label": "ModBus 4",
+        "link_type_id": 4,
+        "hardware_model_id": 10,
+        "region_x": 397.29858,
+        "region_y": 320.10876,
+        "region_width": 57,
+        "region_height": 65
+      },
+      {
+        "id": 549,
+        "label": "Serial",
+        "link_type_id": 4,
+        "hardware_model_id": 7,
+        "region_x": 2.298584,
+        "region_y": 4.472168,
+        "region_width": 30,
+        "region_height": 55
+      },
+      {
+        "id": 10,
+        "label": "Port1",
+        "link_type_id": 1,
+        "hardware_model_id": 1,
+        "region_x": null,
+        "region_y": null,
+        "region_width": null,
+        "region_height": null
+      },
+      {
+        "id": 525,
+        "label": "Fibre 1",
+        "link_type_id": 2,
+        "hardware_model_id": 3,
+        "region_x": 45.298584,
+        "region_y": 86.266174,
+        "region_width": 39,
+        "region_height": 57
+      },
+      {
+        "id": 526,
+        "label": "Fibre 2",
+        "link_type_id": 2,
+        "hardware_model_id": 3,
+        "region_x": 45.298584,
+        "region_y": 156.26617,
+        "region_width": 39,
+        "region_height": 58
+      },
+      {
+        "id": 527,
+        "label": "Fibre 3",
+        "link_type_id": 2,
+        "hardware_model_id": 3,
+        "region_x": 47.298584,
+        "region_y": 234.26617,
+        "region_width": 39,
+        "region_height": 53
+      },
+      {
+        "id": 528,
+        "label": "Fibre 4",
+        "link_type_id": 2,
+        "hardware_model_id": 3,
+        "region_x": 44.298584,
+        "region_y": 306.26617,
+        "region_width": 41,
+        "region_height": 60
+      }
+    ],
+    "sites": [
+      {
+        "id": 2,
+        "name": "DataCenter BNP Marne Nord",
+        "datasheet_path": "2-1786972453515.pdf"
+      }
+    ],
+    "zones": [
+      {
+        "id": 2,
+        "site_id": 2,
+        "name": "Zone1"
+      },
+      {
+        "id": 3,
+        "site_id": 2,
+        "name": "Zone2"
+      },
+      {
+        "id": 4,
+        "site_id": 2,
+        "name": "Zone3"
+      },
+      {
+        "id": 5,
+        "site_id": 2,
+        "name": "Zone4"
+      },
+      {
+        "id": 6,
+        "site_id": 2,
+        "name": "1er étage"
+      }
+    ],
+    "rooms": [
+      {
+        "id": 1,
+        "zone_id": 2,
+        "name": "Salle par défaut"
+      },
+      {
+        "id": 2,
+        "zone_id": 2,
+        "name": "Salle B"
+      },
+      {
+        "id": 3,
+        "zone_id": 6,
+        "name": "Valmy"
+      },
+      {
+        "id": 4,
+        "zone_id": 6,
+        "name": "1109B"
+      },
+      {
+        "id": 5,
+        "zone_id": 6,
+        "name": "R708"
+      }
+    ],
+    "apis": [
+      {
+        "id": 2,
+        "name": "API 6.1",
+        "migration_date": null,
+        "completed": false,
+        "doe_up_to_date": false
+      },
+      {
+        "id": 3,
+        "name": "API 19",
+        "migration_date": null,
+        "completed": false,
+        "doe_up_to_date": false
+      },
+      {
+        "id": 1,
+        "name": "API 1",
+        "migration_date": null,
+        "completed": false,
+        "doe_up_to_date": false
+      }
+    ],
+    "equipment": [
+      {
+        "id": 5,
+        "device_type_id": 3,
+        "hardware_model_id": 1,
+        "name": "SRV-MN-HIV-GTB",
+        "room_id": 4,
+        "api_id": null
+      },
+      {
+        "id": 6,
+        "device_type_id": 5,
+        "hardware_model_id": 4,
+        "name": "Switch CISCO 48 ports",
+        "room_id": 4,
+        "api_id": null
+      },
+      {
+        "id": 8,
+        "device_type_id": 5,
+        "hardware_model_id": 3,
+        "name": "SWI-MN-R406A",
+        "room_id": 1,
+        "api_id": 2
+      },
+      {
+        "id": 9,
+        "device_type_id": 4,
+        "hardware_model_id": 5,
+        "name": "SWI-FO61",
+        "room_id": 1,
+        "api_id": 2
+      },
+      {
+        "id": 10,
+        "device_type_id": 2,
+        "hardware_model_id": 7,
+        "name": "API-R406A-6100",
+        "room_id": 1,
+        "api_id": 2
+      },
+      {
+        "id": 12,
+        "device_type_id": 2,
+        "hardware_model_id": 8,
+        "name": "API-R406A-0601",
+        "room_id": 1,
+        "api_id": 2
+      },
+      {
+        "id": 11,
+        "device_type_id": 2,
+        "hardware_model_id": 9,
+        "name": "API-R406A-6200",
+        "room_id": 1,
+        "api_id": 2
+      },
+      {
+        "id": 13,
+        "device_type_id": 8,
+        "hardware_model_id": 11,
+        "name": "S1",
+        "room_id": 1,
+        "api_id": 3
+      },
+      {
+        "id": 14,
+        "device_type_id": 6,
+        "hardware_model_id": 10,
+        "name": "MOX1-MN-R608",
+        "room_id": 1,
+        "api_id": 3
+      },
+      {
+        "id": 15,
+        "device_type_id": 8,
+        "hardware_model_id": 11,
+        "name": "S2",
+        "room_id": 1,
+        "api_id": 3
+      }
+    ],
+    "equipment_links": [
+      {
+        "id": 3,
+        "parent_equipment_id": 5,
+        "parent_port_id": 10,
+        "child_equipment_id": 6,
+        "child_port_id": 100
+      },
+      {
+        "id": 13,
+        "parent_equipment_id": 12,
+        "parent_port_id": 547,
+        "child_equipment_id": 8,
+        "child_port_id": 529
+      },
+      {
+        "id": 14,
+        "parent_equipment_id": 10,
+        "parent_port_id": 513,
+        "child_equipment_id": 8,
+        "child_port_id": 532
+      },
+      {
+        "id": 16,
+        "parent_equipment_id": 8,
+        "parent_port_id": 531,
+        "child_equipment_id": 11,
+        "child_port_id": 550
+      },
+      {
+        "id": 19,
+        "parent_equipment_id": 9,
+        "parent_port_id": 541,
+        "child_equipment_id": 8,
+        "child_port_id": 526
+      },
+      {
+        "id": 20,
+        "parent_equipment_id": 9,
+        "parent_port_id": 540,
+        "child_equipment_id": 8,
+        "child_port_id": 525
+      },
+      {
+        "id": 21,
+        "parent_equipment_id": 14,
+        "parent_port_id": 558,
+        "child_equipment_id": 13,
+        "child_port_id": 559
+      },
+      {
+        "id": 22,
+        "parent_equipment_id": 13,
+        "parent_port_id": 560,
+        "child_equipment_id": 15,
+        "child_port_id": 559
+      }
+    ],
+    "design_schemas": [
+      {
+        "id": 2,
+        "api_id": 2,
+        "layout": {
+          "zoom": 0.6999999999999997,
+          "bends": {
+            "9": 514.1111145019531,
+            "11": 0.69483675234462,
+            "12": 0.5571807674713236,
+            "13": -0.3725066288833031,
+            "14": 0.46842009333091844,
+            "15": 0.47570234077515805,
+            "16": -0.04921608330590922,
+            "20": 0.6084022848718617
+          },
+          "cards": [
+            {
+              "x": 402.3333333333333,
+              "y": 229.66666666666669,
+              "width": 130,
+              "equipmentId": 8
+            },
+            {
+              "x": 122.33333333333334,
+              "y": 94.33333333333334,
+              "width": 120,
+              "equipmentId": 9
+            },
+            {
+              "x": 155.66666666666686,
+              "y": 700.3333333333333,
+              "equipmentId": 12
+            },
+            {
+              "x": 948.8095238095239,
+              "y": 509.2857142857141,
+              "equipmentId": 10
+            },
+            {
+              "x": 947.6190476190476,
+              "y": 204.7619047619048,
+              "equipmentId": 11
+            }
+          ],
+          "bendsY": {
+            "13": 3.398985838422928,
+            "14": -1.4690861409829792,
+            "16": -3.979142006879257
+          },
+          "textBlocks": []
+        },
+        "updated_at": "2026-08-17T12:31:49.456Z"
+      },
+      {
+        "id": 18,
+        "api_id": 3,
+        "layout": {
+          "zoom": 0.6,
+          "bends": {
+            "21": 0.3816262702797851
+          },
+          "cards": [
+            {
+              "x": 611,
+              "y": 622.3333333333334,
+              "equipmentId": 14
+            },
+            {
+              "x": 1010,
+              "y": 51.66666666666667,
+              "width": 120,
+              "equipmentId": 13
+            },
+            {
+              "x": 1203,
+              "y": 48,
+              "width": 120,
+              "equipmentId": 15
+            }
+          ],
+          "bendsY": {
+            "21": -1.2582035728922136
+          },
+          "textBlocks": [
+            {
+              "x": 1030.0000000000002,
+              "y": 206.66666666666666,
+              "id": 1786971727046,
+              "text": "@201",
+              "fontSize": 28.77777777777778
+            }
+          ]
+        },
+        "updated_at": "2026-08-17T13:02:32.457Z"
+      }
+    ]
+  }
+}

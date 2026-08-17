@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { deleteSite, listSites } from "../../api/sites";
+import { deleteSite, listSites, siteDatasheetUrl } from "../../api/sites";
 import type { Site } from "../../api/sites";
 import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
 import { SortableHeader } from "../../components/SortableHeader";
+import { PdfIcon } from "../../components/PdfIcon";
 import { useSitesTree } from "../../context/SitesTreeContext";
 import { SiteFormModal } from "./SiteFormModal";
 
@@ -97,6 +98,17 @@ export function SitesListPage() {
                 <Link to={`/sites/${item.id}`}>{item.name}</Link>
               </td>
               <td className="table-actions">
+                {item.datasheetPath && (
+                  <a
+                    href={siteDatasheetUrl(item.datasheetPath)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Voir le PDF du site"
+                    aria-label="Voir le PDF du site"
+                  >
+                    <PdfIcon />
+                  </a>
+                )}
                 <button type="button" className="link" onClick={() => openEditModal(item.id)}>
                   Modifier
                 </button>

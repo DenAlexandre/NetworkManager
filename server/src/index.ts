@@ -17,13 +17,15 @@ import equipmentRoutes from "./routes/equipment";
 import equipmentLinkRoutes from "./routes/equipmentLinks";
 import apiRoutes from "./routes/apis";
 import designSchemaRoutes from "./routes/designSchemas";
+import systemRoutes from "./routes/system";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 
 app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }));
-app.use(express.json());
+// Higher limit than the default 100kb: a full database backup/restore payload can exceed it.
+app.use(express.json({ limit: "25mb" }));
 app.use(cookieParser());
 app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
@@ -40,6 +42,7 @@ app.use("/api/equipment", equipmentRoutes);
 app.use("/api/equipment-links", equipmentLinkRoutes);
 app.use("/api/apis", apiRoutes);
 app.use("/api/design-schemas", designSchemaRoutes);
+app.use("/api/system", systemRoutes);
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);

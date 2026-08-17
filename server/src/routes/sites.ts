@@ -1,4 +1,7 @@
+import fs from "fs";
+import path from "path";
 import { Router } from "express";
+import multer from "multer";
 import { z } from "zod";
 import { pool } from "../db/pool";
 import { requireAuth, requireRole } from "../middleware/auth";
@@ -10,13 +13,47 @@ const siteSchema = z.object({
   name: z.string().min(1, "Le nom est requis."),
 });
 
+const SITE_SELECT = `SELECT id, name, datasheet_path AS "datasheetPath" FROM sites`;
+
+const DATASHEET_UPLOAD_DIR = path.resolve(process.cwd(), "uploads", "site-datasheets");
+const DATASHEET_MIME_EXTENSIONS: Record<string, string> = {
+  "application/pdf": ".pdf",
+};
+
+const datasheetUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => {
+      fs.mkdirSync(DATASHEET_UPLOAD_DIR, { recursive: true });
+      cb(null, DATASHEET_UPLOAD_DIR);
+    },
+    filename: (req, file, cb) => {
+      const ext = DATASHEET_MIME_EXTENSIONS[file.mimetype];
+      cb(null, `${req.params.id}-${Date.now()}${ext}`);
+    },
+  }),
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (!DATASHEET_MIME_EXTENSIONS[file.mimetype]) {
+      cb(new Error("Format de fichier non supporté (PDF uniquement)."));
+      return;
+    }
+    cb(null, true);
+  },
+});
+
+function deleteDatasheetFile(datasheetPath: string | null | undefined) {
+  if (!datasheetPath) return;
+  const filePath = path.join(DATASHEET_UPLOAD_DIR, path.basename(datasheetPath));
+  fs.rm(filePath, { force: true }, () => {});
+}
+
 function parseId(raw: string) {
   const id = Number(raw);
   return Number.isInteger(id) ? id : null;
 }
 
 router.get("/", async (_req, res) => {
-  const result = await pool.query("SELECT id, name FROM sites ORDER BY id");
+  const result = await pool.query(`${SITE_SELECT} ORDER BY id`);
   res.json({ sites: result.rows });
 });
 
@@ -25,7 +62,7 @@ router.get("/:id", async (req, res) => {
   if (id === null) {
     return res.status(400).json({ error: "Identifiant invalide." });
   }
-  const result = await pool.query("SELECT id, name FROM sites WHERE id = $1", [id]);
+  const result = await pool.query(`${SITE_SELECT} WHERE id = $1`, [id]);
   const site = result.rows[0];
   if (!site) {
     return res.status(404).json({ error: "Site introuvable." });
@@ -44,10 +81,11 @@ router.post("/", async (req, res) => {
     return res.status(409).json({ error: "Ce site existe déjà." });
   }
 
-  const result = await pool.query(
-    "INSERT INTO sites (name) VALUES ($1) RETURNING id, name",
+  const inserted = await pool.query(
+    "INSERT INTO sites (name) VALUES ($1) RETURNING id",
     [parsed.data.name]
   );
+  const result = await pool.query(`${SITE_SELECT} WHERE id = $1`, [inserted.rows[0].id]);
   res.status(201).json({ site: result.rows[0] });
 });
 
@@ -69,15 +107,54 @@ router.put("/:id", async (req, res) => {
     return res.status(409).json({ error: "Ce site existe déjà." });
   }
 
-  const result = await pool.query(
-    "UPDATE sites SET name = $1 WHERE id = $2 RETURNING id, name",
+  const updated = await pool.query(
+    "UPDATE sites SET name = $1 WHERE id = $2 RETURNING id",
     [parsed.data.name, id]
   );
-  const updated = result.rows[0];
-  if (!updated) {
+  if (!updated.rowCount) {
     return res.status(404).json({ error: "Site introuvable." });
   }
-  res.json({ site: updated });
+  const result = await pool.query(`${SITE_SELECT} WHERE id = $1`, [id]);
+  res.json({ site: result.rows[0] });
+});
+
+router.post("/:id/datasheet", (req, res, next) => {
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ error: "Identifiant invalide." });
+  }
+  datasheetUpload.single("datasheet")(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || "Erreur lors du téléversement." });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: "Aucun fichier fourni." });
+    }
+    const existing = await pool.query("SELECT datasheet_path FROM sites WHERE id = $1", [id]);
+    if (!existing.rowCount) {
+      deleteDatasheetFile(req.file.filename);
+      return res.status(404).json({ error: "Site introuvable." });
+    }
+    await pool.query("UPDATE sites SET datasheet_path = $1 WHERE id = $2", [req.file.filename, id]);
+    deleteDatasheetFile(existing.rows[0].datasheet_path);
+    const result = await pool.query(`${SITE_SELECT} WHERE id = $1`, [id]);
+    res.json({ site: result.rows[0] });
+  });
+});
+
+router.delete("/:id/datasheet", async (req, res) => {
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ error: "Identifiant invalide." });
+  }
+  const existing = await pool.query("SELECT datasheet_path FROM sites WHERE id = $1", [id]);
+  if (!existing.rowCount) {
+    return res.status(404).json({ error: "Site introuvable." });
+  }
+  await pool.query("UPDATE sites SET datasheet_path = NULL WHERE id = $1", [id]);
+  deleteDatasheetFile(existing.rows[0].datasheet_path);
+  const result = await pool.query(`${SITE_SELECT} WHERE id = $1`, [id]);
+  res.json({ site: result.rows[0] });
 });
 
 router.delete("/:id", async (req, res) => {
@@ -86,10 +163,12 @@ router.delete("/:id", async (req, res) => {
     return res.status(400).json({ error: "Identifiant invalide." });
   }
   try {
+    const existing = await pool.query("SELECT datasheet_path FROM sites WHERE id = $1", [id]);
     const result = await pool.query("DELETE FROM sites WHERE id = $1", [id]);
     if (!result.rowCount) {
       return res.status(404).json({ error: "Site introuvable." });
     }
+    deleteDatasheetFile(existing.rows[0]?.datasheet_path);
     res.status(204).send();
   } catch (err) {
     if ((err as { code?: string }).code === "23503") {

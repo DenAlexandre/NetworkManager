@@ -47,3 +47,16 @@ export async function apiUpload<T>(path: string, formData: FormData): Promise<T>
 
   return body as T;
 }
+
+export async function apiDownload(path: string): Promise<{ blob: Blob; filename: string }> {
+  const res = await fetch(`${API_URL}${path}`, { credentials: "include" });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(res.status, body.error || "Une erreur est survenue.");
+  }
+
+  const blob = await res.blob();
+  const match = (res.headers.get("Content-Disposition") || "").match(/filename="?([^"]+)"?/);
+  return { blob, filename: match ? match[1] : "download" };
+}

@@ -21,6 +21,9 @@ import { EquipmentListPage } from "./pages/equipment/EquipmentListPage";
 import { EquipmentLinksPage } from "./pages/equipment/EquipmentLinksPage";
 import { ApisListPage } from "./pages/apis/ApisListPage";
 import { DesignPage } from "./pages/plans/DesignPage";
+import { SystemLayout } from "./pages/system/SystemLayout";
+import { DatabasePage } from "./pages/system/DatabasePage";
+import { ImportExportPage } from "./pages/system/ImportExportPage";
 
 function App() {
   return (
@@ -84,6 +87,17 @@ function App() {
               </AdminRoute>
             }
           />
+          <Route
+            path="system"
+            element={
+              <AdminRoute>
+                <SystemLayout />
+              </AdminRoute>
+            }
+          >
+            <Route index element={<DatabasePage />} />
+            <Route path="import-export" element={<ImportExportPage />} />
+          </Route>
         </Route>
       </Routes>
     </AuthProvider>
