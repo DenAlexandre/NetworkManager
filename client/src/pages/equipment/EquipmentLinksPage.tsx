@@ -4,7 +4,7 @@ import { listEquipment } from "../../api/equipment";
 import type { Equipment } from "../../api/equipment";
 import { listPorts } from "../../api/ports";
 import type { Port } from "../../api/ports";
-import { createEquipmentLink, deleteEquipmentLink, listEquipmentLinks } from "../../api/equipmentLinks";
+import { createEquipmentLink, deleteEquipmentLink, listEquipmentLinks, updateEquipmentLink } from "../../api/equipmentLinks";
 import type { EquipmentLink } from "../../api/equipmentLinks";
 import { ApiError } from "../../api/client";
 
@@ -15,6 +15,7 @@ export function EquipmentLinksPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [editingLinkId, setEditingLinkId] = useState<number | null>(null);
   const [parentEquipmentId, setParentEquipmentId] = useState<number | "">("");
   const [parentPortId, setParentPortId] = useState<number | "">("");
   const [childEquipmentId, setChildEquipmentId] = useState<number | "">("");
@@ -53,42 +54,68 @@ export function EquipmentLinksPage() {
     return used;
   }, [links]);
 
-  function availablePortsFor(equipmentId: number | "") {
+  // currentPortId re-allows this dropdown's own already-assigned port (the one this specific
+  // side of the link is currently using) even though it's marked "used" globally, without
+  // leaking the *other* side's port into this dropdown when both sides share a hardware model.
+  function availablePortsFor(equipmentId: number | "", currentPortId: number | "") {
     if (equipmentId === "") return [];
     const item = equipment.find((e) => e.id === equipmentId);
     if (!item) return [];
-    return ports.filter((p) => p.hardwareModelId === item.hardwareModelId && !usedPortIds.has(p.id));
+    return ports.filter(
+      (p) => p.hardwareModelId === item.hardwareModelId && (p.id === currentPortId || !usedPortIds.has(p.id))
+    );
   }
 
-  const parentPortOptions = availablePortsFor(parentEquipmentId);
-  const childPortOptions = availablePortsFor(childEquipmentId);
+  const parentPortOptions = availablePortsFor(parentEquipmentId, parentPortId);
+  const childPortOptions = availablePortsFor(childEquipmentId, childPortId);
+
+  function resetForm() {
+    setEditingLinkId(null);
+    setParentEquipmentId("");
+    setParentPortId("");
+    setChildEquipmentId("");
+    setChildPortId("");
+    setLinkError(null);
+  }
+
+  function startEditLink(link: EquipmentLink) {
+    setEditingLinkId(link.id);
+    setParentEquipmentId(link.parentEquipmentId);
+    setParentPortId(link.parentPortId);
+    setChildEquipmentId(link.childEquipmentId);
+    setChildPortId(link.childPortId);
+    setLinkError(null);
+  }
 
   async function handleDeleteLink(id: number) {
     if (!window.confirm("Supprimer cette liaison ?")) return;
     try {
       await deleteEquipmentLink(id);
+      if (editingLinkId === id) resetForm();
       await load();
     } catch (err) {
       alert(err instanceof ApiError ? err.message : "Erreur lors de la suppression.");
     }
   }
 
-  async function handleCreateLink(e: FormEvent) {
+  async function handleSubmitLink(e: FormEvent) {
     e.preventDefault();
     if (parentEquipmentId === "" || parentPortId === "" || childEquipmentId === "" || childPortId === "") return;
     setLinkError(null);
     setLinkSubmitting(true);
     try {
-      await createEquipmentLink({
+      const input = {
         parentEquipmentId: Number(parentEquipmentId),
         parentPortId: Number(parentPortId),
         childEquipmentId: Number(childEquipmentId),
         childPortId: Number(childPortId),
-      });
-      setParentEquipmentId("");
-      setParentPortId("");
-      setChildEquipmentId("");
-      setChildPortId("");
+      };
+      if (editingLinkId !== null) {
+        await updateEquipmentLink(editingLinkId, input);
+      } else {
+        await createEquipmentLink(input);
+      }
+      resetForm();
       await load();
     } catch (err) {
       setLinkError(err instanceof ApiError ? err.message : "Erreur lors de l'enregistrement.");
@@ -103,7 +130,8 @@ export function EquipmentLinksPage() {
     <div className="card">
       <h2>Liaisons</h2>
       <p className="muted">Le matériel peut être relié à du matériel d'autres salles.</p>
-      <form className="inline-form" onSubmit={handleCreateLink}>
+      {editingLinkId !== null && <p className="muted">Modification de la liaison sélectionnée.</p>}
+      <form className="inline-form" onSubmit={handleSubmitLink}>
         <label>
           Matériel parent
           <select
@@ -163,8 +191,13 @@ export function EquipmentLinksPage() {
           </select>
         </label>
         <button type="submit" disabled={linkSubmitting}>
-          Relier
+          {editingLinkId !== null ? "Enregistrer" : "Relier"}
         </button>
+        {editingLinkId !== null && (
+          <button type="button" className="btn-outline" onClick={resetForm}>
+            Annuler
+          </button>
+        )}
       </form>
       {linkError && <p className="error">{linkError}</p>}
       {error && <p className="error">{error}</p>}
@@ -186,6 +219,9 @@ export function EquipmentLinksPage() {
               <td>{link.childEquipmentName}</td>
               <td>{link.childPortLabel}</td>
               <td className="table-actions">
+                <button type="button" className="link" onClick={() => startEditLink(link)}>
+                  Modifier
+                </button>
                 <button className="danger" onClick={() => handleDeleteLink(link.id)}>
                   Supprimer
                 </button>
