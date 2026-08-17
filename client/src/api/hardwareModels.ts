@@ -1,4 +1,4 @@
-import { apiFetch } from "./client";
+import { API_ORIGIN, apiFetch, apiUpload } from "./client";
 
 export interface HardwareModel {
   id: number;
@@ -7,6 +7,11 @@ export interface HardwareModel {
   deviceTypeId: number;
   deviceType: string;
   name: string;
+  imagePath: string | null;
+}
+
+export function hardwareModelImageUrl(imagePath: string) {
+  return `${API_ORIGIN}/uploads/hardware-models/${imagePath}`;
 }
 
 export interface HardwareModelInput {
@@ -39,4 +44,14 @@ export function updateHardwareModel(id: number, input: HardwareModelInput) {
 
 export function deleteHardwareModel(id: number) {
   return apiFetch<void>(`/hardware-models/${id}`, { method: "DELETE" });
+}
+
+export function uploadHardwareModelImage(id: number, file: File) {
+  const formData = new FormData();
+  formData.append("image", file);
+  return apiUpload<{ hardwareModel: HardwareModel }>(`/hardware-models/${id}/image`, formData);
+}
+
+export function deleteHardwareModelImage(id: number) {
+  return apiFetch<{ hardwareModel: HardwareModel }>(`/hardware-models/${id}/image`, { method: "DELETE" });
 }

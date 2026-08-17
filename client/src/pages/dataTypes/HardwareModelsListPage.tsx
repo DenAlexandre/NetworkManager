@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { deleteHardwareModel, listHardwareModels } from "../../api/hardwareModels";
+import { deleteHardwareModel, hardwareModelImageUrl, listHardwareModels } from "../../api/hardwareModels";
 import type { HardwareModel } from "../../api/hardwareModels";
 import { listPorts } from "../../api/ports";
 import { ApiError } from "../../api/client";
@@ -97,6 +97,7 @@ export function HardwareModelsListPage() {
       <table className="table">
         <thead>
           <tr>
+            <th></th>
             <SortableHeader label="Nom" field="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
             <SortableHeader
               label="Constructeur"
@@ -119,6 +120,15 @@ export function HardwareModelsListPage() {
         <tbody>
           {rows.map((item) => (
             <tr key={item.id}>
+              <td>
+                {item.imagePath && (
+                  <img
+                    className="hardware-model-thumbnail"
+                    src={hardwareModelImageUrl(item.imagePath)}
+                    alt=""
+                  />
+                )}
+              </td>
               <td>{item.name}</td>
               <td>{item.brandName}</td>
               <td>{item.deviceType}</td>

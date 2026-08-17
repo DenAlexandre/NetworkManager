@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
-import type { FormEvent } from "react";
-import { createHardwareModel, getHardwareModel, updateHardwareModel } from "../../api/hardwareModels";
+import type { ChangeEvent, FormEvent } from "react";
+import {
+  createHardwareModel,
+  deleteHardwareModelImage,
+  getHardwareModel,
+  hardwareModelImageUrl,
+  updateHardwareModel,
+  uploadHardwareModelImage,
+} from "../../api/hardwareModels";
 import { listBrands } from "../../api/brands";
 import type { Brand } from "../../api/brands";
 import { listDeviceTypes } from "../../api/deviceTypes";
@@ -30,6 +37,10 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  const [imagePath, setImagePath] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
+
   const [ports, setPorts] = useState<Port[]>([]);
   const [linkTypes, setLinkTypes] = useState<LinkType[]>([]);
   const [bulkLinkTypeId, setBulkLinkTypeId] = useState<number | "">("");
@@ -47,6 +58,7 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
         setBrandId(hardwareModel.brandId);
         setDeviceTypeId(hardwareModel.deviceTypeId);
         setName(hardwareModel.name);
+        setImagePath(hardwareModel.imagePath);
         await loadPorts();
         const { linkTypes: ltList } = await listLinkTypes();
         setLinkTypes(ltList);
@@ -107,6 +119,33 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
     }
   }
 
+  async function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.currentTarget.files?.[0];
+    e.currentTarget.value = "";
+    if (!file) return;
+    setImageError(null);
+    setImageUploading(true);
+    try {
+      const { hardwareModel } = await uploadHardwareModelImage(Number(hardwareModelId), file);
+      setImagePath(hardwareModel.imagePath);
+    } catch (err) {
+      setImageError(err instanceof ApiError ? err.message : "Erreur lors du téléversement.");
+    } finally {
+      setImageUploading(false);
+    }
+  }
+
+  async function handleRemoveImage() {
+    if (!window.confirm("Supprimer cette image ?")) return;
+    setImageError(null);
+    try {
+      const { hardwareModel } = await deleteHardwareModelImage(Number(hardwareModelId));
+      setImagePath(hardwareModel.imagePath);
+    } catch (err) {
+      setImageError(err instanceof ApiError ? err.message : "Erreur lors de la suppression.");
+    }
+  }
+
   async function handleDeletePort(portId: number) {
     if (!window.confirm("Supprimer ce port ?")) return;
     try {
@@ -123,7 +162,7 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
         <p>Chargement...</p>
       ) : (
         <>
-          <form onSubmit={handleSubmit}>
+          <form id="hardware-model-form" onSubmit={handleSubmit}>
             <label>
               Constructeur
               <select value={brandId} onChange={(e) => setBrandId(Number(e.target.value))} required>
@@ -148,19 +187,33 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
               Nom
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
             </label>
-            {error && <p className="error">{error}</p>}
-            <div className="form-actions">
-              <button type="submit" disabled={submitting}>
-                Enregistrer
-              </button>
-              <button type="button" className="btn-outline" onClick={onClose}>
-                Annuler
-              </button>
-            </div>
           </form>
 
           {isEdit && (
-            <div className="card">
+            <div className="card card-compact-top">
+              <h2>Image</h2>
+              {imagePath && (
+                <div className="hardware-model-image-preview">
+                  <img src={hardwareModelImageUrl(imagePath)} alt={name} />
+                </div>
+              )}
+              <div className="inline-form">
+                <label>
+                  {imagePath ? "Remplacer l'image" : "Ajouter une image"}
+                  <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" onChange={handleImageChange} disabled={imageUploading} />
+                </label>
+                {imagePath && (
+                  <button type="button" className="danger" onClick={handleRemoveImage}>
+                    Supprimer l'image
+                  </button>
+                )}
+              </div>
+              {imageError && <p className="error">{imageError}</p>}
+            </div>
+          )}
+
+          {isEdit && (
+            <div className="card card-compact-top">
               <h2>Ports</h2>
               <form className="inline-form" onSubmit={handleGeneratePorts}>
                 <label>
@@ -218,6 +271,16 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
               {ports.length === 0 && <p className="muted">Aucun port configuré.</p>}
             </div>
           )}
+
+          {error && <p className="error">{error}</p>}
+          <div className="form-actions">
+            <button type="submit" form="hardware-model-form" disabled={submitting}>
+              Enregistrer
+            </button>
+            <button type="button" className="btn-outline" onClick={onClose}>
+              Annuler
+            </button>
+          </div>
         </>
       )}
     </Modal>

@@ -58,6 +58,8 @@ WHERE device_type_id IS NULL;
 
 ALTER TABLE hardware_models ALTER COLUMN device_type_id SET NOT NULL;
 
+ALTER TABLE hardware_models ADD COLUMN IF NOT EXISTS image_path VARCHAR(500);
+
 -- Suppression du module "Materiel reseau" (Equipements/Constructeurs) : plus reference par l'app.
 DROP TABLE IF EXISTS network_equipment;
 DROP TABLE IF EXISTS manufacturers;
