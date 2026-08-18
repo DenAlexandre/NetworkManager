@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { listEquipment } from "../../api/equipment";
 import type { Equipment } from "../../api/equipment";
 import { listPorts } from "../../api/ports";
@@ -152,6 +153,7 @@ async function fetchImageAsDataUrl(url: string): Promise<string> {
 }
 
 export function DesignPage() {
+  const navigate = useNavigate();
   const [equipmentList, setEquipmentList] = useState<Equipment[]>([]);
   const [allPorts, setAllPorts] = useState<Port[]>([]);
   const [links, setLinks] = useState<EquipmentLink[]>([]);
@@ -162,6 +164,7 @@ export function DesignPage() {
   const [addEquipmentId, setAddEquipmentId] = useState<number | "">("");
   const [linkMode, setLinkMode] = useState(false);
   const [linkDraw, setLinkDraw] = useState<LinkDraw | null>(null);
+  const [cardContextMenu, setCardContextMenu] = useState<{ equipmentId: number; x: number; y: number } | null>(null);
   const [linkPreview, setLinkPreview] = useState<{ x: number; y: number } | null>(null);
   const [resizing, setResizing] = useState<{ equipmentId: number; startX: number; startWidth: number } | null>(null);
 
@@ -306,6 +309,24 @@ export function DesignPage() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [linkDraw]);
+
+  useEffect(() => {
+    if (!cardContextMenu) return;
+    function close() {
+      setCardContextMenu(null);
+    }
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") close();
+    }
+    window.addEventListener("mousedown", close);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("scroll", close, true);
+    return () => {
+      window.removeEventListener("mousedown", close);
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("scroll", close, true);
+    };
+  }, [cardContextMenu]);
 
   useEffect(() => {
     window.addEventListener("resize", recomputeEndpoints);
@@ -584,6 +605,25 @@ export function DesignPage() {
       next.delete(equipmentId);
       return next;
     });
+  }
+
+  function handleCardContextMenu(e: ReactMouseEvent, equipmentId: number) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (linkMode) return;
+    setCardContextMenu({ equipmentId, x: e.clientX, y: e.clientY });
+  }
+
+  function handleContextMenuRemove() {
+    if (!cardContextMenu) return;
+    handleRemoveCard(cardContextMenu.equipmentId);
+    setCardContextMenu(null);
+  }
+
+  function handleContextMenuAddress() {
+    if (!cardContextMenu) return;
+    navigate(`/equipment/addressing?open=${cardContextMenu.equipmentId}`);
+    setCardContextMenu(null);
   }
 
   function handleHeaderMouseDown(e: ReactMouseEvent, card: Card) {
@@ -1233,6 +1273,7 @@ export function DesignPage() {
                 ref={(el) => {
                   cardRefs.current[card.equipmentId] = el;
                 }}
+                onContextMenu={(e) => handleCardContextMenu(e, card.equipmentId)}
               >
                 <div className="design-card-header" onMouseDown={(e) => handleHeaderMouseDown(e, card)}>
                   <span>{equipment.name}</span>
@@ -1423,6 +1464,21 @@ export function DesignPage() {
           })}
         </svg>
       </div>
+
+      {cardContextMenu && (
+        <div
+          className="design-context-menu"
+          style={{ left: cardContextMenu.x, top: cardContextMenu.y }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <button type="button" onClick={handleContextMenuAddress}>
+            Adresser le matériel
+          </button>
+          <button type="button" className="danger" onClick={handleContextMenuRemove}>
+            Supprimer du schéma
+          </button>
+        </div>
+      )}
     </div>
   );
 }

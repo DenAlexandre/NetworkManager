@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { listAddressing } from "../../api/equipmentPortSettings";
 import type { AddressingEquipment, AddressingPort } from "../../api/equipmentPortSettings";
 import { ApiError } from "../../api/client";
@@ -25,6 +26,7 @@ export function AddressingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const deviceTypeOptions = useMemo(() => {
     const names = new Set<string>();
@@ -76,6 +78,16 @@ export function AddressingPage() {
   useEffect(() => {
     load();
   }, []);
+
+  // Supports deep-linking here (e.g. from Design's equipment context menu) via
+  // /equipment/addressing?open=<equipmentId>, opening that equipment's config modal directly
+  // once the list has loaded, then stripping the query param so it doesn't reopen on refresh.
+  useEffect(() => {
+    const openId = Number(searchParams.get("open"));
+    if (!openId || !items.some((item) => item.equipmentId === openId)) return;
+    setSelectedId(openId);
+    setSearchParams({}, { replace: true });
+  }, [items, searchParams, setSearchParams]);
 
   async function load() {
     setLoading(true);
