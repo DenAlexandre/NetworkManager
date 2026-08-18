@@ -13,12 +13,14 @@ const hardwareModelSchema = z.object({
   brandId: z.number().int("Le constructeur est requis."),
   deviceTypeId: z.number().int("Le type de matériel est requis."),
   name: z.string().min(1, "Le nom est requis."),
+  configImportEnabled: z.boolean().optional().default(false),
 });
 
 const HARDWARE_MODEL_SELECT = `
   SELECT hm.id, hm.brand_id AS "brandId", b.name AS "brandName",
          hm.device_type_id AS "deviceTypeId", dt.name AS "deviceType", hm.name,
-         hm.image_path AS "imagePath", hm.datasheet_path AS "datasheetPath"
+         hm.image_path AS "imagePath", hm.datasheet_path AS "datasheetPath",
+         hm.config_import_enabled AS "configImportEnabled"
   FROM hardware_models hm
   JOIN brands b ON b.id = hm.brand_id
   JOIN device_types dt ON dt.id = hm.device_type_id
@@ -127,7 +129,7 @@ router.post("/", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
-  const { brandId, deviceTypeId, name } = parsed.data;
+  const { brandId, deviceTypeId, name, configImportEnabled } = parsed.data;
 
   const existing = await pool.query(
     "SELECT id FROM hardware_models WHERE brand_id = $1 AND name = $2",
@@ -139,8 +141,8 @@ router.post("/", async (req, res) => {
 
   try {
     const inserted = await pool.query(
-      "INSERT INTO hardware_models (brand_id, device_type_id, name) VALUES ($1, $2, $3) RETURNING id",
-      [brandId, deviceTypeId, name]
+      "INSERT INTO hardware_models (brand_id, device_type_id, name, config_import_enabled) VALUES ($1, $2, $3, $4) RETURNING id",
+      [brandId, deviceTypeId, name, configImportEnabled]
     );
     const result = await pool.query(`${HARDWARE_MODEL_SELECT} WHERE hm.id = $1`, [inserted.rows[0].id]);
     res.status(201).json({ hardwareModel: result.rows[0] });
@@ -161,7 +163,7 @@ router.put("/:id", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
-  const { brandId, deviceTypeId, name } = parsed.data;
+  const { brandId, deviceTypeId, name, configImportEnabled } = parsed.data;
 
   const existing = await pool.query(
     "SELECT id FROM hardware_models WHERE brand_id = $1 AND name = $2 AND id != $3",
@@ -173,8 +175,8 @@ router.put("/:id", async (req, res) => {
 
   try {
     const updated = await pool.query(
-      "UPDATE hardware_models SET brand_id = $1, device_type_id = $2, name = $3 WHERE id = $4 RETURNING id",
-      [brandId, deviceTypeId, name, id]
+      "UPDATE hardware_models SET brand_id = $1, device_type_id = $2, name = $3, config_import_enabled = $4 WHERE id = $5 RETURNING id",
+      [brandId, deviceTypeId, name, configImportEnabled, id]
     );
     if (!updated.rowCount) {
       return res.status(404).json({ error: "Matériel introuvable." });

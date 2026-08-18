@@ -31,6 +31,7 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
   const [deviceTypes, setDeviceTypes] = useState<DeviceType[]>([]);
   const [deviceTypeId, setDeviceTypeId] = useState<number | "">("");
   const [name, setName] = useState("");
+  const [configImportEnabled, setConfigImportEnabled] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -53,6 +54,7 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
         setBrandId(hardwareModel.brandId);
         setDeviceTypeId(hardwareModel.deviceTypeId);
         setName(hardwareModel.name);
+        setConfigImportEnabled(hardwareModel.configImportEnabled);
         setImagePath(hardwareModel.imagePath);
         setDatasheetPath(hardwareModel.datasheetPath);
       } else {
@@ -73,7 +75,7 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
     setError(null);
     setSubmitting(true);
     try {
-      const input = { brandId: Number(brandId), deviceTypeId: Number(deviceTypeId), name };
+      const input = { brandId: Number(brandId), deviceTypeId: Number(deviceTypeId), name, configImportEnabled };
       if (isEdit) {
         await updateHardwareModel(Number(hardwareModelId), input);
       } else {
@@ -188,6 +190,14 @@ export function HardwareModelFormModal({ hardwareModelId, onClose, onSaved }: Ha
             <label>
               Nom
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+            </label>
+            <label className="checkbox-field">
+              <input
+                type="checkbox"
+                checked={configImportEnabled}
+                onChange={(e) => setConfigImportEnabled(e.target.checked)}
+              />
+              Import de configuration possible
             </label>
           </form>
 

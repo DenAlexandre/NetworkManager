@@ -34,17 +34,18 @@ async function seedAdmin() {
   console.log(`Compte admin prêt : ${username} (${email})`);
 }
 
-const DEVICE_TYPES = ["Serveur", "Switch", "Firewall", "Automate", "Relais de dérivation optique"];
+const DEVICE_TYPES = ["Serveur", "Switch", "Firewall", "Automate", "Relais de dérivation optique", "Passerelle MOXA"];
 
-const BRANDS = ["DELL", "CISCO", "FORTINET", "HIRSCHMANN", "Schneider Electric"];
+const BRANDS = ["DELL", "CISCO", "FORTINET", "HIRSCHMANN", "Schneider Electric", "MOXA"];
 
 const HARDWARE_MODELS = [
-  { brandName: "DELL", name: "Inconnu", deviceTypeName: "Serveur" },
-  { brandName: "CISCO", name: "CISCO", deviceTypeName: "Switch" },
-  { brandName: "HIRSCHMANN", name: "MACH104-20TX-FR", deviceTypeName: "Switch" },
-  { brandName: "Schneider Electric", name: "M580", deviceTypeName: "Automate" },
-  { brandName: "HIRSCHMANN", name: "BRS30", deviceTypeName: "Switch" },
-  { brandName: "HIRSCHMANN", name: "OBR40", deviceTypeName: "Relais de dérivation optique" },
+  { brandName: "DELL", name: "Inconnu", deviceTypeName: "Serveur", configImportEnabled: false },
+  { brandName: "CISCO", name: "CISCO", deviceTypeName: "Switch", configImportEnabled: false },
+  { brandName: "HIRSCHMANN", name: "MACH104-20TX-FR", deviceTypeName: "Switch", configImportEnabled: false },
+  { brandName: "Schneider Electric", name: "M580", deviceTypeName: "Automate", configImportEnabled: false },
+  { brandName: "HIRSCHMANN", name: "BRS30", deviceTypeName: "Switch", configImportEnabled: true },
+  { brandName: "HIRSCHMANN", name: "OBR40", deviceTypeName: "Relais de dérivation optique", configImportEnabled: false },
+  { brandName: "MOXA", name: "MGate 3480", deviceTypeName: "Passerelle MOXA", configImportEnabled: true },
 ];
 
 const LINK_TYPES = ["Fibre", "TCP/IP", "ModBus"];
@@ -87,10 +88,10 @@ async function seedReferenceData() {
     const brandId = brandIdByName.get(hm.brandName);
     const deviceTypeId = deviceTypeIdByName.get(hm.deviceTypeName);
     await pool.query(
-      `INSERT INTO hardware_models (brand_id, device_type_id, name)
-       VALUES ($1, $2, $3)
+      `INSERT INTO hardware_models (brand_id, device_type_id, name, config_import_enabled)
+       VALUES ($1, $2, $3, $4)
        ON CONFLICT (brand_id, name) DO UPDATE SET device_type_id = EXCLUDED.device_type_id`,
-      [brandId, deviceTypeId, hm.name]
+      [brandId, deviceTypeId, hm.name, hm.configImportEnabled]
     );
   }
 

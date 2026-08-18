@@ -4,21 +4,19 @@ import {
   deleteSwitchConfig,
   downloadSwitchConfigXml,
   importSwitchConfig,
+  listSupportedSwitchModels,
   listSwitchConfigs,
 } from "../../api/switchConfigs";
-import type { SwitchConfigSummary } from "../../api/switchConfigs";
+import type { SupportedSwitchModel, SwitchConfigSummary } from "../../api/switchConfigs";
 import { ApiError } from "../../api/client";
-
-// Modèles de switch supportés par l'import. Un seul pour l'instant : d'autres modèles
-// nécessiteront chacun leur propre parseur côté serveur avant de pouvoir être ajoutés ici.
-const SWITCH_MODELS = [{ value: "hirschmann-brs30", label: "HIRSCHMANN — BRS30" }];
 
 export function SwitchConfigPage() {
   const [items, setItems] = useState<SwitchConfigSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [switchModel, setSwitchModel] = useState(SWITCH_MODELS[0].value);
+  const [switchModels, setSwitchModels] = useState<SupportedSwitchModel[]>([]);
+  const [switchModelId, setSwitchModelId] = useState<number | null>(null);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
@@ -26,6 +24,7 @@ export function SwitchConfigPage() {
 
   useEffect(() => {
     load();
+    loadSupportedModels();
   }, []);
 
   async function load() {
@@ -40,12 +39,22 @@ export function SwitchConfigPage() {
     }
   }
 
+  async function loadSupportedModels() {
+    try {
+      const { hardwareModels } = await listSupportedSwitchModels();
+      setSwitchModels(hardwareModels);
+      setSwitchModelId(hardwareModels[0]?.id ?? null);
+    } catch (err) {
+      setImportError(err instanceof ApiError ? err.message : "Erreur de chargement des modèles.");
+    }
+  }
+
   async function handleImport() {
-    if (!importFile) return;
+    if (!importFile || switchModelId === null) return;
     setImportError(null);
     setImporting(true);
     try {
-      await importSwitchConfig(importFile, switchModel);
+      await importSwitchConfig(importFile, switchModelId);
       setImportFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       await load();
@@ -90,10 +99,14 @@ export function SwitchConfigPage() {
         <div className="inline-form">
           <label>
             Modèle de switch
-            <select value={switchModel} onChange={(e) => setSwitchModel(e.target.value)} disabled={importing}>
-              {SWITCH_MODELS.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {m.label}
+            <select
+              value={switchModelId ?? ""}
+              onChange={(e) => setSwitchModelId(Number(e.target.value))}
+              disabled={importing || switchModels.length === 0}
+            >
+              {switchModels.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.brandName} — {m.name}
                 </option>
               ))}
             </select>
@@ -108,10 +121,20 @@ export function SwitchConfigPage() {
               disabled={importing}
             />
           </label>
-          <button type="button" className="btn" onClick={handleImport} disabled={!importFile || importing}>
+          <button
+            type="button"
+            className="btn"
+            onClick={handleImport}
+            disabled={!importFile || switchModelId === null || importing}
+          >
             {importing ? "Import en cours..." : "Importer"}
           </button>
         </div>
+        {switchModels.length === 0 && (
+          <p className="muted">
+            Aucun modèle de switch pris en charge n'est trouvé dans le catalogue (Type des données &gt; Matériel).
+          </p>
+        )}
         {importError && <p className="error">{importError}</p>}
       </div>
 
@@ -121,6 +144,7 @@ export function SwitchConfigPage() {
         <thead>
           <tr>
             <th>Nom</th>
+            <th>Modèle (catalogue)</th>
             <th>Modèle</th>
             <th>Firmware</th>
             <th>Localisation</th>
@@ -137,6 +161,9 @@ export function SwitchConfigPage() {
             <tr key={item.id}>
               <td>
                 <Link to={`/configurations/${item.id}`}>{item.sysName || "—"}</Link>
+              </td>
+              <td>
+                {item.brandName} — {item.hardwareModelName}
               </td>
               <td>{item.productId}</td>
               <td>{item.firmwareVersion}</td>

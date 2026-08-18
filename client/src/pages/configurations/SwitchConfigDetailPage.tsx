@@ -75,10 +75,18 @@ export function SwitchConfigDetailPage() {
               <td>{config.sysLocation || "—"}</td>
             </tr>
             <tr>
+              <th>Modèle (catalogue)</th>
+              <td>
+                {config.brandName} — {config.hardwareModelName}
+              </td>
               <th>Modèle</th>
               <td>{config.productId}</td>
+            </tr>
+            <tr>
               <th>Firmware</th>
               <td>{config.firmwareVersion}</td>
+              <td></td>
+              <td></td>
             </tr>
             <tr>
               <th>IP de gestion</th>

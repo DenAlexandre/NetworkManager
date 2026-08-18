@@ -2,12 +2,21 @@ import { apiDownload, apiFetch, apiUpload } from "./client";
 
 export interface MgateConfigSummary {
   id: number;
+  hardwareModelId: number;
+  hardwareModelName: string;
+  brandName: string;
   deviceName: string;
   ipAddress: string;
   location: string;
   importedAt: string;
   importedBy: string;
   serialPortCount: number;
+}
+
+export interface SupportedMoxaModel {
+  id: number;
+  name: string;
+  brandName: string;
 }
 
 export interface MgateSlaveId {
@@ -39,6 +48,9 @@ export interface MgateSerialPort {
 
 export interface MgateConfigDetail {
   id: number;
+  hardwareModelId: number;
+  hardwareModelName: string;
+  brandName: string;
   deviceName: string;
   description: string;
   location: string;
@@ -69,14 +81,18 @@ export function listMgateConfigs() {
   return apiFetch<{ mgateConfigs: MgateConfigSummary[] }>("/mgate-configs");
 }
 
+export function listSupportedMoxaModels() {
+  return apiFetch<{ hardwareModels: SupportedMoxaModel[] }>("/mgate-configs/supported-models");
+}
+
 export function getMgateConfig(id: number) {
   return apiFetch<{ mgateConfig: MgateConfigDetail }>(`/mgate-configs/${id}`);
 }
 
-export function importMgateConfigCfg(file: File, model: string) {
+export function importMgateConfigCfg(file: File, hardwareModelId: number) {
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("model", model);
+  formData.append("hardwareModelId", String(hardwareModelId));
   return apiUpload<{ id: number; deviceName: string; ipAddress: string; message: string }>(
     "/mgate-configs/import-cfg",
     formData

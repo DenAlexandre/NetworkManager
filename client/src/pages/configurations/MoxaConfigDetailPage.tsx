@@ -75,16 +75,24 @@ export function MoxaConfigDetailPage() {
         <table className="table">
           <tbody>
             <tr>
-              <th>Description</th>
-              <td>{config.description || "—"}</td>
+              <th>Modèle (catalogue)</th>
+              <td>
+                {config.brandName} — {config.hardwareModelName}
+              </td>
               <th>Localisation</th>
               <td>{config.location || "—"}</td>
             </tr>
             <tr>
+              <th>Description</th>
+              <td>{config.description || "—"}</td>
               <th>Contact</th>
               <td>{config.contact || "—"}</td>
+            </tr>
+            <tr>
               <th>Adresse MAC</th>
               <td>{config.macAddress || "—"}</td>
+              <td></td>
+              <td></td>
             </tr>
             <tr>
               <th>IP</th>

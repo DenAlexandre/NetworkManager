@@ -1,19 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { deleteMgateConfig, downloadMgateConfigCfg, importMgateConfigCfg, listMgateConfigs } from "../../api/mgateConfigs";
-import type { MgateConfigSummary } from "../../api/mgateConfigs";
+import {
+  deleteMgateConfig,
+  downloadMgateConfigCfg,
+  importMgateConfigCfg,
+  listMgateConfigs,
+  listSupportedMoxaModels,
+} from "../../api/mgateConfigs";
+import type { MgateConfigSummary, SupportedMoxaModel } from "../../api/mgateConfigs";
 import { ApiError } from "../../api/client";
-
-// Modèles de passerelle Moxa supportés par l'import. Un seul pour l'instant : d'autres modèles
-// nécessiteront chacun leur propre parseur côté serveur avant de pouvoir être ajoutés ici.
-const MOXA_MODELS = [{ value: "moxa-mgate-mb3480", label: "MOXA — MGate MB3480" }];
 
 export function MoxaConfigPage() {
   const [items, setItems] = useState<MgateConfigSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [moxaModel, setMoxaModel] = useState(MOXA_MODELS[0].value);
+  const [moxaModels, setMoxaModels] = useState<SupportedMoxaModel[]>([]);
+  const [moxaModelId, setMoxaModelId] = useState<number | null>(null);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
@@ -21,6 +24,7 @@ export function MoxaConfigPage() {
 
   useEffect(() => {
     load();
+    loadSupportedModels();
   }, []);
 
   async function load() {
@@ -35,12 +39,22 @@ export function MoxaConfigPage() {
     }
   }
 
+  async function loadSupportedModels() {
+    try {
+      const { hardwareModels } = await listSupportedMoxaModels();
+      setMoxaModels(hardwareModels);
+      setMoxaModelId(hardwareModels[0]?.id ?? null);
+    } catch (err) {
+      setImportError(err instanceof ApiError ? err.message : "Erreur de chargement des modèles.");
+    }
+  }
+
   async function handleImport() {
-    if (!importFile) return;
+    if (!importFile || moxaModelId === null) return;
     setImportError(null);
     setImporting(true);
     try {
-      await importMgateConfigCfg(importFile, moxaModel);
+      await importMgateConfigCfg(importFile, moxaModelId);
       setImportFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       await load();
@@ -85,10 +99,14 @@ export function MoxaConfigPage() {
         <div className="inline-form">
           <label>
             Modèle de passerelle
-            <select value={moxaModel} onChange={(e) => setMoxaModel(e.target.value)} disabled={importing}>
-              {MOXA_MODELS.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {m.label}
+            <select
+              value={moxaModelId ?? ""}
+              onChange={(e) => setMoxaModelId(Number(e.target.value))}
+              disabled={importing || moxaModels.length === 0}
+            >
+              {moxaModels.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.brandName} — {m.name}
                 </option>
               ))}
             </select>
@@ -103,10 +121,20 @@ export function MoxaConfigPage() {
               disabled={importing}
             />
           </label>
-          <button type="button" className="btn" onClick={handleImport} disabled={!importFile || importing}>
+          <button
+            type="button"
+            className="btn"
+            onClick={handleImport}
+            disabled={!importFile || moxaModelId === null || importing}
+          >
             {importing ? "Import en cours..." : "Importer"}
           </button>
         </div>
+        {moxaModels.length === 0 && (
+          <p className="muted">
+            Aucun modèle de passerelle pris en charge n'est trouvé dans le catalogue (Type des données &gt; Matériel).
+          </p>
+        )}
         {importError && <p className="error">{importError}</p>}
       </div>
 
@@ -116,6 +144,7 @@ export function MoxaConfigPage() {
         <thead>
           <tr>
             <th>Nom</th>
+            <th>Modèle (catalogue)</th>
             <th>IP</th>
             <th>Localisation</th>
             <th>Ports série</th>
@@ -129,6 +158,9 @@ export function MoxaConfigPage() {
             <tr key={item.id}>
               <td>
                 <Link to={`/configurations/moxa/${item.id}`}>{item.deviceName || "—"}</Link>
+              </td>
+              <td>
+                {item.brandName} — {item.hardwareModelName}
               </td>
               <td>{item.ipAddress}</td>
               <td>{item.location || "—"}</td>

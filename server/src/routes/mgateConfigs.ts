@@ -9,24 +9,59 @@ router.use(requireAuth, requireRole("admin"));
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
-// Un parseur par modèle de passerelle Moxa supporté. Un seul pour l'instant : chaque nouveau
-// modèle nécessite son propre parseur (format de fichier différent) avant de pouvoir être ajouté ici.
-const MOXA_MODEL_PARSERS: Record<string, (buf: Buffer) => ReturnType<typeof parseMoxaMgateCfg>> = {
-  "moxa-mgate-mb3480": parseMoxaMgateCfg,
+// Un parseur par modèle de passerelle Moxa supporté, identifié par (marque, nom) tels que définis
+// dans le catalogue Type des données > Matériel. Un seul pour l'instant : chaque nouveau modèle
+// nécessite son propre parseur (format de fichier différent) avant de pouvoir être ajouté ici.
+const MOXA_MODEL_PARSERS: Record<string, Record<string, (buf: Buffer) => ReturnType<typeof parseMoxaMgateCfg>>> = {
+  MOXA: { "MGate 3480": parseMoxaMgateCfg },
 };
+
+async function findMoxaParser(hardwareModelId: number) {
+  const result = await pool.query(
+    `SELECT hm.name, b.name AS "brandName" FROM hardware_models hm
+     JOIN brands b ON b.id = hm.brand_id WHERE hm.id = $1 AND hm.config_import_enabled = true`,
+    [hardwareModelId]
+  );
+  const row = result.rows[0];
+  const parser = row && MOXA_MODEL_PARSERS[row.brandName]?.[row.name];
+  return parser ?? null;
+}
 
 function parseId(raw: string) {
   const id = Number(raw);
   return Number.isInteger(id) ? id : null;
 }
 
+router.get("/supported-models", async (_req, res) => {
+  const pairs = Object.entries(MOXA_MODEL_PARSERS).flatMap(([brandName, models]) =>
+    Object.keys(models).map((modelName) => ({ brandName, modelName }))
+  );
+  if (!pairs.length) {
+    return res.json({ hardwareModels: [] });
+  }
+  const conditions = pairs.map((_, i) => `(b.name = $${i * 2 + 1} AND hm.name = $${i * 2 + 2})`).join(" OR ");
+  const params = pairs.flatMap((p) => [p.brandName, p.modelName]);
+  const result = await pool.query(
+    `SELECT hm.id, hm.name, b.name AS "brandName"
+     FROM hardware_models hm
+     JOIN brands b ON b.id = hm.brand_id
+     WHERE hm.config_import_enabled = true AND (${conditions})
+     ORDER BY b.name, hm.name`,
+    params
+  );
+  res.json({ hardwareModels: result.rows });
+});
+
 router.get("/", async (_req, res) => {
   const result = await pool.query(`
     SELECT g.id, g.device_name AS "deviceName", g.ip_address AS "ipAddress", g.location AS "location",
            g.imported_at AS "importedAt", u.username AS "importedBy",
+           g.hardware_model_id AS "hardwareModelId", hm.name AS "hardwareModelName", b.name AS "brandName",
            (SELECT count(*) FROM mgate_serial_ports p WHERE p.mgate_configuration_id = g.id) AS "serialPortCount"
     FROM mgate_configurations g
     JOIN users u ON u.id = g.imported_by_id
+    JOIN hardware_models hm ON hm.id = g.hardware_model_id
+    JOIN brands b ON b.id = hm.brand_id
     ORDER BY g.imported_at DESC
   `);
   res.json({ mgateConfigs: result.rows });
@@ -39,8 +74,12 @@ router.get("/:id", async (req, res) => {
   }
 
   const configResult = await pool.query(
-    `SELECT g.*, u.username AS "importedByUsername" FROM mgate_configurations g
-     JOIN users u ON u.id = g.imported_by_id WHERE g.id = $1`,
+    `SELECT g.*, u.username AS "importedByUsername", hm.name AS "hardwareModelName", b.name AS "brandName"
+     FROM mgate_configurations g
+     JOIN users u ON u.id = g.imported_by_id
+     JOIN hardware_models hm ON hm.id = g.hardware_model_id
+     JOIN brands b ON b.id = hm.brand_id
+     WHERE g.id = $1`,
     [id]
   );
   const config = configResult.rows[0];
@@ -90,6 +129,9 @@ router.get("/:id", async (req, res) => {
   res.json({
     mgateConfig: {
       id: config.id,
+      hardwareModelId: config.hardware_model_id,
+      hardwareModelName: config.hardwareModelName,
+      brandName: config.brandName,
       deviceName: config.device_name,
       description: config.description,
       location: config.location,
@@ -125,7 +167,11 @@ router.post("/import-cfg", upload.single("file"), async (req, res) => {
   if (!req.file.originalname.toLowerCase().endsWith(".cfg")) {
     return res.status(400).json({ error: "Le fichier doit être au format .cfg." });
   }
-  const parser = MOXA_MODEL_PARSERS[req.body.model];
+  const hardwareModelId = parseId(req.body.hardwareModelId);
+  if (hardwareModelId === null) {
+    return res.status(400).json({ error: "Le modèle de passerelle est requis." });
+  }
+  const parser = await findMoxaParser(hardwareModelId);
   if (!parser) {
     return res.status(400).json({ error: "Modèle de passerelle non supporté." });
   }
@@ -143,10 +189,11 @@ router.post("/import-cfg", upload.single("file"), async (req, res) => {
 
     const inserted = await client.query(
       `INSERT INTO mgate_configurations
-        (device_name, ip_address, subnet_mask, default_gateway, mac_address,
+        (hardware_model_id, device_name, ip_address, subnet_mask, default_gateway, mac_address,
          modbus_tcp_port, max_tcp_sessions, snmp_enabled, read_community, raw_cfg, imported_by_id)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
       [
+        hardwareModelId,
         parsed.deviceName,
         parsed.ipAddress,
         parsed.subnetMask,

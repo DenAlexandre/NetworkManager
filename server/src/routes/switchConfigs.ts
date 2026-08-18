@@ -9,11 +9,23 @@ router.use(requireAuth, requireRole("admin"));
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
-// Un parseur par modèle de switch supporté. Un seul pour l'instant : chaque nouveau modèle
-// nécessite son propre parseur (format de fichier différent) avant de pouvoir être ajouté ici.
-const SWITCH_MODEL_PARSERS: Record<string, (xmlContent: string) => ReturnType<typeof parseMoxaSwitchXml>> = {
-  "hirschmann-brs30": parseMoxaSwitchXml,
+// Un parseur par modèle de switch supporté, identifié par (marque, nom) tels que définis dans le
+// catalogue Type des données > Matériel. Un seul pour l'instant : chaque nouveau modèle nécessite
+// son propre parseur (format de fichier différent) avant de pouvoir être ajouté ici.
+const SWITCH_MODEL_PARSERS: Record<string, Record<string, (xmlContent: string) => ReturnType<typeof parseMoxaSwitchXml>>> = {
+  HIRSCHMANN: { BRS30: parseMoxaSwitchXml },
 };
+
+async function findSwitchParser(hardwareModelId: number) {
+  const result = await pool.query(
+    `SELECT hm.name, b.name AS "brandName" FROM hardware_models hm
+     JOIN brands b ON b.id = hm.brand_id WHERE hm.id = $1 AND hm.config_import_enabled = true`,
+    [hardwareModelId]
+  );
+  const row = result.rows[0];
+  const parser = row && SWITCH_MODEL_PARSERS[row.brandName]?.[row.name];
+  return parser ?? null;
+}
 
 const STP_STATES: Record<number, string> = { 1: "Désactivé", 2: "Activé", 3: "Forwarding", 4: "Blocking" };
 const LLDP_MODES: Record<number, string> = { 1: "Off", 2: "Rx", 3: "Tx", 4: "Tx+Rx" };
@@ -32,17 +44,40 @@ function splitPorts(csv: string | null): string[] {
     .filter(Boolean);
 }
 
+router.get("/supported-models", async (_req, res) => {
+  const pairs = Object.entries(SWITCH_MODEL_PARSERS).flatMap(([brandName, models]) =>
+    Object.keys(models).map((modelName) => ({ brandName, modelName }))
+  );
+  if (!pairs.length) {
+    return res.json({ hardwareModels: [] });
+  }
+  const conditions = pairs.map((_, i) => `(b.name = $${i * 2 + 1} AND hm.name = $${i * 2 + 2})`).join(" OR ");
+  const params = pairs.flatMap((p) => [p.brandName, p.modelName]);
+  const result = await pool.query(
+    `SELECT hm.id, hm.name, b.name AS "brandName"
+     FROM hardware_models hm
+     JOIN brands b ON b.id = hm.brand_id
+     WHERE hm.config_import_enabled = true AND (${conditions})
+     ORDER BY b.name, hm.name`,
+    params
+  );
+  res.json({ hardwareModels: result.rows });
+});
+
 router.get("/", async (_req, res) => {
   const result = await pool.query(`
     SELECT s.id, s.sys_name AS "sysName", s.product_id AS "productId", s.firmware_version AS "firmwareVersion",
            s.sys_location AS "sysLocation", s.management_ip AS "managementIp", s.prefix_length AS "prefixLength",
            s.imported_at AS "importedAt", u.username AS "importedBy",
+           s.hardware_model_id AS "hardwareModelId", hm.name AS "hardwareModelName", b.name AS "brandName",
            (SELECT count(*) FROM switch_vlans v WHERE v.switch_configuration_id = s.id) AS "vlanCount",
            (SELECT count(*) FROM switch_ports p WHERE p.switch_configuration_id = s.id) AS "portCount",
            (SELECT count(*) FROM switch_ports p
               WHERE p.switch_configuration_id = s.id AND p.admin_status = 1 AND p.power_state = 1) AS "activePortCount"
     FROM switch_configurations s
     JOIN users u ON u.id = s.imported_by_id
+    JOIN hardware_models hm ON hm.id = s.hardware_model_id
+    JOIN brands b ON b.id = hm.brand_id
     ORDER BY s.imported_at DESC
   `);
   res.json({ switchConfigs: result.rows });
@@ -55,8 +90,12 @@ router.get("/:id", async (req, res) => {
   }
 
   const configResult = await pool.query(
-    `SELECT s.*, u.username AS "importedByUsername" FROM switch_configurations s
-     JOIN users u ON u.id = s.imported_by_id WHERE s.id = $1`,
+    `SELECT s.*, u.username AS "importedByUsername", hm.name AS "hardwareModelName", b.name AS "brandName"
+     FROM switch_configurations s
+     JOIN users u ON u.id = s.imported_by_id
+     JOIN hardware_models hm ON hm.id = s.hardware_model_id
+     JOIN brands b ON b.id = hm.brand_id
+     WHERE s.id = $1`,
     [id]
   );
   const config = configResult.rows[0];
@@ -118,6 +157,9 @@ router.get("/:id", async (req, res) => {
   res.json({
     switchConfig: {
       id: config.id,
+      hardwareModelId: config.hardware_model_id,
+      hardwareModelName: config.hardwareModelName,
+      brandName: config.brandName,
       productId: config.product_id,
       firmwareVersion: config.firmware_version,
       sysName: config.sys_name,
@@ -143,7 +185,11 @@ router.post("/import", upload.single("file"), async (req, res) => {
   if (!req.file.originalname.toLowerCase().endsWith(".xml")) {
     return res.status(400).json({ error: "Le fichier doit être au format XML." });
   }
-  const parser = SWITCH_MODEL_PARSERS[req.body.model];
+  const hardwareModelId = parseId(req.body.hardwareModelId);
+  if (hardwareModelId === null) {
+    return res.status(400).json({ error: "Le modèle de switch est requis." });
+  }
+  const parser = await findSwitchParser(hardwareModelId);
   if (!parser) {
     return res.status(400).json({ error: "Modèle de switch non supporté." });
   }
@@ -163,10 +209,11 @@ router.post("/import", upload.single("file"), async (req, res) => {
 
     const inserted = await client.query(
       `INSERT INTO switch_configurations
-        (product_id, firmware_version, sys_name, sys_contact, sys_location, management_ip,
+        (hardware_model_id, product_id, firmware_version, sys_name, sys_contact, sys_location, management_ip,
          prefix_length, gateway_ip, management_vlan_id, raw_xml, imported_by_id)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
       [
+        hardwareModelId,
         parsed.productId,
         parsed.firmwareVersion,
         parsed.sysName,

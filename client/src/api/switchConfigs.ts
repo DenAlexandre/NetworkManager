@@ -2,6 +2,9 @@ import { apiDownload, apiFetch, apiUpload } from "./client";
 
 export interface SwitchConfigSummary {
   id: number;
+  hardwareModelId: number;
+  hardwareModelName: string;
+  brandName: string;
   sysName: string;
   productId: string;
   firmwareVersion: string;
@@ -13,6 +16,12 @@ export interface SwitchConfigSummary {
   vlanCount: number;
   portCount: number;
   activePortCount: number;
+}
+
+export interface SupportedSwitchModel {
+  id: number;
+  name: string;
+  brandName: string;
 }
 
 export interface SwitchVlan {
@@ -57,6 +66,9 @@ export interface SwitchMrpConfig {
 
 export interface SwitchConfigDetail {
   id: number;
+  hardwareModelId: number;
+  hardwareModelName: string;
+  brandName: string;
   productId: string;
   firmwareVersion: string;
   sysName: string;
@@ -77,14 +89,18 @@ export function listSwitchConfigs() {
   return apiFetch<{ switchConfigs: SwitchConfigSummary[] }>("/switch-configs");
 }
 
+export function listSupportedSwitchModels() {
+  return apiFetch<{ hardwareModels: SupportedSwitchModel[] }>("/switch-configs/supported-models");
+}
+
 export function getSwitchConfig(id: number) {
   return apiFetch<{ switchConfig: SwitchConfigDetail }>(`/switch-configs/${id}`);
 }
 
-export function importSwitchConfig(file: File, model: string) {
+export function importSwitchConfig(file: File, hardwareModelId: number) {
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("model", model);
+  formData.append("hardwareModelId", String(hardwareModelId));
   return apiUpload<{ id: number; sysName: string; managementIp: string; message: string }>(
     "/switch-configs/import",
     formData

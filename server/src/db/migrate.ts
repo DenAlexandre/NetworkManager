@@ -61,6 +61,16 @@ ALTER TABLE hardware_models ALTER COLUMN device_type_id SET NOT NULL;
 ALTER TABLE hardware_models ADD COLUMN IF NOT EXISTS image_path VARCHAR(500);
 ALTER TABLE hardware_models ADD COLUMN IF NOT EXISTS datasheet_path VARCHAR(500);
 
+-- Marque les modeles materiel pour lesquels l'import de configuration (Gestion des configurations)
+-- est propose. Coche par defaut pour les modeles ayant deja un parseur code en dur cote serveur.
+ALTER TABLE hardware_models ADD COLUMN IF NOT EXISTS config_import_enabled BOOLEAN NOT NULL DEFAULT false;
+UPDATE hardware_models hm
+SET config_import_enabled = true
+FROM brands b
+WHERE b.id = hm.brand_id
+  AND ((b.name = 'HIRSCHMANN' AND hm.name = 'BRS30') OR (b.name = 'MOXA' AND hm.name = 'MGate 3480'))
+  AND hm.config_import_enabled = false;
+
 -- Suppression du module "Materiel reseau" (Equipements/Constructeurs) : plus reference par l'app.
 DROP TABLE IF EXISTS network_equipment;
 DROP TABLE IF EXISTS manufacturers;
@@ -215,10 +225,12 @@ CREATE TABLE IF NOT EXISTS design_schemas (
 CREATE UNIQUE INDEX IF NOT EXISTS ux_design_schemas_api ON design_schemas(api_id);
 
 -- Gestion des configurations : import de fichiers de configuration MOXA (switchs BRS30 en XML,
--- passerelles MGate en binaire .cfg MGateManager). Liste independante, non liee a l'inventaire
--- "equipment" existant.
+-- passerelles MGate en binaire .cfg MGateManager). Chaque configuration importee est rattachee
+-- au modele materiel du catalogue (Type des donnees > Materiel) via hardware_model_id, mais reste
+-- independante de l'inventaire "equipment" (pas d'instance de materiel creee automatiquement).
 CREATE TABLE IF NOT EXISTS switch_configurations (
   id SERIAL PRIMARY KEY,
+  hardware_model_id INTEGER REFERENCES hardware_models(id),
   product_id VARCHAR(100) NOT NULL DEFAULT '',
   firmware_version VARCHAR(50) NOT NULL DEFAULT '',
   sys_name VARCHAR(200) NOT NULL DEFAULT '',
@@ -232,6 +244,17 @@ CREATE TABLE IF NOT EXISTS switch_configurations (
   imported_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   imported_by_id INTEGER NOT NULL REFERENCES users(id)
 );
+
+ALTER TABLE switch_configurations ADD COLUMN IF NOT EXISTS hardware_model_id INTEGER REFERENCES hardware_models(id);
+UPDATE switch_configurations s
+SET hardware_model_id = (
+  SELECT hm.id FROM hardware_models hm
+  JOIN brands b ON b.id = hm.brand_id
+  WHERE b.name = 'HIRSCHMANN' AND hm.name = 'BRS30'
+  LIMIT 1
+)
+WHERE s.hardware_model_id IS NULL;
+ALTER TABLE switch_configurations ALTER COLUMN hardware_model_id SET NOT NULL;
 
 CREATE TABLE IF NOT EXISTS switch_vlans (
   id SERIAL PRIMARY KEY,
@@ -282,6 +305,7 @@ CREATE INDEX IF NOT EXISTS ix_switch_mrp_configs_config ON switch_mrp_configs(sw
 
 CREATE TABLE IF NOT EXISTS mgate_configurations (
   id SERIAL PRIMARY KEY,
+  hardware_model_id INTEGER REFERENCES hardware_models(id),
   ip_address VARCHAR(45) NOT NULL DEFAULT '',
   subnet_mask VARCHAR(45) NOT NULL DEFAULT '',
   default_gateway VARCHAR(45) NOT NULL DEFAULT '',
@@ -306,6 +330,17 @@ CREATE TABLE IF NOT EXISTS mgate_configurations (
   imported_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   imported_by_id INTEGER NOT NULL REFERENCES users(id)
 );
+
+ALTER TABLE mgate_configurations ADD COLUMN IF NOT EXISTS hardware_model_id INTEGER REFERENCES hardware_models(id);
+UPDATE mgate_configurations m
+SET hardware_model_id = (
+  SELECT hm.id FROM hardware_models hm
+  JOIN brands b ON b.id = hm.brand_id
+  WHERE b.name = 'MOXA' AND hm.name = 'MGate 3480'
+  LIMIT 1
+)
+WHERE m.hardware_model_id IS NULL;
+ALTER TABLE mgate_configurations ALTER COLUMN hardware_model_id SET NOT NULL;
 
 CREATE TABLE IF NOT EXISTS mgate_serial_ports (
   id SERIAL PRIMARY KEY,

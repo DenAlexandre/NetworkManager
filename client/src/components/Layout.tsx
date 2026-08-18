@@ -52,11 +52,11 @@ export function Layout() {
               <NavLink to="/equipment" className="sidebar-link">
                 Gestion du matériel
               </NavLink>
-              <NavLink to="/plans" className="sidebar-link">
-                Gestion des plans
-              </NavLink>
               <NavLink to="/configurations" className="sidebar-link">
                 Gestion des configurations
+              </NavLink>
+              <NavLink to="/plans" className="sidebar-link">
+                Gestion des plans
               </NavLink>
               <NavLink to="/system" className="sidebar-link">
                 Système

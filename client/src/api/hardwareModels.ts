@@ -9,6 +9,7 @@ export interface HardwareModel {
   name: string;
   imagePath: string | null;
   datasheetPath: string | null;
+  configImportEnabled: boolean;
 }
 
 export function hardwareModelImageUrl(imagePath: string) {
@@ -23,6 +24,7 @@ export interface HardwareModelInput {
   brandId: number;
   deviceTypeId: number;
   name: string;
+  configImportEnabled: boolean;
 }
 
 export function listHardwareModels() {
