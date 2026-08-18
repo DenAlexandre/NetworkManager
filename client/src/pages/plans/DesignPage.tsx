@@ -56,7 +56,7 @@ type Endpoints = Record<string, { x: number; y: number }>;
 type Rect = { x: number; y: number; width: number; height: number };
 type PortRects = Record<string, Rect>;
 
-interface ModbusConnection {
+interface Connection {
   ownPortLabel: string;
   otherEquipmentName: string;
   otherPortLabel: string;
@@ -66,7 +66,11 @@ interface ModbusConnection {
 interface InfoTreeNode {
   equipment: Equipment;
   via?: { parentPortLabel: string; childPortLabel: string; linkId: number };
-  modbusConnections: ModbusConnection[];
+  /** Every link touching this equipment (any link type), minus the one already shown via `via` —
+      an equipment only ever appears once in the tree, so every OTHER link it's part of (whether
+      it lost out on nesting to a link found first, or is a fan-out ModBus link) must still be
+      visible somewhere, or it would silently disappear from the panel. */
+  connections: Connection[];
   children: InfoTreeNode[];
 }
 
@@ -300,8 +304,11 @@ export function DesignPage() {
   // point-to-point Fibre/TCP-IP cable has) — instead, every equipment on the same ModBus network
   // (chained or not) is grouped one level deep under whichever member is never itself a ModBus
   // child, e.g. all the AEG* units sit directly under API 2-406A-HQ regardless of how many ModBus
-  // hops actually separate them. Each node still lists its real point-to-point ModBus neighbor(s)
-  // via modbusConnections.
+  // hops actually separate them. Every piece of equipment is placed in the tree exactly once (an
+  // equipment linked from more than one parent — e.g. a switch uplinked to two others — would
+  // otherwise get built as a separate subtree under each one); any link that lost out on nesting
+  // that way, plus every ModBus link, still shows up via `connections` on whichever single node
+  // instance exists, so no link is ever silently dropped from view.
   const infoTree = useMemo(() => {
     if (selectedApiId === "") return [] as InfoTreeNode[];
     const apiEquipment = equipmentList.filter((e) => e.apiId === selectedApiId);
@@ -312,24 +319,24 @@ export function DesignPage() {
     const modbusLinks = apiEquipmentLinks.filter((l) => portsById.get(l.parentPortId)?.portType === "ModBus");
     const apiLinks = apiEquipmentLinks.filter((l) => portsById.get(l.parentPortId)?.portType !== "ModBus");
 
-    const modbusConnectionsByEquipment = new Map<number, ModbusConnection[]>();
-    for (const l of modbusLinks) {
-      const parentList = modbusConnectionsByEquipment.get(l.parentEquipmentId) ?? [];
+    const connectionsByEquipment = new Map<number, Connection[]>();
+    for (const l of apiEquipmentLinks) {
+      const parentList = connectionsByEquipment.get(l.parentEquipmentId) ?? [];
       parentList.push({
         ownPortLabel: l.parentPortLabel,
         otherEquipmentName: l.childEquipmentName,
         otherPortLabel: l.childPortLabel,
         linkId: l.id,
       });
-      modbusConnectionsByEquipment.set(l.parentEquipmentId, parentList);
-      const childList = modbusConnectionsByEquipment.get(l.childEquipmentId) ?? [];
+      connectionsByEquipment.set(l.parentEquipmentId, parentList);
+      const childList = connectionsByEquipment.get(l.childEquipmentId) ?? [];
       childList.push({
         ownPortLabel: l.childPortLabel,
         otherEquipmentName: l.parentEquipmentName,
         otherPortLabel: l.parentPortLabel,
         linkId: l.id,
       });
-      modbusConnectionsByEquipment.set(l.childEquipmentId, childList);
+      connectionsByEquipment.set(l.childEquipmentId, childList);
     }
 
     // Union-find over the ModBus subgraph only, to group every equipment on the same bus/chain
@@ -393,6 +400,7 @@ export function DesignPage() {
       ancestors: Set<number>,
       via?: { parentPortLabel: string; childPortLabel: string; linkId: number }
     ): InfoTreeNode | null {
+      if (visited.has(equipmentId)) return null;
       const equipment = equipmentById.get(equipmentId);
       if (!equipment) return null;
       visited.add(equipmentId);
@@ -411,7 +419,8 @@ export function DesignPage() {
         const memberNode = buildNode(memberId, new Set(ancestors).add(memberId));
         if (memberNode) children.push(memberNode);
       }
-      return { equipment, via, modbusConnections: modbusConnectionsByEquipment.get(equipmentId) ?? [], children };
+      const connections = (connectionsByEquipment.get(equipmentId) ?? []).filter((c) => c.linkId !== via?.linkId);
+      return { equipment, via, connections, children };
     }
 
     const roots = apiEquipment
@@ -1377,7 +1386,7 @@ export function DesignPage() {
   }
 
   function renderInfoNode(node: InfoTreeNode) {
-    const { equipment, via, modbusConnections, children } = node;
+    const { equipment, via, connections, children } = node;
     const collapsed = collapsedInfoEquipmentIds.has(equipment.id);
     const addr = addressingByEquipmentId.get(equipment.id);
     const modelPorts = portsByModel.get(equipment.hardwareModelId) ?? [];
@@ -1397,7 +1406,7 @@ export function DesignPage() {
       setSelectedLinkIds(new Set([via.linkId]));
     }
 
-    function selectModbusLink(e: ReactMouseEvent, linkId: number) {
+    function selectConnectionLink(e: ReactMouseEvent, linkId: number) {
       e.stopPropagation();
       setSelectedCardIds(new Set());
       setSelectedTextIds(new Set());
@@ -1427,12 +1436,12 @@ export function DesignPage() {
                 via {via.parentPortLabel} → {via.childPortLabel}
               </span>
             )}
-            {modbusConnections.map((c) => (
+            {connections.map((c) => (
               <span
                 key={c.linkId}
-                className={`design-info-tree-modbus${selectedLinkIds.has(c.linkId) ? " active" : ""}`}
-                onClick={(e) => selectModbusLink(e, c.linkId)}
-                title="Liaison ModBus (bus, sans hiérarchie parent/enfant)"
+                className={`design-info-tree-connection${selectedLinkIds.has(c.linkId) ? " active" : ""}`}
+                onClick={(e) => selectConnectionLink(e, c.linkId)}
+                title="Liaison"
               >
                 {c.ownPortLabel} ↔ {c.otherEquipmentName} ({c.otherPortLabel})
               </span>

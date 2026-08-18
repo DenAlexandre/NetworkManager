@@ -1358,7 +1358,7 @@ textarea {
   text-decoration: underline;
 }
 
-.design-info-tree-modbus {
+.design-info-tree-connection {
   flex-shrink: 0;
   font-size: 11px;
   font-weight: 600;
@@ -1367,8 +1367,8 @@ textarea {
   margin-left: 8px;
 }
 
-.design-info-tree-modbus:hover,
-.design-info-tree-modbus.active {
+.design-info-tree-connection:hover,
+.design-info-tree-connection.active {
   text-decoration: underline;
   color: var(--accent-dark);
 }
