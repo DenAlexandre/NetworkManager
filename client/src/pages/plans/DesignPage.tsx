@@ -88,21 +88,38 @@ export function DesignPage() {
   const [cards, setCards] = useState<Card[]>([]);
   const [addEquipmentId, setAddEquipmentId] = useState<number | "">("");
   const [pendingPort, setPendingPort] = useState<PendingPort | null>(null);
-  const [dragging, setDragging] = useState<{ equipmentId: number; offsetX: number; offsetY: number } | null>(null);
   const [resizing, setResizing] = useState<{ equipmentId: number; startX: number; startWidth: number } | null>(null);
 
   const [textBlocks, setTextBlocks] = useState<TextBlock[]>([]);
-  const [draggingText, setDraggingText] = useState<{ id: number; offsetX: number; offsetY: number } | null>(null);
   const [resizingText, setResizingText] = useState<{ id: number; startX: number; startFontSize: number } | null>(null);
   const [endpoints, setEndpoints] = useState<Endpoints>({});
   const [naturalSizes, setNaturalSizes] = useState<Record<number, { width: number; height: number }>>({});
   const [bendOverrides, setBendOverrides] = useState<Record<number, number>>({});
   const [bendYOverrides, setBendYOverrides] = useState<Record<number, number>>({});
-  const [selectedLinkId, setSelectedLinkId] = useState<number | null>(null);
+  const [selectedCardIds, setSelectedCardIds] = useState<Set<number>>(new Set());
+  const [selectedTextIds, setSelectedTextIds] = useState<Set<number>>(new Set());
+  const [selectedLinkIds, setSelectedLinkIds] = useState<Set<number>>(new Set());
   const [bendDrag, setBendDrag] = useState<{ linkId: number; startX: number; startY: number; axis: "x" | "y" | "both" } | null>(
     null
   );
   const [zoom, setZoom] = useState(1);
+
+  // Group drag: moves every selected card/text block together, preserving their relative
+  // offsets. Started from any selected card's or text block's header; "cards"/"texts" hold each
+  // one's position at drag-start so movement on each mousemove is computed as a delta from
+  // startX/startY rather than accumulated incrementally.
+  const [groupDrag, setGroupDrag] = useState<{
+    startX: number;
+    startY: number;
+    cards: Record<number, { x: number; y: number }>;
+    texts: Record<number, { x: number; y: number }>;
+  } | null>(null);
+
+  // Rubber-band selection: marqueeStart is the fixed anchor point (unzoomed canvas coordinates)
+  // set on mousedown; marqueeRect is the live normalized rectangle used both to render the
+  // selection box and, on mouseup, to hit-test cards/text blocks/links.
+  const [marqueeStart, setMarqueeStart] = useState<{ x: number; y: number } | null>(null);
+  const [marqueeRect, setMarqueeRect] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
 
   const [apis, setApis] = useState<Api[]>([]);
   const [selectedApiId, setSelectedApiId] = useState<number | "">("");
@@ -113,11 +130,6 @@ export function DesignPage() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const imgRefs = useRef<Record<number, HTMLImageElement | null>>({});
   const cardRefs = useRef<Record<number, HTMLDivElement | null>>({});
-  // When a drag ends with the mouse over empty canvas, the browser's native click event (fired
-  // after mouseup) targets the nearest common ancestor of the mousedown/mouseup elements, which
-  // can be the canvas itself even though the user never intended to click it. Set before clearing
-  // drag state so the canvas's onClick (which deselects the current link) can ignore that one.
-  const suppressCanvasClickRef = useRef(false);
 
   useEffect(() => {
     Promise.all([listEquipment(), listPorts(), listEquipmentLinks(), listApis()])
@@ -192,17 +204,29 @@ export function DesignPage() {
   }, [cards, portsByModel, equipmentById]);
 
   useEffect(() => {
-    if (!dragging) return;
+    if (!groupDrag) return;
     function onMove(e: MouseEvent) {
       const canvasRect = canvasRef.current?.getBoundingClientRect();
-      if (!canvasRect || !dragging) return;
-      const x = (e.clientX - canvasRect.left) / zoom - dragging.offsetX;
-      const y = (e.clientY - canvasRect.top) / zoom - dragging.offsetY;
-      setCards((prev) => prev.map((c) => (c.equipmentId === dragging.equipmentId ? { ...c, x, y } : c)));
+      if (!canvasRect || !groupDrag) return;
+      const x = (e.clientX - canvasRect.left) / zoom;
+      const y = (e.clientY - canvasRect.top) / zoom;
+      const dx = x - groupDrag.startX;
+      const dy = y - groupDrag.startY;
+      setCards((prev) =>
+        prev.map((c) => {
+          const start = groupDrag.cards[c.equipmentId];
+          return start ? { ...c, x: start.x + dx, y: start.y + dy } : c;
+        })
+      );
+      setTextBlocks((prev) =>
+        prev.map((t) => {
+          const start = groupDrag.texts[t.id];
+          return start ? { ...t, x: start.x + dx, y: start.y + dy } : t;
+        })
+      );
     }
     function onUp() {
-      suppressCanvasClickRef.current = true;
-      setDragging(null);
+      setGroupDrag(null);
     }
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
@@ -210,7 +234,7 @@ export function DesignPage() {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
     };
-  }, [dragging, zoom]);
+  }, [groupDrag, zoom]);
 
   useEffect(() => {
     if (!resizing) return;
@@ -221,7 +245,6 @@ export function DesignPage() {
       setCards((prev) => prev.map((c) => (c.equipmentId === resizing.equipmentId ? { ...c, width } : c)));
     }
     function onUp() {
-      suppressCanvasClickRef.current = true;
       setResizing(null);
     }
     window.addEventListener("mousemove", onMove);
@@ -232,24 +255,28 @@ export function DesignPage() {
     };
   }, [resizing, zoom]);
 
-  function handleResizeMouseDown(e: ReactMouseEvent, card: Card) {
-    e.stopPropagation();
-    e.preventDefault();
-    setResizing({ equipmentId: card.equipmentId, startX: e.clientX, startWidth: card.width ?? DEFAULT_CARD_WIDTH });
-  }
-
   useEffect(() => {
-    if (!draggingText) return;
+    if (!marqueeStart) return;
     function onMove(e: MouseEvent) {
       const canvasRect = canvasRef.current?.getBoundingClientRect();
-      if (!canvasRect || !draggingText) return;
-      const x = (e.clientX - canvasRect.left) / zoom - draggingText.offsetX;
-      const y = (e.clientY - canvasRect.top) / zoom - draggingText.offsetY;
-      setTextBlocks((prev) => prev.map((t) => (t.id === draggingText.id ? { ...t, x, y } : t)));
+      if (!canvasRect || !marqueeStart) return;
+      const x = (e.clientX - canvasRect.left) / zoom;
+      const y = (e.clientY - canvasRect.top) / zoom;
+      setMarqueeRect({
+        x: Math.min(marqueeStart.x, x),
+        y: Math.min(marqueeStart.y, y),
+        width: Math.abs(x - marqueeStart.x),
+        height: Math.abs(y - marqueeStart.y),
+      });
     }
     function onUp() {
-      suppressCanvasClickRef.current = true;
-      setDraggingText(null);
+      setMarqueeRect((rect) => {
+        // Treat a near-zero-size drag as a plain click on empty canvas (selection was already
+        // cleared on mousedown) rather than as an empty marquee that would do the same thing.
+        if (rect && (rect.width > 4 || rect.height > 4)) applyMarqueeSelection(rect);
+        return null;
+      });
+      setMarqueeStart(null);
     }
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
@@ -257,16 +284,67 @@ export function DesignPage() {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
     };
-  }, [draggingText, zoom]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [marqueeStart, zoom]);
 
-  function handleTextHeaderMouseDown(e: ReactMouseEvent, block: TextBlock) {
+  function handleResizeMouseDown(e: ReactMouseEvent, card: Card) {
+    e.stopPropagation();
+    e.preventDefault();
+    setResizing({ equipmentId: card.equipmentId, startX: e.clientX, startWidth: card.width ?? DEFAULT_CARD_WIDTH });
+  }
+
+  // Snapshots the current x/y of every selected card and text block, used as the drag-start
+  // reference point so group movement is computed as a delta rather than accumulated per event.
+  function snapshotSelection(cardIds: Set<number>, textIds: Set<number>) {
+    const cardsSnapshot: Record<number, { x: number; y: number }> = {};
+    for (const id of cardIds) {
+      const c = cards.find((cc) => cc.equipmentId === id);
+      if (c) cardsSnapshot[id] = { x: c.x, y: c.y };
+    }
+    const textsSnapshot: Record<number, { x: number; y: number }> = {};
+    for (const id of textIds) {
+      const t = textBlocks.find((tt) => tt.id === id);
+      if (t) textsSnapshot[id] = { x: t.x, y: t.y };
+    }
+    return { cardsSnapshot, textsSnapshot };
+  }
+
+  // Shared mousedown handler for both card and text-block headers: shift-click toggles the
+  // object in/out of the current selection; a plain click on an object outside the current
+  // selection replaces the selection with just that object; either way a group drag starts,
+  // moving every currently-selected card/text block together.
+  function beginObjectDrag(e: ReactMouseEvent, kind: "card" | "text", id: number) {
+    e.stopPropagation();
     const canvasRect = canvasRef.current?.getBoundingClientRect();
     if (!canvasRect) return;
-    setDraggingText({
-      id: block.id,
-      offsetX: (e.clientX - canvasRect.left) / zoom - block.x,
-      offsetY: (e.clientY - canvasRect.top) / zoom - block.y,
-    });
+    const selected = kind === "card" ? selectedCardIds : selectedTextIds;
+    const alreadySelected = selected.has(id);
+    if (e.shiftKey) {
+      const next = new Set(selected);
+      if (alreadySelected) next.delete(id);
+      else next.add(id);
+      if (kind === "card") setSelectedCardIds(next);
+      else setSelectedTextIds(next);
+      setSelectedLinkIds(new Set());
+      return;
+    }
+    let cardIds = selectedCardIds;
+    let textIds = selectedTextIds;
+    if (!alreadySelected) {
+      cardIds = kind === "card" ? new Set([id]) : new Set();
+      textIds = kind === "text" ? new Set([id]) : new Set();
+      setSelectedCardIds(cardIds);
+      setSelectedTextIds(textIds);
+      setSelectedLinkIds(new Set());
+    }
+    const startX = (e.clientX - canvasRect.left) / zoom;
+    const startY = (e.clientY - canvasRect.top) / zoom;
+    const { cardsSnapshot, textsSnapshot } = snapshotSelection(cardIds, textIds);
+    setGroupDrag({ startX, startY, cards: cardsSnapshot, texts: textsSnapshot });
+  }
+
+  function handleTextHeaderMouseDown(e: ReactMouseEvent, block: TextBlock) {
+    beginObjectDrag(e, "text", block.id);
   }
 
   useEffect(() => {
@@ -278,7 +356,6 @@ export function DesignPage() {
       setTextBlocks((prev) => prev.map((t) => (t.id === resizingText.id ? { ...t, fontSize } : t)));
     }
     function onUp() {
-      suppressCanvasClickRef.current = true;
       setResizingText(null);
     }
     window.addEventListener("mousemove", onMove);
@@ -351,7 +428,6 @@ export function DesignPage() {
       }
     }
     function onUp() {
-      suppressCanvasClickRef.current = true;
       setBendDrag(null);
     }
     window.addEventListener("mousemove", onMove);
@@ -389,20 +465,92 @@ export function DesignPage() {
   function handleRemoveCard(equipmentId: number) {
     setCards((prev) => prev.filter((c) => c.equipmentId !== equipmentId));
     if (pendingPort?.equipmentId === equipmentId) setPendingPort(null);
+    setSelectedCardIds((prev) => {
+      if (!prev.has(equipmentId)) return prev;
+      const next = new Set(prev);
+      next.delete(equipmentId);
+      return next;
+    });
   }
 
   function handleHeaderMouseDown(e: ReactMouseEvent, card: Card) {
-    const canvasRect = canvasRef.current?.getBoundingClientRect();
-    if (!canvasRect) return;
-    setDragging({
-      equipmentId: card.equipmentId,
-      offsetX: (e.clientX - canvasRect.left) / zoom - card.x,
-      offsetY: (e.clientY - canvasRect.top) / zoom - card.y,
-    });
+    beginObjectDrag(e, "card", card.equipmentId);
   }
 
   function handleZoomChange(next: number) {
     setZoom(clamp(next, MIN_ZOOM, MAX_ZOOM));
+  }
+
+  // Selects everything (cards, text blocks, links) whose canvas position falls inside the
+  // rubber-banded rectangle. Card hit-testing uses the rendered DOM box (accounts for content
+  // height, not just the stored width); link hit-testing requires both endpoints inside the
+  // rectangle, since a link has no position of its own beyond the two ports it connects.
+  function applyMarqueeSelection(rect: { x: number; y: number; width: number; height: number }) {
+    const canvasRect = canvasRef.current?.getBoundingClientRect();
+    if (!canvasRect) return;
+    const left = rect.x;
+    const top = rect.y;
+    const right = rect.x + rect.width;
+    const bottom = rect.y + rect.height;
+
+    const cardIds = new Set<number>();
+    for (const card of cards) {
+      const el = cardRefs.current[card.equipmentId];
+      let cLeft = card.x;
+      let cTop = card.y;
+      let cRight = card.x + (card.width ?? DEFAULT_CARD_WIDTH);
+      let cBottom = card.y + 40;
+      if (el) {
+        const r = el.getBoundingClientRect();
+        cLeft = (r.left - canvasRect.left) / zoom;
+        cTop = (r.top - canvasRect.top) / zoom;
+        cRight = (r.right - canvasRect.left) / zoom;
+        cBottom = (r.bottom - canvasRect.top) / zoom;
+      }
+      if (cLeft < right && cRight > left && cTop < bottom && cBottom > top) cardIds.add(card.equipmentId);
+    }
+
+    const textIds = new Set<number>();
+    for (const block of textBlocks) {
+      const size = textBlockSize(block);
+      const bLeft = block.x;
+      const bTop = block.y;
+      const bRight = block.x + size.width;
+      const bBottom = block.y + size.height;
+      if (bLeft < right && bRight > left && bTop < bottom && bBottom > top) textIds.add(block.id);
+    }
+
+    const linkIds = new Set<number>();
+    for (const { link, from, to } of visibleLinks) {
+      // endpoints are stored in already-zoomed canvas pixels; convert back to the unzoomed
+      // layer space the marquee rectangle is expressed in.
+      const fx = from.x / zoom;
+      const fy = from.y / zoom;
+      const tx = to.x / zoom;
+      const ty = to.y / zoom;
+      if (fx >= left && fx <= right && fy >= top && fy <= bottom && tx >= left && tx <= right && ty >= top && ty <= bottom) {
+        linkIds.add(link.id);
+      }
+    }
+
+    setSelectedCardIds(cardIds);
+    setSelectedTextIds(textIds);
+    setSelectedLinkIds(linkIds);
+  }
+
+  function handleCanvasMouseDown(e: ReactMouseEvent) {
+    if (e.button !== 0) return;
+    const canvasRect = canvasRef.current?.getBoundingClientRect();
+    if (!canvasRect) return;
+    const x = (e.clientX - canvasRect.left) / zoom;
+    const y = (e.clientY - canvasRect.top) / zoom;
+    if (!e.shiftKey) {
+      setSelectedCardIds(new Set());
+      setSelectedTextIds(new Set());
+      setSelectedLinkIds(new Set());
+    }
+    setMarqueeStart({ x, y });
+    setMarqueeRect({ x, y, width: 0, height: 0 });
   }
 
   async function handlePortMouseDown(e: ReactMouseEvent, equipmentId: number, portId: number) {
@@ -450,16 +598,28 @@ export function DesignPage() {
         delete next[linkId];
         return next;
       });
-      setSelectedLinkId((prev) => (prev === linkId ? null : prev));
+      setSelectedLinkIds((prev) => {
+        if (!prev.has(linkId)) return prev;
+        const next = new Set(prev);
+        next.delete(linkId);
+        return next;
+      });
     } catch (err) {
       alert(err instanceof ApiError ? err.message : "Erreur lors de la suppression.");
     }
+  }
+
+  function clearSelection() {
+    setSelectedCardIds(new Set());
+    setSelectedTextIds(new Set());
+    setSelectedLinkIds(new Set());
   }
 
   async function handleSelectApi(value: string) {
     const apiId = value ? Number(value) : "";
     setSelectedApiId(apiId);
     setPendingPort(null);
+    clearSelection();
     if (apiId === "") {
       setCards([]);
       setBendOverrides({});
@@ -832,17 +992,7 @@ export function DesignPage() {
         </p>
       )}
 
-      <div
-        className="design-canvas"
-        ref={canvasRef}
-        onClick={() => {
-          if (suppressCanvasClickRef.current) {
-            suppressCanvasClickRef.current = false;
-            return;
-          }
-          setSelectedLinkId(null);
-        }}
-      >
+      <div className="design-canvas" ref={canvasRef} onMouseDown={handleCanvasMouseDown}>
         <div className="design-canvas-zoom-layer" style={{ transform: `scale(${zoom})` }}>
           {cards.map((card) => {
             const equipment = equipmentById.get(card.equipmentId);
@@ -853,7 +1003,7 @@ export function DesignPage() {
             return (
               <div
                 key={card.equipmentId}
-                className="design-card"
+                className={`design-card${selectedCardIds.has(card.equipmentId) ? " selected" : ""}`}
                 style={{ left: card.x, top: card.y, width: card.width ?? DEFAULT_CARD_WIDTH }}
                 ref={(el) => {
                   cardRefs.current[card.equipmentId] = el;
@@ -924,7 +1074,7 @@ export function DesignPage() {
             return (
               <div
                 key={block.id}
-                className="design-text-block"
+                className={`design-text-block${selectedTextIds.has(block.id) ? " selected" : ""}`}
                 style={{ left: block.x, top: block.y, width: size.width, height: size.height }}
               >
                 <div className="design-text-block-header" onMouseDown={(e) => handleTextHeaderMouseDown(e, block)}>
@@ -959,15 +1109,36 @@ export function DesignPage() {
         )}
 
         <svg className="design-canvas-svg">
+          {marqueeRect && (
+            <rect
+              className="design-marquee"
+              x={marqueeRect.x * zoom}
+              y={marqueeRect.y * zoom}
+              width={marqueeRect.width * zoom}
+              height={marqueeRect.height * zoom}
+            />
+          )}
           {visibleLinks.map(({ link, from, to, midX, midY, color, strokeWidth }) => {
             const corner1 = { x: midX, y: from.y };
             const corner2 = { x: midX, y: midY };
             const corner3 = { x: to.x, y: midY };
             const tooltip = `${link.parentEquipmentName} (${link.parentPortLabel}) ↔ ${link.childEquipmentName} (${link.childPortLabel})`;
-            const selected = selectedLinkId === link.id;
+            const selected = selectedLinkIds.has(link.id);
+            const showHandles = selected && selectedLinkIds.size === 1;
             function selectLink(e: ReactMouseEvent) {
               e.stopPropagation();
-              setSelectedLinkId(link.id);
+              if (e.shiftKey) {
+                setSelectedLinkIds((prev) => {
+                  const next = new Set(prev);
+                  if (next.has(link.id)) next.delete(link.id);
+                  else next.add(link.id);
+                  return next;
+                });
+                return;
+              }
+              setSelectedCardIds(new Set());
+              setSelectedTextIds(new Set());
+              setSelectedLinkIds(new Set([link.id]));
             }
             function deleteLink(e: ReactMouseEvent) {
               e.stopPropagation();
@@ -976,6 +1147,7 @@ export function DesignPage() {
             return (
               <g key={link.id}>
                 <polyline
+                  className={selected ? "design-link-selected" : undefined}
                   points={`${from.x},${from.y} ${corner1.x},${corner1.y} ${corner2.x},${corner2.y} ${corner3.x},${corner3.y} ${to.x},${to.y}`}
                   fill="none"
                   stroke={color}
@@ -1010,7 +1182,7 @@ export function DesignPage() {
                 <line x1={corner3.x} y1={corner3.y} x2={to.x} y2={to.y} className="design-link-hit" onClick={selectLink} onDoubleClick={deleteLink}>
                   <title>{tooltip}</title>
                 </line>
-                {selected && (
+                {showHandles && (
                   <>
                     <circle
                       cx={corner1.x}

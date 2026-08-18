@@ -1205,6 +1205,20 @@ textarea {
   cursor: move;
 }
 
+.design-link-selected {
+  filter: drop-shadow(0 0 3px var(--accent));
+  stroke-dasharray: 6 4;
+}
+
+.design-marquee {
+  fill: var(--accent-light);
+  fill-opacity: 0.5;
+  stroke: var(--accent);
+  stroke-width: 1px;
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
+
 .design-canvas-empty {
   position: absolute;
   top: 24px;
@@ -1222,6 +1236,11 @@ textarea {
 
 .design-card:hover {
   box-shadow: var(--shadow-md);
+}
+
+.design-card.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .design-card-header {
@@ -1293,6 +1312,10 @@ textarea {
 
 .design-text-block:hover {
   outline-color: var(--accent);
+}
+
+.design-text-block.selected {
+  outline: 2px dashed var(--accent);
 }
 
 .design-text-block-header {

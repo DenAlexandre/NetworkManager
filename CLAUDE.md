@@ -65,6 +65,10 @@ npm run preview
 
 There are no test scripts/frameworks configured in either package as of now.
 
+Don't launch the dev servers or drive the app yourself (e.g. via Playwright) to verify a change
+works — the user checks it manually. Type-checking (`tsc -b`) and linting (`npm run lint`) are
+still fine to run.
+
 ## Architecture
 
 ### Auth flow
