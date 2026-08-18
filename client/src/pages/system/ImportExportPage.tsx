@@ -1,3 +1,4 @@
+import { ApisImportExport } from "./ApisImportExport";
 import { EquipmentImportExport } from "./EquipmentImportExport";
 import { RoomsImport } from "./RoomsImport";
 
@@ -10,6 +11,7 @@ export function ImportExportPage() {
 
       <EquipmentImportExport />
       <RoomsImport />
+      <ApisImportExport />
     </div>
   );
 }

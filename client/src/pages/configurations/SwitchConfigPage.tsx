@@ -11,11 +11,14 @@ import {
 import type { RoomOption, SupportedSwitchModel, SwitchConfigSummary } from "../../api/switchConfigs";
 import { ApiError } from "../../api/client";
 import { Modal } from "../../components/Modal";
+import { usePagination } from "../../hooks/usePagination";
+import { Pagination } from "../../components/Pagination";
 
 export function SwitchConfigPage() {
   const [items, setItems] = useState<SwitchConfigSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { page, setPage, pageCount, pagedItems } = usePagination(items);
 
   const [switchModels, setSwitchModels] = useState<SupportedSwitchModel[]>([]);
   const [switchModelId, setSwitchModelId] = useState<number | null>(null);
@@ -192,7 +195,7 @@ export function SwitchConfigPage() {
           </tr>
         </thead>
         <tbody>
-          {items.map((item) => (
+          {pagedItems.map((item) => (
             <tr key={item.id}>
               <td>
                 <Link to={`/configurations/${item.id}`}>{item.sysName || "—"}</Link>
@@ -233,6 +236,7 @@ export function SwitchConfigPage() {
         </tbody>
       </table>
       {items.length === 0 && <p className="muted">Aucune configuration switch importée.</p>}
+      <Pagination page={page} pageCount={pageCount} onChange={setPage} />
 
       {roomPicker && (
         <Modal title="Choisir la salle" onClose={() => setRoomPicker(null)}>

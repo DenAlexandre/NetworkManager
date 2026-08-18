@@ -9,13 +9,13 @@ import type { HardwareModel } from "../../api/hardwareModels";
 import { listPorts } from "../../api/ports";
 import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
+import type { FilterColumn } from "../../hooks/useTableQuery";
+import { usePagination } from "../../hooks/usePagination";
 import { SortableHeader } from "../../components/SortableHeader";
+import { ColumnFilterCell } from "../../components/ColumnFilterCell";
+import { Pagination } from "../../components/Pagination";
 import { PdfIcon } from "../../components/PdfIcon";
 import { HardwareModelFormModal } from "./HardwareModelFormModal";
-
-function searchFields(item: HardwareModel) {
-  return [item.name, item.brandName, item.deviceType];
-}
 
 function formatPortCounts(counts: Record<string, number> | undefined) {
   if (!counts) return "—";
@@ -30,22 +30,29 @@ export function HardwareModelsListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [deviceTypeFilter, setDeviceTypeFilter] = useState<number | "">("");
-
   const deviceTypeOptions = useMemo(() => {
-    const map = new Map<number, string>();
-    for (const item of items) {
-      map.set(item.deviceTypeId, item.deviceType);
-    }
-    return [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+    const names = new Set<string>();
+    for (const item of items) names.add(item.deviceType);
+    return [...names].sort((a, b) => a.localeCompare(b));
   }, [items]);
 
-  const filteredItems = useMemo(() => {
-    if (deviceTypeFilter === "") return items;
-    return items.filter((item) => item.deviceTypeId === deviceTypeFilter);
-  }, [items, deviceTypeFilter]);
+  const columns = useMemo<FilterColumn<HardwareModel>[]>(
+    () => [
+      { key: "name", getValue: (item) => item.name },
+      { key: "brandName", getValue: (item) => item.brandName },
+      {
+        key: "deviceType",
+        getValue: (item) => item.deviceType,
+        type: "select",
+        options: deviceTypeOptions.map((name) => ({ value: name, label: name })),
+      },
+      { key: "ports", getValue: (item) => formatPortCounts(portCounts[item.id]) },
+    ],
+    [deviceTypeOptions, portCounts]
+  );
 
-  const { search, setSearch, sortKey, sortDir, toggleSort, rows } = useTableQuery(filteredItems, searchFields);
+  const { filters, setFilter, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, columns);
+  const { page, setPage, pageCount, pagedItems } = usePagination(rows);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -108,25 +115,6 @@ export function HardwareModelsListPage() {
         </button>
       </div>
       {error && <p className="error">{error}</p>}
-      <div className="table-toolbar">
-        <input
-          type="search"
-          placeholder="Filtrer..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select
-          value={deviceTypeFilter}
-          onChange={(e) => setDeviceTypeFilter(e.target.value ? Number(e.target.value) : "")}
-        >
-          <option value="">Tous les types</option>
-          {deviceTypeOptions.map(([id, name]) => (
-            <option key={id} value={id}>
-              {name}
-            </option>
-          ))}
-        </select>
-      </div>
       <table className="table">
         <thead>
           <tr>
@@ -149,9 +137,18 @@ export function HardwareModelsListPage() {
             <th>Ports</th>
             <th></th>
           </tr>
+          <tr className="filter-row">
+            <th></th>
+            {columns.map((column) => (
+              <th key={column.key}>
+                <ColumnFilterCell column={column} value={filters[column.key] ?? ""} onChange={(v) => setFilter(column.key, v)} />
+              </th>
+            ))}
+            <th></th>
+          </tr>
         </thead>
         <tbody>
-          {rows.map((item) => (
+          {pagedItems.map((item) => (
             <tr key={item.id}>
               <td>
                 {item.imagePath && (
@@ -190,6 +187,7 @@ export function HardwareModelsListPage() {
         </tbody>
       </table>
       {rows.length === 0 && <p className="muted">Aucun matériel enregistré.</p>}
+      <Pagination page={page} pageCount={pageCount} onChange={setPage} />
       {modalOpen && (
         <HardwareModelFormModal hardwareModelId={editingId} onClose={() => setModalOpen(false)} onSaved={handleSaved} />
       )}

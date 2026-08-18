@@ -3,23 +3,46 @@ import { deleteApi, listApis } from "../../api/apis";
 import type { Api } from "../../api/apis";
 import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
+import type { FilterColumn } from "../../hooks/useTableQuery";
+import { usePagination } from "../../hooks/usePagination";
 import { SortableHeader } from "../../components/SortableHeader";
+import { ColumnFilterCell } from "../../components/ColumnFilterCell";
+import { Pagination } from "../../components/Pagination";
 import { ApiFormModal } from "./ApiFormModal";
-
-function searchFields(item: Api) {
-  return [item.name];
-}
 
 function formatDate(value: string | null) {
   if (!value) return "—";
   return new Date(value).toLocaleDateString("fr-FR");
 }
 
+const YES_NO_OPTIONS = [
+  { value: "Oui", label: "Oui" },
+  { value: "Non", label: "Non" },
+];
+
+const COLUMNS: FilterColumn<Api>[] = [
+  { key: "name", getValue: (item) => item.name },
+  { key: "migrationDate", getValue: (item) => formatDate(item.migrationDate) },
+  {
+    key: "completed",
+    getValue: (item) => (item.completed ? "Oui" : "Non"),
+    type: "select",
+    options: YES_NO_OPTIONS,
+  },
+  {
+    key: "doeUpToDate",
+    getValue: (item) => (item.doeUpToDate ? "Oui" : "Non"),
+    type: "select",
+    options: YES_NO_OPTIONS,
+  },
+];
+
 export function ApisListPage() {
   const [items, setItems] = useState<Api[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { search, setSearch, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, searchFields);
+  const { filters, setFilter, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, COLUMNS);
+  const { page, setPage, pageCount, pagedItems } = usePagination(rows);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -76,14 +99,6 @@ export function ApisListPage() {
         </button>
       </div>
       {error && <p className="error">{error}</p>}
-      <div className="table-toolbar">
-        <input
-          type="search"
-          placeholder="Filtrer..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
       <table className="table">
         <thead>
           <tr>
@@ -99,14 +114,34 @@ export function ApisListPage() {
             <th>DOE à jour</th>
             <th></th>
           </tr>
+          <tr className="filter-row">
+            {COLUMNS.map((column) => (
+              <th key={column.key}>
+                <ColumnFilterCell column={column} value={filters[column.key] ?? ""} onChange={(v) => setFilter(column.key, v)} />
+              </th>
+            ))}
+            <th></th>
+          </tr>
         </thead>
         <tbody>
-          {rows.map((item) => (
+          {pagedItems.map((item) => (
             <tr key={item.id}>
               <td>{item.name}</td>
               <td>{formatDate(item.migrationDate)}</td>
-              <td>{item.completed ? "Oui" : "Non"}</td>
-              <td>{item.doeUpToDate ? "Oui" : "Non"}</td>
+              <td>
+                {item.completed ? (
+                  <span className="status-check">✓</span>
+                ) : (
+                  <span className="status-cross">✕</span>
+                )}
+              </td>
+              <td>
+                {item.doeUpToDate ? (
+                  <span className="status-check">✓</span>
+                ) : (
+                  <span className="status-cross">✕</span>
+                )}
+              </td>
               <td className="table-actions">
                 <button type="button" className="link" onClick={() => openEditModal(item.id)}>
                   Modifier
@@ -120,6 +155,7 @@ export function ApisListPage() {
         </tbody>
       </table>
       {rows.length === 0 && <p className="muted">Aucune API enregistrée.</p>}
+      <Pagination page={page} pageCount={pageCount} onChange={setPage} />
       {modalOpen && <ApiFormModal apiId={editingId} onClose={() => setModalOpen(false)} onSaved={handleSaved} />}
     </div>
   );

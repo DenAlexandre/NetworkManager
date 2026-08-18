@@ -4,20 +4,23 @@ import { deleteSite, listSites, siteDatasheetUrl } from "../../api/sites";
 import type { Site } from "../../api/sites";
 import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
+import type { FilterColumn } from "../../hooks/useTableQuery";
+import { usePagination } from "../../hooks/usePagination";
 import { SortableHeader } from "../../components/SortableHeader";
+import { ColumnFilterCell } from "../../components/ColumnFilterCell";
+import { Pagination } from "../../components/Pagination";
 import { PdfIcon } from "../../components/PdfIcon";
 import { useSitesTree } from "../../context/SitesTreeContext";
 import { SiteFormModal } from "./SiteFormModal";
 
-function searchFields(item: Site) {
-  return [item.name];
-}
+const COLUMNS: FilterColumn<Site>[] = [{ key: "name", getValue: (item) => item.name }];
 
 export function SitesListPage() {
   const [items, setItems] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { search, setSearch, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, searchFields);
+  const { filters, setFilter, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, COLUMNS);
+  const { page, setPage, pageCount, pagedItems } = usePagination(rows);
   const { refresh } = useSitesTree();
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -76,23 +79,21 @@ export function SitesListPage() {
         </button>
       </div>
       {error && <p className="error">{error}</p>}
-      <div className="table-toolbar">
-        <input
-          type="search"
-          placeholder="Filtrer..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
       <table className="table">
         <thead>
           <tr>
             <SortableHeader label="Nom" field="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
             <th></th>
           </tr>
+          <tr className="filter-row">
+            <th>
+              <ColumnFilterCell column={COLUMNS[0]} value={filters[COLUMNS[0].key] ?? ""} onChange={(v) => setFilter(COLUMNS[0].key, v)} />
+            </th>
+            <th></th>
+          </tr>
         </thead>
         <tbody>
-          {rows.map((item) => (
+          {pagedItems.map((item) => (
             <tr key={item.id}>
               <td>
                 <Link to={`/sites/${item.id}`}>{item.name}</Link>
@@ -121,6 +122,7 @@ export function SitesListPage() {
         </tbody>
       </table>
       {rows.length === 0 && <p className="muted">Aucun site enregistré.</p>}
+      <Pagination page={page} pageCount={pageCount} onChange={setPage} />
       {modalOpen && (
         <SiteFormModal siteId={editingId} onClose={() => setModalOpen(false)} onSaved={handleSaved} />
       )}

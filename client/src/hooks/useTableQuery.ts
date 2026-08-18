@@ -1,9 +1,25 @@
 import { useMemo, useState } from "react";
 
-export function useTableQuery<T>(items: T[], searchFields: (item: T) => Array<string | null>) {
-  const [search, setSearch] = useState("");
+export interface FilterOption {
+  value: string;
+  label: string;
+}
+
+export interface FilterColumn<T> {
+  key: string;
+  getValue: (item: T) => string;
+  type?: "text" | "select";
+  options?: FilterOption[];
+}
+
+export function useTableQuery<T>(items: T[], columns: FilterColumn<T>[]) {
+  const [filters, setFilters] = useState<Record<string, string>>({});
   const [sortKey, setSortKey] = useState<keyof T | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+
+  function setFilter(key: string, value: string) {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  }
 
   function toggleSort(key: keyof T) {
     if (sortKey === key) {
@@ -17,11 +33,15 @@ export function useTableQuery<T>(items: T[], searchFields: (item: T) => Array<st
   const rows = useMemo(() => {
     let result = items;
 
-    const query = search.trim().toLowerCase();
-    if (query) {
-      result = result.filter((item) =>
-        searchFields(item).some((field) => (field || "").toLowerCase().includes(query))
-      );
+    for (const column of columns) {
+      const raw = (filters[column.key] ?? "").trim();
+      if (!raw) continue;
+      if (column.type === "select") {
+        result = result.filter((item) => column.getValue(item) === raw);
+      } else {
+        const query = raw.toLowerCase();
+        result = result.filter((item) => column.getValue(item).toLowerCase().includes(query));
+      }
     }
 
     if (sortKey) {
@@ -37,7 +57,7 @@ export function useTableQuery<T>(items: T[], searchFields: (item: T) => Array<st
     }
 
     return result;
-  }, [items, search, sortKey, sortDir, searchFields]);
+  }, [items, columns, filters, sortKey, sortDir]);
 
-  return { search, setSearch, sortKey, sortDir, toggleSort, rows };
+  return { filters, setFilter, sortKey, sortDir, toggleSort, rows };
 }

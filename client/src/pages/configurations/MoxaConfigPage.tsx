@@ -11,11 +11,14 @@ import {
 import type { MgateConfigSummary, RoomOption, SupportedMoxaModel } from "../../api/mgateConfigs";
 import { ApiError } from "../../api/client";
 import { Modal } from "../../components/Modal";
+import { usePagination } from "../../hooks/usePagination";
+import { Pagination } from "../../components/Pagination";
 
 export function MoxaConfigPage() {
   const [items, setItems] = useState<MgateConfigSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { page, setPage, pageCount, pagedItems } = usePagination(items);
 
   const [moxaModels, setMoxaModels] = useState<SupportedMoxaModel[]>([]);
   const [moxaModelId, setMoxaModelId] = useState<number | null>(null);
@@ -189,7 +192,7 @@ export function MoxaConfigPage() {
           </tr>
         </thead>
         <tbody>
-          {items.map((item) => (
+          {pagedItems.map((item) => (
             <tr key={item.id}>
               <td>
                 <Link to={`/configurations/moxa/${item.id}`}>{item.deviceName || "—"}</Link>
@@ -223,6 +226,7 @@ export function MoxaConfigPage() {
         </tbody>
       </table>
       {items.length === 0 && <p className="muted">Aucune configuration Moxa importée.</p>}
+      <Pagination page={page} pageCount={pageCount} onChange={setPage} />
 
       {roomPicker && (
         <Modal title="Choisir la salle" onClose={() => setRoomPicker(null)}>

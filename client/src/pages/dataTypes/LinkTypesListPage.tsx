@@ -3,18 +3,32 @@ import { deleteLinkType, listLinkTypes } from "../../api/linkTypes";
 import type { LinkType } from "../../api/linkTypes";
 import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
+import type { FilterColumn } from "../../hooks/useTableQuery";
+import { usePagination } from "../../hooks/usePagination";
 import { SortableHeader } from "../../components/SortableHeader";
+import { ColumnFilterCell } from "../../components/ColumnFilterCell";
+import { Pagination } from "../../components/Pagination";
 import { LinkTypeFormModal } from "./LinkTypeFormModal";
 
-function searchFields(item: LinkType) {
-  return [item.name];
-}
+const COLUMNS: FilterColumn<LinkType>[] = [
+  { key: "name", getValue: (item) => item.name },
+  {
+    key: "pointToPoint",
+    getValue: (item) => (item.pointToPoint ? "Oui" : "Non"),
+    type: "select",
+    options: [
+      { value: "Oui", label: "Oui" },
+      { value: "Non", label: "Non" },
+    ],
+  },
+];
 
 export function LinkTypesListPage() {
   const [items, setItems] = useState<LinkType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { search, setSearch, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, searchFields);
+  const { filters, setFilter, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, COLUMNS);
+  const { page, setPage, pageCount, pagedItems } = usePagination(rows);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -71,14 +85,6 @@ export function LinkTypesListPage() {
         </button>
       </div>
       {error && <p className="error">{error}</p>}
-      <div className="table-toolbar">
-        <input
-          type="search"
-          placeholder="Filtrer..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
       <table className="table">
         <thead>
           <tr>
@@ -87,9 +93,19 @@ export function LinkTypesListPage() {
             <th>Point à point</th>
             <th></th>
           </tr>
+          <tr className="filter-row">
+            <th>
+              <ColumnFilterCell column={COLUMNS[0]} value={filters[COLUMNS[0].key] ?? ""} onChange={(v) => setFilter(COLUMNS[0].key, v)} />
+            </th>
+            <th></th>
+            <th>
+              <ColumnFilterCell column={COLUMNS[1]} value={filters[COLUMNS[1].key] ?? ""} onChange={(v) => setFilter(COLUMNS[1].key, v)} />
+            </th>
+            <th></th>
+          </tr>
         </thead>
         <tbody>
-          {rows.map((item) => (
+          {pagedItems.map((item) => (
             <tr key={item.id}>
               <td>{item.name}</td>
               <td>
@@ -119,6 +135,7 @@ export function LinkTypesListPage() {
         </tbody>
       </table>
       {rows.length === 0 && <p className="muted">Aucun type de liaison enregistré.</p>}
+      <Pagination page={page} pageCount={pageCount} onChange={setPage} />
       {modalOpen && <LinkTypeFormModal linkTypeId={editingId} onClose={() => setModalOpen(false)} onSaved={handleSaved} />}
     </div>
   );

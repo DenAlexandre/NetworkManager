@@ -6,6 +6,8 @@ import { deleteRoom, listRooms } from "../../api/rooms";
 import type { Room } from "../../api/rooms";
 import { ApiError } from "../../api/client";
 import { useSitesTree } from "../../context/SitesTreeContext";
+import { usePagination } from "../../hooks/usePagination";
+import { Pagination } from "../../components/Pagination";
 import { RoomFormModal } from "./RoomFormModal";
 
 export function ZoneDetailPage() {
@@ -15,6 +17,7 @@ export function ZoneDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { refresh } = useSitesTree();
+  const { page, setPage, pageCount, pagedItems } = usePagination(rooms);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -86,7 +89,7 @@ export function ZoneDetailPage() {
           </tr>
         </thead>
         <tbody>
-          {rooms.map((room) => (
+          {pagedItems.map((room) => (
             <tr key={room.id}>
               <td>
                 <Link to={`/sites/${siteId}/zones/${zone.id}/rooms/${room.id}`}>{room.name}</Link>
@@ -104,6 +107,7 @@ export function ZoneDetailPage() {
         </tbody>
       </table>
       {rooms.length === 0 && <p className="muted">Aucune salle pour cette zone.</p>}
+      <Pagination page={page} pageCount={pageCount} onChange={setPage} />
       {modalOpen && (
         <RoomFormModal
           zoneId={zone.id}

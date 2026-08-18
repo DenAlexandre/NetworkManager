@@ -3,22 +3,17 @@ import { deleteEquipment, listEquipment } from "../../api/equipment";
 import type { Equipment } from "../../api/equipment";
 import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
+import type { FilterColumn } from "../../hooks/useTableQuery";
 import { usePagination } from "../../hooks/usePagination";
 import { SortableHeader } from "../../components/SortableHeader";
+import { ColumnFilterCell } from "../../components/ColumnFilterCell";
 import { Pagination } from "../../components/Pagination";
 import { EquipmentFormModal } from "./EquipmentFormModal";
 
-function searchFields(item: Equipment) {
-  return [
-    item.name,
-    item.deviceType,
-    item.brandName,
-    item.hardwareModel,
-    item.siteName,
-    item.zoneName,
-    item.roomName,
-    item.apiName,
-  ];
+const NO_API_LABEL = "Sans API";
+
+function roomLabel(item: Equipment) {
+  return `${item.siteName} / ${item.zoneName} / ${item.roomName}`;
 }
 
 export function EquipmentListPage() {
@@ -26,35 +21,51 @@ export function EquipmentListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [roomFilter, setRoomFilter] = useState<number | "">("");
-  const [apiFilter, setApiFilter] = useState<number | "none" | "">("");
+  const deviceTypeOptions = useMemo(() => {
+    const names = new Set<string>();
+    for (const item of items) names.add(item.deviceType);
+    return [...names].sort((a, b) => a.localeCompare(b));
+  }, [items]);
 
   const roomOptions = useMemo(() => {
-    const map = new Map<number, string>();
-    for (const item of items) {
-      map.set(item.roomId, `${item.siteName} / ${item.zoneName} / ${item.roomName}`);
-    }
-    return [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+    const labels = new Set<string>();
+    for (const item of items) labels.add(roomLabel(item));
+    return [...labels].sort((a, b) => a.localeCompare(b));
   }, [items]);
 
   const apiOptions = useMemo(() => {
-    const map = new Map<number, string>();
-    for (const item of items) {
-      if (item.apiId !== null && item.apiName) map.set(item.apiId, item.apiName);
-    }
-    return [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+    const names = new Set<string>();
+    for (const item of items) names.add(item.apiName ?? NO_API_LABEL);
+    return [...names].sort((a, b) => a.localeCompare(b));
   }, [items]);
 
-  const filteredItems = useMemo(() => {
-    return items.filter((item) => {
-      if (roomFilter !== "" && item.roomId !== roomFilter) return false;
-      if (apiFilter === "none" && item.apiId !== null) return false;
-      if (typeof apiFilter === "number" && item.apiId !== apiFilter) return false;
-      return true;
-    });
-  }, [items, roomFilter, apiFilter]);
+  const columns = useMemo<FilterColumn<Equipment>[]>(
+    () => [
+      { key: "name", getValue: (item) => item.name },
+      {
+        key: "deviceType",
+        getValue: (item) => item.deviceType,
+        type: "select",
+        options: deviceTypeOptions.map((name) => ({ value: name, label: name })),
+      },
+      { key: "materiel", getValue: (item) => `${item.brandName} — ${item.hardwareModel}` },
+      {
+        key: "emplacement",
+        getValue: roomLabel,
+        type: "select",
+        options: roomOptions.map((label) => ({ value: label, label })),
+      },
+      {
+        key: "api",
+        getValue: (item) => item.apiName ?? NO_API_LABEL,
+        type: "select",
+        options: apiOptions.map((name) => ({ value: name, label: name })),
+      },
+    ],
+    [deviceTypeOptions, roomOptions, apiOptions]
+  );
 
-  const { search, setSearch, sortKey, sortDir, toggleSort, rows } = useTableQuery(filteredItems, searchFields);
+  const { filters, setFilter, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, columns);
   const { page, setPage, pageCount, pagedItems } = usePagination(rows);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -112,34 +123,6 @@ export function EquipmentListPage() {
         </button>
       </div>
       {error && <p className="error">{error}</p>}
-      <div className="table-toolbar">
-        <input
-          type="search"
-          placeholder="Filtrer..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select value={roomFilter} onChange={(e) => setRoomFilter(e.target.value ? Number(e.target.value) : "")}>
-          <option value="">Toutes les salles</option>
-          {roomOptions.map(([id, label]) => (
-            <option key={id} value={id}>
-              {label}
-            </option>
-          ))}
-        </select>
-        <select
-          value={apiFilter}
-          onChange={(e) => setApiFilter(e.target.value === "" ? "" : e.target.value === "none" ? "none" : Number(e.target.value))}
-        >
-          <option value="">Toutes les API</option>
-          <option value="none">Sans API</option>
-          {apiOptions.map(([id, label]) => (
-            <option key={id} value={id}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </div>
       <table className="table">
         <thead>
           <tr>
@@ -148,6 +131,14 @@ export function EquipmentListPage() {
             <th>Matériel</th>
             <th>Emplacement</th>
             <th>API</th>
+            <th></th>
+          </tr>
+          <tr className="filter-row">
+            {columns.map((column) => (
+              <th key={column.key}>
+                <ColumnFilterCell column={column} value={filters[column.key] ?? ""} onChange={(v) => setFilter(column.key, v)} />
+              </th>
+            ))}
             <th></th>
           </tr>
         </thead>

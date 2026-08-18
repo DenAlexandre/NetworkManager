@@ -3,18 +3,21 @@ import { createBrand, deleteBrand, getBrand, listBrands, updateBrand } from "../
 import type { Brand } from "../../api/brands";
 import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
+import type { FilterColumn } from "../../hooks/useTableQuery";
+import { usePagination } from "../../hooks/usePagination";
 import { SortableHeader } from "../../components/SortableHeader";
+import { ColumnFilterCell } from "../../components/ColumnFilterCell";
+import { Pagination } from "../../components/Pagination";
 import { SimpleNameFormModal } from "../../components/SimpleNameFormModal";
 
-function searchFields(item: Brand) {
-  return [item.name];
-}
+const COLUMNS: FilterColumn<Brand>[] = [{ key: "name", getValue: (item) => item.name }];
 
 export function BrandsListPage() {
   const [items, setItems] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { search, setSearch, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, searchFields);
+  const { filters, setFilter, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, COLUMNS);
+  const { page, setPage, pageCount, pagedItems } = usePagination(rows);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -71,23 +74,21 @@ export function BrandsListPage() {
         </button>
       </div>
       {error && <p className="error">{error}</p>}
-      <div className="table-toolbar">
-        <input
-          type="search"
-          placeholder="Filtrer..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
       <table className="table">
         <thead>
           <tr>
             <SortableHeader label="Nom" field="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
             <th></th>
           </tr>
+          <tr className="filter-row">
+            <th>
+              <ColumnFilterCell column={COLUMNS[0]} value={filters[COLUMNS[0].key] ?? ""} onChange={(v) => setFilter(COLUMNS[0].key, v)} />
+            </th>
+            <th></th>
+          </tr>
         </thead>
         <tbody>
-          {rows.map((item) => (
+          {pagedItems.map((item) => (
             <tr key={item.id}>
               <td>{item.name}</td>
               <td className="table-actions">
@@ -103,6 +104,7 @@ export function BrandsListPage() {
         </tbody>
       </table>
       {rows.length === 0 && <p className="muted">Aucun constructeur enregistré.</p>}
+      <Pagination page={page} pageCount={pageCount} onChange={setPage} />
       {modalOpen && (
         <SimpleNameFormModal
           title={editingId === null ? "Ajouter un constructeur" : "Modifier le constructeur"}

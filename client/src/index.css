@@ -316,18 +316,6 @@ a {
 
 /* tables */
 
-.table-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.table-toolbar input,
-.table-toolbar select {
-  max-width: 280px;
-}
-
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -361,6 +349,20 @@ a {
   margin-left: 4px;
   color: var(--accent-dark);
   font-size: 10px;
+}
+
+.filter-row th {
+  padding: 4px 12px 10px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 400;
+  text-transform: none;
+}
+
+.column-filter {
+  width: 100%;
+  max-width: 100%;
+  font-size: 13px;
+  padding: 5px 8px;
 }
 
 .table td {
@@ -798,6 +800,32 @@ textarea {
   padding: 10px 12px;
   font-size: 14px;
   margin: 0;
+}
+
+.status-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--success);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.status-cross {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--danger);
+  font-size: 13px;
+  line-height: 1;
 }
 
 .muted {

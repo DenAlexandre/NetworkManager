@@ -3,13 +3,15 @@ import { listAddressing } from "../../api/equipmentPortSettings";
 import type { AddressingEquipment, AddressingPort } from "../../api/equipmentPortSettings";
 import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
+import type { FilterColumn } from "../../hooks/useTableQuery";
 import { usePagination } from "../../hooks/usePagination";
 import { SortableHeader } from "../../components/SortableHeader";
+import { ColumnFilterCell } from "../../components/ColumnFilterCell";
 import { Pagination } from "../../components/Pagination";
 import { AddressingConfigModal } from "./AddressingConfigModal";
 
-function searchFields(item: AddressingEquipment) {
-  return [item.equipmentName, item.deviceType, item.brandName, item.hardwareModel, item.siteName, item.zoneName, item.roomName];
+function roomLabel(item: AddressingEquipment) {
+  return `${item.siteName} / ${item.zoneName} / ${item.roomName}`;
 }
 
 function isPortConfigured(port: AddressingPort) {
@@ -22,35 +24,39 @@ export function AddressingPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  const [roomFilter, setRoomFilter] = useState<number | "">("");
-  const [apiFilter, setApiFilter] = useState<number | "none" | "">("");
+  const deviceTypeOptions = useMemo(() => {
+    const names = new Set<string>();
+    for (const item of items) names.add(item.deviceType);
+    return [...names].sort((a, b) => a.localeCompare(b));
+  }, [items]);
 
   const roomOptions = useMemo(() => {
-    const map = new Map<number, string>();
-    for (const item of items) {
-      map.set(item.roomId, `${item.siteName} / ${item.zoneName} / ${item.roomName}`);
-    }
-    return [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+    const labels = new Set<string>();
+    for (const item of items) labels.add(roomLabel(item));
+    return [...labels].sort((a, b) => a.localeCompare(b));
   }, [items]);
 
-  const apiOptions = useMemo(() => {
-    const map = new Map<number, string>();
-    for (const item of items) {
-      if (item.apiId !== null && item.apiName) map.set(item.apiId, item.apiName);
-    }
-    return [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]));
-  }, [items]);
+  const columns = useMemo<FilterColumn<AddressingEquipment>[]>(
+    () => [
+      { key: "equipmentName", getValue: (item) => item.equipmentName },
+      {
+        key: "deviceType",
+        getValue: (item) => item.deviceType,
+        type: "select",
+        options: deviceTypeOptions.map((name) => ({ value: name, label: name })),
+      },
+      { key: "materiel", getValue: (item) => `${item.brandName} — ${item.hardwareModel}` },
+      {
+        key: "emplacement",
+        getValue: roomLabel,
+        type: "select",
+        options: roomOptions.map((label) => ({ value: label, label })),
+      },
+    ],
+    [deviceTypeOptions, roomOptions]
+  );
 
-  const filteredItems = useMemo(() => {
-    return items.filter((item) => {
-      if (roomFilter !== "" && item.roomId !== roomFilter) return false;
-      if (apiFilter === "none" && item.apiId !== null) return false;
-      if (typeof apiFilter === "number" && item.apiId !== apiFilter) return false;
-      return true;
-    });
-  }, [items, roomFilter, apiFilter]);
-
-  const { search, setSearch, sortKey, sortDir, toggleSort, rows } = useTableQuery(filteredItems, searchFields);
+  const { filters, setFilter, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, columns);
   const { page, setPage, pageCount, pagedItems } = usePagination(rows);
 
   useEffect(() => {
@@ -84,29 +90,6 @@ export function AddressingPage() {
         <h2>Adressage</h2>
       </div>
       {error && <p className="error">{error}</p>}
-      <div className="table-toolbar">
-        <input type="search" placeholder="Filtrer..." value={search} onChange={(e) => setSearch(e.target.value)} />
-        <select value={roomFilter} onChange={(e) => setRoomFilter(e.target.value ? Number(e.target.value) : "")}>
-          <option value="">Toutes les salles</option>
-          {roomOptions.map(([id, label]) => (
-            <option key={id} value={id}>
-              {label}
-            </option>
-          ))}
-        </select>
-        <select
-          value={apiFilter}
-          onChange={(e) => setApiFilter(e.target.value === "" ? "" : e.target.value === "none" ? "none" : Number(e.target.value))}
-        >
-          <option value="">Toutes les API</option>
-          <option value="none">Sans API</option>
-          {apiOptions.map(([id, label]) => (
-            <option key={id} value={id}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </div>
       <table className="table">
         <thead>
           <tr>
@@ -115,6 +98,15 @@ export function AddressingPage() {
             <th>Matériel</th>
             <th>Emplacement</th>
             <th>Ports configurés</th>
+            <th></th>
+          </tr>
+          <tr className="filter-row">
+            {columns.map((column) => (
+              <th key={column.key}>
+                <ColumnFilterCell column={column} value={filters[column.key] ?? ""} onChange={(v) => setFilter(column.key, v)} />
+              </th>
+            ))}
+            <th></th>
             <th></th>
           </tr>
         </thead>
