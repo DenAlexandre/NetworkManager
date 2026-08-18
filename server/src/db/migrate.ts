@@ -184,8 +184,16 @@ CREATE TABLE IF NOT EXISTS equipment_links (
   child_port_id INTEGER NOT NULL REFERENCES hardware_model_ports(id),
   CHECK (parent_equipment_id != child_equipment_id)
 );
-CREATE UNIQUE INDEX IF NOT EXISTS ux_equipment_links_parent_port ON equipment_links(parent_equipment_id, parent_port_id);
-CREATE UNIQUE INDEX IF NOT EXISTS ux_equipment_links_child_port ON equipment_links(child_equipment_id, child_port_id);
+-- A "point à point" port (Fibre, TCP/IP...) may only ever appear in a single link; a non-"point à
+-- point" port (ModBus bus wiring) must be allowed to fan out to any number of links in the same
+-- role. That distinction depends on link_types.point_to_point, which a partial unique index can't
+-- reference (its predicate can only see this table's own columns), so uniqueness is enforced in
+-- the application layer instead (server/src/routes/equipmentLinks.ts, findPortInUse) — these are
+-- now plain lookup indexes, not unique constraints.
+DROP INDEX IF EXISTS ux_equipment_links_parent_port;
+DROP INDEX IF EXISTS ux_equipment_links_child_port;
+CREATE INDEX IF NOT EXISTS ix_equipment_links_parent_port ON equipment_links(parent_equipment_id, parent_port_id);
+CREATE INDEX IF NOT EXISTS ix_equipment_links_child_port ON equipment_links(child_equipment_id, child_port_id);
 CREATE INDEX IF NOT EXISTS ix_equipment_links_parent ON equipment_links(parent_equipment_id);
 CREATE INDEX IF NOT EXISTS ix_equipment_links_child ON equipment_links(child_equipment_id);
 

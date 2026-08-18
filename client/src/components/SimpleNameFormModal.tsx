@@ -6,20 +6,30 @@ import { Modal } from "./Modal";
 interface SimpleNameFormModalProps {
   title: string;
   itemId: number | null;
-  loadName: (id: number) => Promise<string>;
+  /** Prefilled value when there's no itemId to load a name from (e.g. suggesting "X (copie)"). */
+  defaultName?: string;
+  loadName?: (id: number) => Promise<string>;
   save: (name: string) => Promise<void>;
   onClose: () => void;
   onSaved: () => void;
 }
 
-export function SimpleNameFormModal({ title, itemId, loadName, save, onClose, onSaved }: SimpleNameFormModalProps) {
-  const [name, setName] = useState("");
+export function SimpleNameFormModal({
+  title,
+  itemId,
+  defaultName,
+  loadName,
+  save,
+  onClose,
+  onSaved,
+}: SimpleNameFormModalProps) {
+  const [name, setName] = useState(defaultName ?? "");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(itemId !== null);
+  const [loading, setLoading] = useState(itemId !== null && !!loadName);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (itemId === null) return;
+    if (itemId === null || !loadName) return;
     loadName(itemId)
       .then(setName)
       .catch((err) => setError(err instanceof ApiError ? err.message : "Erreur de chargement."))

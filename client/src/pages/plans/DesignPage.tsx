@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { listEquipment } from "../../api/equipment";
+import { createEquipment, listEquipment } from "../../api/equipment";
 import type { Equipment } from "../../api/equipment";
 import { listPorts } from "../../api/ports";
 import type { Port } from "../../api/ports";
@@ -11,7 +11,10 @@ import { listApis } from "../../api/apis";
 import type { Api } from "../../api/apis";
 import { getDesignSchema, saveDesignSchema } from "../../api/designSchemas";
 import { hardwareModelImageUrl } from "../../api/hardwareModels";
+import { listAddressing } from "../../api/equipmentPortSettings";
+import type { AddressingEquipment } from "../../api/equipmentPortSettings";
 import { ApiError } from "../../api/client";
+import { SimpleNameFormModal } from "../../components/SimpleNameFormModal";
 
 interface Card {
   equipmentId: number;
@@ -53,12 +56,40 @@ type Endpoints = Record<string, { x: number; y: number }>;
 type Rect = { x: number; y: number; width: number; height: number };
 type PortRects = Record<string, Rect>;
 
+interface ModbusConnection {
+  ownPortLabel: string;
+  otherEquipmentName: string;
+  otherPortLabel: string;
+  linkId: number;
+}
+
+interface InfoTreeNode {
+  equipment: Equipment;
+  via?: { parentPortLabel: string; childPortLabel: string; linkId: number };
+  modbusConnections: ModbusConnection[];
+  children: InfoTreeNode[];
+}
+
 function endpointKey(equipmentId: number, portId: number) {
   return `${equipmentId}:${portId}`;
 }
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
+}
+
+// Cards are keyed by equipmentId in JSX (both the canvas and the info panel); a duplicate breaks
+// React's reconciliation (refs/DOM nodes can get misattributed for every card after it), which is
+// exactly what silently broke port clicks — the port rendered fine (driven by naturalSizes) but
+// its endpoint was never computed (driven by imgRefs, which reconciliation had scrambled).
+// Deduplicating defensively wherever cards are set makes that whole class of bug impossible.
+function dedupeCardsByEquipmentId(cards: Card[]): Card[] {
+  const seen = new Set<number>();
+  return cards.filter((c) => {
+    if (seen.has(c.equipmentId)) return false;
+    seen.add(c.equipmentId);
+    return true;
+  });
 }
 
 // Axis-aligned segment vs. axis-aligned rect: for a purely horizontal or vertical segment, a
@@ -165,6 +196,7 @@ export function DesignPage() {
   const [linkMode, setLinkMode] = useState(false);
   const [linkDraw, setLinkDraw] = useState<LinkDraw | null>(null);
   const [cardContextMenu, setCardContextMenu] = useState<{ equipmentId: number; x: number; y: number } | null>(null);
+  const [duplicateSource, setDuplicateSource] = useState<Equipment | null>(null);
   const [linkPreview, setLinkPreview] = useState<{ x: number; y: number } | null>(null);
   const [resizing, setResizing] = useState<{ equipmentId: number; startX: number; startWidth: number } | null>(null);
 
@@ -206,6 +238,11 @@ export function DesignPage() {
   const [schemaLoading, setSchemaLoading] = useState(false);
   const [schemaSaving, setSchemaSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [addressing, setAddressing] = useState<AddressingEquipment[]>([]);
+  const [infoPanelOpen, setInfoPanelOpen] = useState(false);
+  // Tree nodes (one per equipment on the schema) are expanded by default; this only tracks the
+  // exceptions a user has explicitly collapsed, same convention as SitesTree/EquipmentLinksTree.
+  const [collapsedInfoEquipmentIds, setCollapsedInfoEquipmentIds] = useState<Set<number>>(new Set());
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const imgRefs = useRef<Record<number, HTMLImageElement | null>>({});
@@ -213,12 +250,13 @@ export function DesignPage() {
   const hasRestoredSavedApi = useRef(false);
 
   useEffect(() => {
-    Promise.all([listEquipment(), listPorts(), listEquipmentLinks(), listApis()])
-      .then(([eqRes, portsRes, linksRes, apisRes]) => {
+    Promise.all([listEquipment(), listPorts(), listEquipmentLinks(), listApis(), listAddressing()])
+      .then(([eqRes, portsRes, linksRes, apisRes, addressingRes]) => {
         setEquipmentList(eqRes.equipment);
         setAllPorts(portsRes.ports);
         setLinks(linksRes.links);
         setApis(apisRes.apis);
+        setAddressing(addressingRes.equipment);
       })
       .catch((err) => setError(err instanceof ApiError ? err.message : "Erreur de chargement."))
       .finally(() => setLoading(false));
@@ -247,6 +285,156 @@ export function DesignPage() {
     }
     return map;
   }, [allPorts]);
+
+  const addressingByEquipmentId = useMemo(
+    () => new Map(addressing.map((a) => [a.equipmentId, a])),
+    [addressing]
+  );
+
+  // Hierarchy for the info panel: only equipment belonging to the selected API, rooted at
+  // whichever piece is named "FO-R406A" (the actual gateway in this network), with every other
+  // equipment nested under its parent link — mirroring the real topology instead of a flat list.
+  // Falls back to alphabetical, then to raising anything a cycle would otherwise hide, so nothing
+  // silently disappears. ModBus links don't drive that same chain-of-custody nesting (a bus port
+  // can fan out to many others, so there's no real one-hop parent/child to reflect the way a
+  // point-to-point Fibre/TCP-IP cable has) — instead, every equipment on the same ModBus network
+  // (chained or not) is grouped one level deep under whichever member is never itself a ModBus
+  // child, e.g. all the AEG* units sit directly under API 2-406A-HQ regardless of how many ModBus
+  // hops actually separate them. Each node still lists its real point-to-point ModBus neighbor(s)
+  // via modbusConnections.
+  const infoTree = useMemo(() => {
+    if (selectedApiId === "") return [] as InfoTreeNode[];
+    const apiEquipment = equipmentList.filter((e) => e.apiId === selectedApiId);
+    const apiEquipmentIds = new Set(apiEquipment.map((e) => e.id));
+    const apiEquipmentLinks = links.filter(
+      (l) => apiEquipmentIds.has(l.parentEquipmentId) && apiEquipmentIds.has(l.childEquipmentId)
+    );
+    const modbusLinks = apiEquipmentLinks.filter((l) => portsById.get(l.parentPortId)?.portType === "ModBus");
+    const apiLinks = apiEquipmentLinks.filter((l) => portsById.get(l.parentPortId)?.portType !== "ModBus");
+
+    const modbusConnectionsByEquipment = new Map<number, ModbusConnection[]>();
+    for (const l of modbusLinks) {
+      const parentList = modbusConnectionsByEquipment.get(l.parentEquipmentId) ?? [];
+      parentList.push({
+        ownPortLabel: l.parentPortLabel,
+        otherEquipmentName: l.childEquipmentName,
+        otherPortLabel: l.childPortLabel,
+        linkId: l.id,
+      });
+      modbusConnectionsByEquipment.set(l.parentEquipmentId, parentList);
+      const childList = modbusConnectionsByEquipment.get(l.childEquipmentId) ?? [];
+      childList.push({
+        ownPortLabel: l.childPortLabel,
+        otherEquipmentName: l.parentEquipmentName,
+        otherPortLabel: l.parentPortLabel,
+        linkId: l.id,
+      });
+      modbusConnectionsByEquipment.set(l.childEquipmentId, childList);
+    }
+
+    // Union-find over the ModBus subgraph only, to group every equipment on the same bus/chain
+    // together regardless of how many hops apart they actually are.
+    const ufParent = new Map<number, number>();
+    function find(id: number): number {
+      let root = id;
+      while (ufParent.has(root) && ufParent.get(root) !== root) root = ufParent.get(root)!;
+      let cur = id;
+      while (ufParent.has(cur) && ufParent.get(cur) !== root) {
+        const next = ufParent.get(cur)!;
+        ufParent.set(cur, root);
+        cur = next;
+      }
+      return root;
+    }
+    function union(a: number, b: number) {
+      if (!ufParent.has(a)) ufParent.set(a, a);
+      if (!ufParent.has(b)) ufParent.set(b, b);
+      const ra = find(a);
+      const rb = find(b);
+      if (ra !== rb) ufParent.set(ra, rb);
+    }
+    for (const l of modbusLinks) union(l.parentEquipmentId, l.childEquipmentId);
+
+    const modbusChildIds = new Set(modbusLinks.map((l) => l.childEquipmentId));
+    const componentMembers = new Map<number, number[]>();
+    for (const id of ufParent.keys()) {
+      const root = find(id);
+      const list = componentMembers.get(root) ?? [];
+      list.push(id);
+      componentMembers.set(root, list);
+    }
+    const modbusChildrenByDisplayRoot = new Map<number, number[]>();
+    const nonRootModbusMemberIds = new Set<number>();
+    for (const members of componentMembers.values()) {
+      const candidates = members
+        .filter((id) => !modbusChildIds.has(id))
+        .sort((a, b) => (equipmentById.get(a)?.name ?? "").localeCompare(equipmentById.get(b)?.name ?? ""));
+      const displayRoot = candidates[0] ?? [...members].sort((a, b) =>
+        (equipmentById.get(a)?.name ?? "").localeCompare(equipmentById.get(b)?.name ?? "")
+      )[0];
+      const others = members
+        .filter((id) => id !== displayRoot)
+        .sort((a, b) => (equipmentById.get(a)?.name ?? "").localeCompare(equipmentById.get(b)?.name ?? ""));
+      modbusChildrenByDisplayRoot.set(displayRoot, others);
+      for (const id of others) nonRootModbusMemberIds.add(id);
+    }
+
+    const childLinksByParent = new Map<number, EquipmentLink[]>();
+    for (const l of apiLinks) {
+      const list = childLinksByParent.get(l.parentEquipmentId) ?? [];
+      list.push(l);
+      childLinksByParent.set(l.parentEquipmentId, list);
+    }
+    const childEquipmentIds = new Set(apiLinks.map((l) => l.childEquipmentId));
+    const visited = new Set<number>();
+
+    function buildNode(
+      equipmentId: number,
+      ancestors: Set<number>,
+      via?: { parentPortLabel: string; childPortLabel: string; linkId: number }
+    ): InfoTreeNode | null {
+      const equipment = equipmentById.get(equipmentId);
+      if (!equipment) return null;
+      visited.add(equipmentId);
+      const children: InfoTreeNode[] = [];
+      for (const l of childLinksByParent.get(equipmentId) ?? []) {
+        if (ancestors.has(l.childEquipmentId)) continue;
+        const childNode = buildNode(l.childEquipmentId, new Set(ancestors).add(l.childEquipmentId), {
+          parentPortLabel: l.parentPortLabel,
+          childPortLabel: l.childPortLabel,
+          linkId: l.id,
+        });
+        if (childNode) children.push(childNode);
+      }
+      for (const memberId of modbusChildrenByDisplayRoot.get(equipmentId) ?? []) {
+        if (ancestors.has(memberId)) continue;
+        const memberNode = buildNode(memberId, new Set(ancestors).add(memberId));
+        if (memberNode) children.push(memberNode);
+      }
+      return { equipment, via, modbusConnections: modbusConnectionsByEquipment.get(equipmentId) ?? [], children };
+    }
+
+    const roots = apiEquipment
+      .filter((e) => !childEquipmentIds.has(e.id) && !nonRootModbusMemberIds.has(e.id))
+      .sort((a, b) => {
+        if (a.name === "FO-R406A") return -1;
+        if (b.name === "FO-R406A") return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+    const tree: InfoTreeNode[] = [];
+    for (const root of roots) {
+      const node = buildNode(root.id, new Set([root.id]));
+      if (node) tree.push(node);
+    }
+    // Equipment never reached from a root (e.g. stuck in a link cycle) still needs to be shown.
+    for (const e of apiEquipment) {
+      if (visited.has(e.id)) continue;
+      const node = buildNode(e.id, new Set([e.id]));
+      if (node) tree.push(node);
+    }
+    return tree;
+  }, [selectedApiId, equipmentList, links, equipmentById, portsById]);
 
   const linkedPortIds = useMemo(() => {
     const set = new Set<number>();
@@ -308,6 +496,24 @@ export function DesignPage() {
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
+  }, [linkDraw]);
+
+  // Tracks the live preview line while drawing a link. Listens on `window` (like every other
+  // drag/track interaction below), not a React onMouseMove prop on the canvas element — a
+  // React-scoped handler stops firing the instant the cursor crosses any sibling element that
+  // happens to overlap the canvas visually (e.g. the floating info panel), since that sibling,
+  // not the canvas, becomes the event target and the canvas is never an ancestor of it.
+  useEffect(() => {
+    if (!linkDraw) return;
+    function onMove(e: MouseEvent) {
+      const canvasRect = canvasRef.current?.getBoundingClientRect();
+      if (!canvasRect || !linkDraw) return;
+      const cursor = { x: e.clientX - canvasRect.left, y: e.clientY - canvasRect.top };
+      const anchor = linkDraw.points[linkDraw.points.length - 1] ?? linkDraw.from;
+      setLinkPreview(orthoConstrain(anchor, cursor));
+    }
+    window.addEventListener("mousemove", onMove);
+    return () => window.removeEventListener("mousemove", onMove);
   }, [linkDraw]);
 
   useEffect(() => {
@@ -586,10 +792,14 @@ export function DesignPage() {
 
   function handleAddCard() {
     if (addEquipmentId === "") return;
-    setCards((prev) => [
-      ...prev,
-      { equipmentId: Number(addEquipmentId), x: 40 + (prev.length % 4) * 260, y: 40 + Math.floor(prev.length / 4) * 300 },
-    ]);
+    const newEquipmentId = Number(addEquipmentId);
+    setCards((prev) => {
+      if (prev.some((c) => c.equipmentId === newEquipmentId)) return prev;
+      return [
+        ...prev,
+        { equipmentId: newEquipmentId, x: 40 + (prev.length % 4) * 260, y: 40 + Math.floor(prev.length / 4) * 300 },
+      ];
+    });
     setAddEquipmentId("");
   }
 
@@ -624,6 +834,39 @@ export function DesignPage() {
     if (!cardContextMenu) return;
     navigate(`/equipment/addressing?open=${cardContextMenu.equipmentId}`);
     setCardContextMenu(null);
+  }
+
+  function handleContextMenuDuplicate() {
+    if (!cardContextMenu) return;
+    const equipment = equipmentById.get(cardContextMenu.equipmentId);
+    setCardContextMenu(null);
+    if (equipment) setDuplicateSource(equipment);
+  }
+
+  async function handleSaveDuplicate(name: string) {
+    if (!duplicateSource) return;
+    const { equipment } = await createEquipment({
+      roomId: duplicateSource.roomId,
+      deviceTypeId: duplicateSource.deviceTypeId,
+      hardwareModelId: duplicateSource.hardwareModelId,
+      apiId: duplicateSource.apiId,
+      name,
+    });
+    setEquipmentList((prev) => [...prev, equipment]);
+    // Places the duplicate right next to the original's card, if it's on this canvas.
+    const originalCard = cards.find((c) => c.equipmentId === duplicateSource.id);
+    setCards((prev) => {
+      if (prev.some((c) => c.equipmentId === equipment.id)) return prev;
+      return [
+        ...prev,
+        {
+          equipmentId: equipment.id,
+          x: (originalCard?.x ?? 40) + 30,
+          y: (originalCard?.y ?? 40) + 30,
+          width: originalCard?.width,
+        },
+      ];
+    });
   }
 
   function handleHeaderMouseDown(e: ReactMouseEvent, card: Card) {
@@ -724,14 +967,6 @@ export function DesignPage() {
     setMarqueeRect({ x, y, width: 0, height: 0 });
   }
 
-  function handleCanvasMouseMove(e: ReactMouseEvent) {
-    if (!linkDraw) return;
-    const canvasRect = canvasRef.current?.getBoundingClientRect();
-    if (!canvasRect) return;
-    const cursor = { x: e.clientX - canvasRect.left, y: e.clientY - canvasRect.top };
-    const anchor = linkDraw.points[linkDraw.points.length - 1] ?? linkDraw.from;
-    setLinkPreview(orthoConstrain(anchor, cursor));
-  }
 
   async function handlePortMouseDown(e: ReactMouseEvent, equipmentId: number, portId: number) {
     e.stopPropagation();
@@ -817,6 +1052,15 @@ export function DesignPage() {
     }
   }
 
+  function toggleInfoEquipmentCollapse(equipmentId: number) {
+    setCollapsedInfoEquipmentIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(equipmentId)) next.delete(equipmentId);
+      else next.add(equipmentId);
+      return next;
+    });
+  }
+
   function clearSelection() {
     setSelectedCardIds(new Set());
     setSelectedTextIds(new Set());
@@ -846,7 +1090,7 @@ export function DesignPage() {
       const { schema } = await getDesignSchema(apiId);
       if (schema) {
         const validEquipmentIds = new Set(equipmentList.map((e) => e.id));
-        setCards(schema.layout.cards.filter((c) => validEquipmentIds.has(c.equipmentId)));
+        setCards(dedupeCardsByEquipmentId(schema.layout.cards.filter((c) => validEquipmentIds.has(c.equipmentId))));
         setBendOverrides(schema.layout.bends ?? {});
         setBendYOverrides(schema.layout.bendsY ?? {});
         setLinkPaths(schema.layout.paths ?? {});
@@ -1132,6 +1376,91 @@ export function DesignPage() {
     }
   }
 
+  function renderInfoNode(node: InfoTreeNode) {
+    const { equipment, via, modbusConnections, children } = node;
+    const collapsed = collapsedInfoEquipmentIds.has(equipment.id);
+    const addr = addressingByEquipmentId.get(equipment.id);
+    const modelPorts = portsByModel.get(equipment.hardwareModelId) ?? [];
+    const addressRows = modelPorts
+      .map((port) => {
+        const addressInfo = addr?.ports.find((p) => p.hardwareModelPortId === port.id);
+        if (!addressInfo?.ipAddress && !addressInfo?.modbusAddress) return null;
+        return { port, addressInfo };
+      })
+      .filter((row): row is NonNullable<typeof row> => row !== null);
+
+    function selectViaLink(e: ReactMouseEvent) {
+      e.stopPropagation();
+      if (!via) return;
+      setSelectedCardIds(new Set());
+      setSelectedTextIds(new Set());
+      setSelectedLinkIds(new Set([via.linkId]));
+    }
+
+    function selectModbusLink(e: ReactMouseEvent, linkId: number) {
+      e.stopPropagation();
+      setSelectedCardIds(new Set());
+      setSelectedTextIds(new Set());
+      setSelectedLinkIds(new Set([linkId]));
+    }
+
+    return (
+      <li key={equipment.id} className="design-info-tree-node">
+        <div className="design-info-tree-row">
+          <div className="design-info-tree-left">
+            <button
+              type="button"
+              className="design-info-tree-toggle"
+              onClick={() => toggleInfoEquipmentCollapse(equipment.id)}
+              disabled={children.length === 0}
+            >
+              {children.length > 0 && (
+                <span className={`design-info-tree-caret${collapsed ? "" : " open"}`}>▸</span>
+              )}
+              {equipment.name}
+            </button>
+            {via && (
+              <span
+                className={`design-info-tree-via${selectedLinkIds.has(via.linkId) ? " active" : ""}`}
+                onClick={selectViaLink}
+              >
+                via {via.parentPortLabel} → {via.childPortLabel}
+              </span>
+            )}
+            {modbusConnections.map((c) => (
+              <span
+                key={c.linkId}
+                className={`design-info-tree-modbus${selectedLinkIds.has(c.linkId) ? " active" : ""}`}
+                onClick={(e) => selectModbusLink(e, c.linkId)}
+                title="Liaison ModBus (bus, sans hiérarchie parent/enfant)"
+              >
+                {c.ownPortLabel} ↔ {c.otherEquipmentName} ({c.otherPortLabel})
+              </span>
+            ))}
+          </div>
+          {addressRows.length > 0 && (
+            <div className="design-info-tree-addr">
+              {addressRows.map(({ port, addressInfo }) => (
+                <span key={port.id} className="design-info-port-chip">
+                  <span className="design-info-port-label">{port.label}</span>
+                  {addressInfo?.ipAddress && (
+                    <span className="design-info-port-detail">IP {addressInfo.ipAddress}</span>
+                  )}
+                  {addressInfo?.modbusAddress && (
+                    <span className="design-info-port-detail">Modbus {addressInfo.modbusAddress}</span>
+                  )}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+        {!collapsed && children.length > 0 && (
+          <ul className="design-info-tree-nested">{children.map((child) => renderInfoNode(child))}</ul>
+        )}
+      </li>
+    );
+  }
+
   if (loading) return <p>Chargement...</p>;
 
   return (
@@ -1252,11 +1581,11 @@ export function DesignPage() {
         </p>
       )}
 
+      <div className="design-canvas-outer">
       <div
         className={`design-canvas${linkMode ? " design-canvas-linkmode" : ""}`}
         ref={canvasRef}
         onMouseDown={handleCanvasMouseDown}
-        onMouseMove={handleCanvasMouseMove}
       >
         <div className="design-canvas-zoom-layer" style={{ transform: `scale(${zoom})` }}>
           {cards.map((card) => {
@@ -1426,6 +1755,12 @@ export function DesignPage() {
                   strokeWidth={strokeWidth}
                   pointerEvents="none"
                 />
+                {/* In link mode these invisible hit-lines (14px wide) would otherwise sit on top
+                    of the DOM and swallow clicks meant for a port they happen to pass through or
+                    end at — most noticeably a port that already has a link, since the path
+                    necessarily terminates right on top of it. Disabled while drawing so every
+                    port stays clickable; existing-link selection/deletion resumes once you leave
+                    link mode. */}
                 {path.slice(0, -1).map((point, i) => {
                   const next = path[i + 1];
                   return (
@@ -1436,6 +1771,7 @@ export function DesignPage() {
                       x2={next.x}
                       y2={next.y}
                       className="design-link-hit"
+                      style={{ pointerEvents: linkMode ? "none" : "stroke" }}
                       onClick={selectLink}
                       onDoubleClick={deleteLink}
                     >
@@ -1444,6 +1780,7 @@ export function DesignPage() {
                   );
                 })}
                 {showHandles &&
+                  !linkMode &&
                   points.map((point, i) => (
                     <circle
                       key={i}
@@ -1465,6 +1802,32 @@ export function DesignPage() {
         </svg>
       </div>
 
+      <div className={`design-info-panel${infoPanelOpen ? " open" : ""}`}>
+        <button
+          type="button"
+          className="design-info-panel-toggle"
+          onClick={() => setInfoPanelOpen((prev) => !prev)}
+          title={infoPanelOpen ? "Masquer le panneau d'informations" : "Afficher le panneau d'informations"}
+        >
+          {infoPanelOpen ? "Infos ✕" : "Infos ▾"}
+        </button>
+        {infoPanelOpen && (
+          <div className="design-info-panel-body">
+            <section>
+              <h3>Matériel &amp; liaisons</h3>
+              {selectedApiId === "" ? (
+                <p className="muted">Sélectionnez une API pour voir son matériel.</p>
+              ) : infoTree.length === 0 ? (
+                <p className="muted">Aucun matériel pour cette API.</p>
+              ) : (
+                <ul className="design-info-tree">{infoTree.map((node) => renderInfoNode(node))}</ul>
+              )}
+            </section>
+          </div>
+        )}
+      </div>
+      </div>
+
       {cardContextMenu && (
         <div
           className="design-context-menu"
@@ -1474,10 +1837,24 @@ export function DesignPage() {
           <button type="button" onClick={handleContextMenuAddress}>
             Adresser le matériel
           </button>
+          <button type="button" onClick={handleContextMenuDuplicate}>
+            Dupliquer le matériel
+          </button>
           <button type="button" className="danger" onClick={handleContextMenuRemove}>
             Supprimer du schéma
           </button>
         </div>
+      )}
+
+      {duplicateSource && (
+        <SimpleNameFormModal
+          title="Dupliquer le matériel"
+          itemId={null}
+          defaultName={`${duplicateSource.name} (copie)`}
+          save={handleSaveDuplicate}
+          onClose={() => setDuplicateSource(null)}
+          onSaved={() => setDuplicateSource(null)}
+        />
       )}
     </div>
   );

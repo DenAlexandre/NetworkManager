@@ -88,13 +88,11 @@ async function findPortInUse(
   );
   const usage = usageResult.rows[0];
 
-  // A port already used in its own role is always a conflict. A non-"point à point" port
-  // may additionally hold one link in the other role (e.g. pass-through wiring); a
-  // "point à point" port is restricted to a single link total, so mixing roles also conflicts.
-  if (usage.parentAsParent) return true;
-  if (parentPointToPoint && usage.parentAsChild) return true;
-  if (usage.childAsChild) return true;
-  if (childPointToPoint && usage.childAsParent) return true;
+  // A "point à point" port (Fibre, TCP/IP...) may only ever be used by a single link, in either
+  // role. A non-"point à point" port (ModBus bus wiring) has no such limit — it can fan out to
+  // any number of links, in either role, since a bus port isn't a dedicated point-to-point cable.
+  if (parentPointToPoint && (usage.parentAsParent || usage.parentAsChild)) return true;
+  if (childPointToPoint && (usage.childAsParent || usage.childAsChild)) return true;
 
   return false;
 }
