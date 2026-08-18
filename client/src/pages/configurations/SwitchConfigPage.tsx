@@ -22,14 +22,21 @@ export function SwitchConfigPage() {
 
   const [switchModels, setSwitchModels] = useState<SupportedSwitchModel[]>([]);
   const [switchModelId, setSwitchModelId] = useState<number | null>(null);
-  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importFiles, setImportFiles] = useState<File[]>([]);
   const [importing, setImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState({ done: 0, total: 0 });
   const [importError, setImportError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [applyingId, setApplyingId] = useState<number | null>(null);
-  const [roomPicker, setRoomPicker] = useState<{ item: SwitchConfigSummary; rooms: RoomOption[] } | null>(null);
+  const [roomPicker, setRoomPicker] = useState<{ item: SwitchConfigSummary; rooms: RoomOption[]; isBulk?: boolean } | null>(
+    null
+  );
   const [pickedRoomId, setPickedRoomId] = useState<number | "">("");
   const [applyError, setApplyError] = useState<string | null>(null);
+
+  const [bulkUpdating, setBulkUpdating] = useState(false);
+  const [bulkStats, setBulkStats] = useState<{ done: number; total: number; errors: string[] } | null>(null);
+  const bulkQueueRef = useRef<SwitchConfigSummary[]>([]);
 
   useEffect(() => {
     load();
@@ -59,19 +66,25 @@ export function SwitchConfigPage() {
   }
 
   async function handleImport() {
-    if (!importFile || switchModelId === null) return;
+    if (importFiles.length === 0 || switchModelId === null) return;
     setImportError(null);
     setImporting(true);
-    try {
-      await importSwitchConfig(importFile, switchModelId);
-      setImportFile(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      await load();
-    } catch (err) {
-      setImportError(err instanceof ApiError ? err.message : "Erreur lors de l'import.");
-    } finally {
-      setImporting(false);
+    setImportProgress({ done: 0, total: importFiles.length });
+    const errors: string[] = [];
+    for (const file of importFiles) {
+      try {
+        await importSwitchConfig(file, switchModelId);
+      } catch (err) {
+        const message = err instanceof ApiError ? err.message : "Erreur lors de l'import.";
+        errors.push(`${file.name} : ${message}`);
+      }
+      setImportProgress((prev) => ({ ...prev, done: prev.done + 1 }));
     }
+    setImportFiles([]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setImportError(errors.length > 0 ? errors.join("\n") : null);
+    setImporting(false);
+    await load();
   }
 
   async function handleDelete(id: number) {
@@ -118,7 +131,71 @@ export function SwitchConfigPage() {
 
   function handleConfirmRoomPicker() {
     if (!roomPicker || pickedRoomId === "") return;
+    if (roomPicker.isBulk) {
+      const item = roomPicker.item;
+      const roomId = Number(pickedRoomId);
+      setRoomPicker(null);
+      resolveBulkItem(item, roomId);
+      return;
+    }
     handleApplyToEquipment(roomPicker.item, Number(pickedRoomId));
+  }
+
+  function recordBulkOutcome(error?: string) {
+    setBulkStats((prev) => {
+      if (!prev) return prev;
+      return { done: prev.done + 1, total: prev.total, errors: error ? [...prev.errors, error] : prev.errors };
+    });
+  }
+
+  async function resolveBulkItem(item: SwitchConfigSummary, roomId: number) {
+    try {
+      await applySwitchConfigToEquipment(item.id, roomId);
+      recordBulkOutcome();
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : "Erreur lors de la mise à jour du matériel.";
+      recordBulkOutcome(`${item.sysName || "?"} : ${message}`);
+    }
+    await runBulkQueue();
+  }
+
+  async function runBulkQueue() {
+    while (bulkQueueRef.current.length > 0) {
+      const [current, ...rest] = bulkQueueRef.current;
+      bulkQueueRef.current = rest;
+      try {
+        const result = await applySwitchConfigToEquipment(current.id);
+        if (result.requiresRoomSelection) {
+          setRoomPicker({ item: current, rooms: result.rooms ?? [], isBulk: true });
+          setPickedRoomId("");
+          return; // paused until the room picker is confirmed or skipped
+        }
+        recordBulkOutcome();
+      } catch (err) {
+        const message = err instanceof ApiError ? err.message : "Erreur lors de la mise à jour du matériel.";
+        recordBulkOutcome(`${current.sysName || "?"} : ${message}`);
+      }
+    }
+    setBulkUpdating(false);
+    await load();
+  }
+
+  function handleBulkUpdate() {
+    if (items.length === 0 || bulkUpdating) return;
+    bulkQueueRef.current = [...items];
+    setBulkStats({ done: 0, total: items.length, errors: [] });
+    setBulkUpdating(true);
+    runBulkQueue();
+  }
+
+  function handleSkipRoomPicker() {
+    if (!roomPicker) return;
+    const wasBulk = roomPicker.isBulk;
+    setRoomPicker(null);
+    if (wasBulk) {
+      recordBulkOutcome(`${roomPicker.item.sysName || "?"} : Salle non choisie, mise à jour ignorée.`);
+      runBulkQueue();
+    }
   }
 
   if (loading) return <p>Chargement...</p>;
@@ -127,7 +204,26 @@ export function SwitchConfigPage() {
     <div className="card">
       <div className="page-header">
         <h2>Switch</h2>
+        <button type="button" className="btn" onClick={handleBulkUpdate} disabled={items.length === 0 || bulkUpdating}>
+          {bulkUpdating && bulkStats ? `Mise à jour... (${bulkStats.done}/${bulkStats.total})` : "Update complet"}
+        </button>
       </div>
+      {bulkStats && !bulkUpdating && (
+        <p className={bulkStats.errors.length > 0 ? "error" : "success"}>
+          {bulkStats.done - bulkStats.errors.length} mis à jour, {bulkStats.errors.length} erreur(s).
+          {bulkStats.errors.length > 0 && (
+            <>
+              <br />
+              {bulkStats.errors.map((e, i) => (
+                <span key={i}>
+                  {e}
+                  <br />
+                </span>
+              ))}
+            </>
+          )}
+        </p>
+      )}
 
       <div className="card card-compact-top">
         <h2>Importer une configuration</h2>
@@ -150,12 +246,13 @@ export function SwitchConfigPage() {
             </select>
           </label>
           <label>
-            Fichier XML
+            Fichier(s) XML
             <input
               type="file"
               accept=".xml,application/xml,text/xml"
+              multiple
               ref={fileInputRef}
-              onChange={(e) => setImportFile(e.currentTarget.files?.[0] ?? null)}
+              onChange={(e) => setImportFiles(Array.from(e.currentTarget.files ?? []))}
               disabled={importing}
             />
           </label>
@@ -163,17 +260,33 @@ export function SwitchConfigPage() {
             type="button"
             className="btn"
             onClick={handleImport}
-            disabled={!importFile || switchModelId === null || importing}
+            disabled={importFiles.length === 0 || switchModelId === null || importing}
           >
-            {importing ? "Import en cours..." : "Importer"}
+            {importing
+              ? `Import en cours... (${importProgress.done}/${importProgress.total})`
+              : importFiles.length > 1
+                ? `Importer (${importFiles.length} fichiers)`
+                : "Importer"}
           </button>
         </div>
+        {importFiles.length > 1 && (
+          <p className="muted">{importFiles.map((f) => f.name).join(", ")}</p>
+        )}
         {switchModels.length === 0 && (
           <p className="muted">
             Aucun modèle de switch pris en charge n'est trouvé dans le catalogue (Type des données &gt; Matériel).
           </p>
         )}
-        {importError && <p className="error">{importError}</p>}
+        {importError && (
+          <p className="error">
+            {importError.split("\n").map((line, i) => (
+              <span key={i}>
+                {line}
+                <br />
+              </span>
+            ))}
+          </p>
+        )}
       </div>
 
       {error && <p className="error">{error}</p>}
@@ -239,11 +352,14 @@ export function SwitchConfigPage() {
       <Pagination page={page} pageCount={pageCount} onChange={setPage} />
 
       {roomPicker && (
-        <Modal title="Choisir la salle" onClose={() => setRoomPicker(null)}>
+        <Modal title="Choisir la salle" onClose={handleSkipRoomPicker}>
           <p>
             Impossible de déterminer automatiquement la salle pour l'équipement "{roomPicker.item.sysName}"
             (localisation "{roomPicker.item.sysLocation}" introuvable ou ambiguë). Choisissez une salle :
           </p>
+          {roomPicker.isBulk && (
+            <p className="muted">Mise à jour groupée en cours — les autres configurations suivront ensuite.</p>
+          )}
           <label>
             Salle
             <select value={pickedRoomId} onChange={(e) => setPickedRoomId(Number(e.target.value))}>
@@ -259,8 +375,8 @@ export function SwitchConfigPage() {
           </label>
           {applyError && <p className="error">{applyError}</p>}
           <div className="modal-actions">
-            <button type="button" onClick={() => setRoomPicker(null)}>
-              Annuler
+            <button type="button" onClick={handleSkipRoomPicker}>
+              {roomPicker.isBulk ? "Ignorer celle-ci" : "Annuler"}
             </button>
             <button
               type="button"
