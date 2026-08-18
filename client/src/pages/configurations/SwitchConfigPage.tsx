@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  applySwitchConfigToEquipment,
   deleteSwitchConfig,
   downloadSwitchConfigXml,
   importSwitchConfig,
   listSupportedSwitchModels,
   listSwitchConfigs,
 } from "../../api/switchConfigs";
-import type { SupportedSwitchModel, SwitchConfigSummary } from "../../api/switchConfigs";
+import type { RoomOption, SupportedSwitchModel, SwitchConfigSummary } from "../../api/switchConfigs";
 import { ApiError } from "../../api/client";
+import { Modal } from "../../components/Modal";
 
 export function SwitchConfigPage() {
   const [items, setItems] = useState<SwitchConfigSummary[]>([]);
@@ -21,6 +23,10 @@ export function SwitchConfigPage() {
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [applyingId, setApplyingId] = useState<number | null>(null);
+  const [roomPicker, setRoomPicker] = useState<{ item: SwitchConfigSummary; rooms: RoomOption[] } | null>(null);
+  const [pickedRoomId, setPickedRoomId] = useState<number | "">("");
+  const [applyError, setApplyError] = useState<string | null>(null);
 
   useEffect(() => {
     load();
@@ -81,6 +87,35 @@ export function SwitchConfigPage() {
     } catch (err) {
       alert(err instanceof ApiError ? err.message : "Erreur lors du téléchargement.");
     }
+  }
+
+  async function handleApplyToEquipment(item: SwitchConfigSummary, roomId?: number) {
+    setApplyingId(item.id);
+    setApplyError(null);
+    try {
+      const result = await applySwitchConfigToEquipment(item.id, roomId);
+      if (result.requiresRoomSelection) {
+        setRoomPicker({ item, rooms: result.rooms ?? [] });
+        setPickedRoomId("");
+        return;
+      }
+      setRoomPicker(null);
+      await load();
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : "Erreur lors de la mise à jour du matériel.";
+      if (roomPicker) {
+        setApplyError(message);
+      } else {
+        alert(message);
+      }
+    } finally {
+      setApplyingId(null);
+    }
+  }
+
+  function handleConfirmRoomPicker() {
+    if (!roomPicker || pickedRoomId === "") return;
+    handleApplyToEquipment(roomPicker.item, Number(pickedRoomId));
   }
 
   if (loading) return <p>Chargement...</p>;
@@ -181,6 +216,14 @@ export function SwitchConfigPage() {
                 <button type="button" className="link" onClick={() => handleDownload(item.id)}>
                   XML
                 </button>
+                <button
+                  type="button"
+                  className="link"
+                  onClick={() => handleApplyToEquipment(item)}
+                  disabled={applyingId === item.id}
+                >
+                  {applyingId === item.id ? "Mise à jour..." : "Update"}
+                </button>
                 <button className="danger" onClick={() => handleDelete(item.id)}>
                   Supprimer
                 </button>
@@ -190,6 +233,42 @@ export function SwitchConfigPage() {
         </tbody>
       </table>
       {items.length === 0 && <p className="muted">Aucune configuration switch importée.</p>}
+
+      {roomPicker && (
+        <Modal title="Choisir la salle" onClose={() => setRoomPicker(null)}>
+          <p>
+            Impossible de déterminer automatiquement la salle pour l'équipement "{roomPicker.item.sysName}"
+            (localisation "{roomPicker.item.sysLocation}" introuvable ou ambiguë). Choisissez une salle :
+          </p>
+          <label>
+            Salle
+            <select value={pickedRoomId} onChange={(e) => setPickedRoomId(Number(e.target.value))}>
+              <option value="" disabled>
+                — Sélectionner —
+              </option>
+              {roomPicker.rooms.map((room) => (
+                <option key={room.id} value={room.id}>
+                  {room.siteName} / {room.zoneName} / {room.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          {applyError && <p className="error">{applyError}</p>}
+          <div className="modal-actions">
+            <button type="button" onClick={() => setRoomPicker(null)}>
+              Annuler
+            </button>
+            <button
+              type="button"
+              className="btn"
+              onClick={handleConfirmRoomPicker}
+              disabled={pickedRoomId === "" || applyingId === roomPicker.item.id}
+            >
+              {applyingId === roomPicker.item.id ? "Mise à jour..." : "Valider"}
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

@@ -111,6 +111,31 @@ export function deleteSwitchConfig(id: number) {
   return apiFetch<void>(`/switch-configs/${id}`, { method: "DELETE" });
 }
 
+export interface RoomOption {
+  id: number;
+  name: string;
+  zoneName: string;
+  siteName: string;
+}
+
+export interface ApplySwitchConfigResult {
+  requiresRoomSelection?: boolean;
+  rooms?: RoomOption[];
+  equipmentId?: number;
+  equipmentName?: string;
+  roomId?: number;
+  created?: boolean;
+  portCount?: number;
+  createdPortCount?: number;
+}
+
+export function applySwitchConfigToEquipment(id: number, roomId?: number) {
+  return apiFetch<ApplySwitchConfigResult>(`/switch-configs/${id}/apply-to-equipment`, {
+    method: "POST",
+    body: JSON.stringify({ roomId }),
+  });
+}
+
 export async function downloadSwitchConfigXml(id: number) {
   const { blob, filename } = await apiDownload(`/switch-configs/${id}/xml`);
   const url = URL.createObjectURL(blob);

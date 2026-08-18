@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { downloadDatabaseBackup, restoreDatabase } from "../../api/system";
+import { downloadDatabaseBackup, resetDatabaseKeepDataTypes, restoreDatabase } from "../../api/system";
 import { ApiError } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 
@@ -15,6 +15,10 @@ export function DatabasePage() {
   const [restoring, setRestoring] = useState(false);
   const [restoreError, setRestoreError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [resetting, setResetting] = useState(false);
+  const [resetError, setResetError] = useState<string | null>(null);
+  const [resetSuccess, setResetSuccess] = useState(false);
 
   async function handleBackup() {
     setBackupError(null);
@@ -59,6 +63,29 @@ export function DatabasePage() {
     }
   }
 
+  async function handleReset() {
+    if (
+      !window.confirm(
+        "Cette action va supprimer TOUTES les données de l'application (sites, matériel, API, configurations switch/moxa, " +
+          "schémas de câblage...) à l'exception des comptes utilisateurs et du catalogue \"Type des données\" " +
+          "(marques, types de matériel, matériel, types de liaison). Cette action est irréversible. Continuer ?"
+      )
+    ) {
+      return;
+    }
+    setResetError(null);
+    setResetSuccess(false);
+    setResetting(true);
+    try {
+      await resetDatabaseKeepDataTypes();
+      setResetSuccess(true);
+    } catch (err) {
+      setResetError(err instanceof ApiError ? err.message : "Erreur lors de la réinitialisation.");
+    } finally {
+      setResetting(false);
+    }
+  }
+
   return (
     <div className="card">
       <div className="page-header">
@@ -99,6 +126,21 @@ export function DatabasePage() {
           </button>
         </div>
         {restoreError && <p className="error">{restoreError}</p>}
+
+        <hr />
+
+        <h3>Réinitialisation (RAZ)</h3>
+        <p className="error">
+          Attention : cette action supprime toutes les données (sites, matériel, API, configurations switch/moxa,
+          schémas de câblage...) à l'exception des comptes utilisateurs et du catalogue "Type des données"
+          (marques, types de matériel, matériel, types de liaison), qui sont conservés. Cette action est
+          irréversible.
+        </p>
+        <button type="button" className="danger" onClick={handleReset} disabled={resetting}>
+          {resetting ? "Réinitialisation..." : "Réinitialiser le système"}
+        </button>
+        {resetError && <p className="error">{resetError}</p>}
+        {resetSuccess && <p className="success">Le système a été réinitialisé.</p>}
       </div>
     </div>
   );

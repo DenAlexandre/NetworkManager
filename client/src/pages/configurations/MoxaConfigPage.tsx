@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  applyMgateConfigToEquipment,
   deleteMgateConfig,
   downloadMgateConfigCfg,
   importMgateConfigCfg,
   listMgateConfigs,
   listSupportedMoxaModels,
 } from "../../api/mgateConfigs";
-import type { MgateConfigSummary, SupportedMoxaModel } from "../../api/mgateConfigs";
+import type { MgateConfigSummary, RoomOption, SupportedMoxaModel } from "../../api/mgateConfigs";
 import { ApiError } from "../../api/client";
+import { Modal } from "../../components/Modal";
 
 export function MoxaConfigPage() {
   const [items, setItems] = useState<MgateConfigSummary[]>([]);
@@ -21,6 +23,10 @@ export function MoxaConfigPage() {
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [applyingId, setApplyingId] = useState<number | null>(null);
+  const [roomPicker, setRoomPicker] = useState<{ item: MgateConfigSummary; rooms: RoomOption[] } | null>(null);
+  const [pickedRoomId, setPickedRoomId] = useState<number | "">("");
+  const [applyError, setApplyError] = useState<string | null>(null);
 
   useEffect(() => {
     load();
@@ -81,6 +87,35 @@ export function MoxaConfigPage() {
     } catch (err) {
       alert(err instanceof ApiError ? err.message : "Erreur lors du téléchargement.");
     }
+  }
+
+  async function handleApplyToEquipment(item: MgateConfigSummary, roomId?: number) {
+    setApplyingId(item.id);
+    setApplyError(null);
+    try {
+      const result = await applyMgateConfigToEquipment(item.id, roomId);
+      if (result.requiresRoomSelection) {
+        setRoomPicker({ item, rooms: result.rooms ?? [] });
+        setPickedRoomId("");
+        return;
+      }
+      setRoomPicker(null);
+      await load();
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : "Erreur lors de la mise à jour du matériel.";
+      if (roomPicker) {
+        setApplyError(message);
+      } else {
+        alert(message);
+      }
+    } finally {
+      setApplyingId(null);
+    }
+  }
+
+  function handleConfirmRoomPicker() {
+    if (!roomPicker || pickedRoomId === "") return;
+    handleApplyToEquipment(roomPicker.item, Number(pickedRoomId));
   }
 
   if (loading) return <p>Chargement...</p>;
@@ -171,6 +206,14 @@ export function MoxaConfigPage() {
                 <button type="button" className="link" onClick={() => handleDownload(item.id)}>
                   CFG
                 </button>
+                <button
+                  type="button"
+                  className="link"
+                  onClick={() => handleApplyToEquipment(item)}
+                  disabled={applyingId === item.id}
+                >
+                  {applyingId === item.id ? "Mise à jour..." : "Update"}
+                </button>
                 <button className="danger" onClick={() => handleDelete(item.id)}>
                   Supprimer
                 </button>
@@ -180,6 +223,42 @@ export function MoxaConfigPage() {
         </tbody>
       </table>
       {items.length === 0 && <p className="muted">Aucune configuration Moxa importée.</p>}
+
+      {roomPicker && (
+        <Modal title="Choisir la salle" onClose={() => setRoomPicker(null)}>
+          <p>
+            Impossible de déterminer automatiquement la salle pour l'équipement "{roomPicker.item.deviceName}"
+            (localisation "{roomPicker.item.location}" introuvable ou ambiguë). Choisissez une salle :
+          </p>
+          <label>
+            Salle
+            <select value={pickedRoomId} onChange={(e) => setPickedRoomId(Number(e.target.value))}>
+              <option value="" disabled>
+                — Sélectionner —
+              </option>
+              {roomPicker.rooms.map((room) => (
+                <option key={room.id} value={room.id}>
+                  {room.siteName} / {room.zoneName} / {room.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          {applyError && <p className="error">{applyError}</p>}
+          <div className="modal-actions">
+            <button type="button" onClick={() => setRoomPicker(null)}>
+              Annuler
+            </button>
+            <button
+              type="button"
+              className="btn"
+              onClick={handleConfirmRoomPicker}
+              disabled={pickedRoomId === "" || applyingId === roomPicker.item.id}
+            >
+              {applyingId === roomPicker.item.id ? "Mise à jour..." : "Valider"}
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

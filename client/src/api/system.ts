@@ -18,3 +18,7 @@ export function restoreDatabase(payload: unknown) {
     body: JSON.stringify(payload),
   });
 }
+
+export function resetDatabaseKeepDataTypes() {
+  return apiFetch<{ success: boolean }>("/system/database/reset", { method: "POST" });
+}

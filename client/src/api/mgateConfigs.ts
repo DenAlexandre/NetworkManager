@@ -103,6 +103,30 @@ export function deleteMgateConfig(id: number) {
   return apiFetch<void>(`/mgate-configs/${id}`, { method: "DELETE" });
 }
 
+export interface RoomOption {
+  id: number;
+  name: string;
+  zoneName: string;
+  siteName: string;
+}
+
+export interface ApplyMgateConfigResult {
+  requiresRoomSelection?: boolean;
+  rooms?: RoomOption[];
+  equipmentId?: number;
+  equipmentName?: string;
+  roomId?: number;
+  created?: boolean;
+  ipPortConfigured?: boolean;
+}
+
+export function applyMgateConfigToEquipment(id: number, roomId?: number) {
+  return apiFetch<ApplyMgateConfigResult>(`/mgate-configs/${id}/apply-to-equipment`, {
+    method: "POST",
+    body: JSON.stringify({ roomId }),
+  });
+}
+
 export async function downloadMgateConfigCfg(id: number) {
   const { blob, filename } = await apiDownload(`/mgate-configs/${id}/cfg`);
   const url = URL.createObjectURL(blob);

@@ -160,7 +160,7 @@ export function EquipmentListPage() {
                 {item.brandName} — {item.hardwareModel}
               </td>
               <td>
-                {item.siteName} / {item.zoneName} / {item.roomName}
+                {item.zoneName} / {item.roomName}
               </td>
               <td>{item.apiName ?? "—"}</td>
               <td className="table-actions">

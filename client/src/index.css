@@ -791,6 +791,15 @@ textarea {
   margin: 0;
 }
 
+.success {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, white);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  margin: 0;
+}
+
 .muted {
   color: var(--text-muted);
   font-size: 14px;
@@ -851,6 +860,16 @@ textarea {
 
 .tree-node.active {
   background: var(--accent-light);
+}
+
+.tree-node.drag-over {
+  background: var(--accent-light);
+  outline: 2px dashed var(--accent-dark);
+  outline-offset: -2px;
+}
+
+.tree-node.dragging {
+  opacity: 0.5;
 }
 
 .tree-node a {

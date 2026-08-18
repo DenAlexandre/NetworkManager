@@ -23,8 +23,21 @@ const TABLES = [
   "apis",
   "equipment",
   "equipment_links",
+  "equipment_port_settings",
   "design_schemas",
+  "switch_configurations",
+  "switch_vlans",
+  "switch_ports",
+  "switch_mrp_configs",
+  "mgate_configurations",
+  "mgate_serial_ports",
+  "mgate_slave_ids",
 ];
+
+// Le catalogue "Type des données" (Type des données > Marques/Types de matériel/Matériel/Liaisons) :
+// conservé tel quel par la réinitialisation, seules les autres tables sont vidées.
+const CATALOG_TABLES = ["device_types", "brands", "link_types", "hardware_models", "hardware_model_ports"];
+const RESET_TABLES = TABLES.filter((t) => t !== "users" && !CATALOG_TABLES.includes(t));
 
 // Columns that hold JSONB data and must be re-stringified before being sent back as an
 // INSERT parameter (node-postgres returns them already parsed as JS objects from SELECT).
@@ -81,6 +94,25 @@ router.post("/database/restore", async (req, res) => {
       );
     }
 
+    await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
+
+  res.json({ success: true });
+});
+
+// Réinitialisation (RAZ) : vide toutes les données de l'application à l'exception des comptes
+// utilisateurs et du catalogue "Type des données" (device_types, brands, link_types,
+// hardware_models, hardware_model_ports), qui restent intacts.
+router.post("/database/reset", async (_req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query(`TRUNCATE ${RESET_TABLES.join(", ")} RESTART IDENTITY CASCADE`);
     await client.query("COMMIT");
   } catch (err) {
     await client.query("ROLLBACK");

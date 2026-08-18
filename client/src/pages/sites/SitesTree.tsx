@@ -1,25 +1,32 @@
 import { useEffect, useMemo, useState } from "react";
+import type { DragEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import { listSites } from "../../api/sites";
 import type { Site } from "../../api/sites";
 import { listZones } from "../../api/zones";
 import type { Zone } from "../../api/zones";
-import { listRooms } from "../../api/rooms";
+import { listRooms, updateRoom } from "../../api/rooms";
 import type { Room } from "../../api/rooms";
+import { ApiError } from "../../api/client";
 import { useSitesTree } from "../../context/SitesTreeContext";
+
+const ROOM_DND_TYPE = "application/x-networkmanager-room-id";
 
 export function SitesTree() {
   const params = useParams();
   const activeSiteId = Number(params.siteId ?? params.id) || null;
   const activeZoneId = Number(params.zoneId) || null;
   const activeRoomId = Number(params.roomId) || null;
-  const { version } = useSitesTree();
+  const { version, refresh } = useSitesTree();
 
   const [sites, setSites] = useState<Site[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [collapsedSites, setCollapsedSites] = useState<Set<number>>(new Set());
   const [collapsedZones, setCollapsedZones] = useState<Set<number>>(new Set());
+  const [draggingRoomId, setDraggingRoomId] = useState<number | null>(null);
+  const [dragOverZoneId, setDragOverZoneId] = useState<number | null>(null);
+  const [moveError, setMoveError] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([listSites(), listZones(), listRooms()]).then(([{ sites: s }, { zones: z }, { rooms: r }]) => {
@@ -67,6 +74,42 @@ export function SitesTree() {
     });
   }
 
+  function handleRoomDragStart(e: DragEvent, room: Room) {
+    e.dataTransfer.setData(ROOM_DND_TYPE, String(room.id));
+    e.dataTransfer.effectAllowed = "move";
+    setDraggingRoomId(room.id);
+  }
+
+  function handleRoomDragEnd() {
+    setDraggingRoomId(null);
+    setDragOverZoneId(null);
+  }
+
+  function handleZoneDragOver(e: DragEvent) {
+    if (!e.dataTransfer.types.includes(ROOM_DND_TYPE)) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  }
+
+  async function handleZoneDrop(e: DragEvent, zone: Zone) {
+    const raw = e.dataTransfer.getData(ROOM_DND_TYPE);
+    setDragOverZoneId(null);
+    setDraggingRoomId(null);
+    if (!raw) return;
+    e.preventDefault();
+    const roomId = Number(raw);
+    const room = rooms.find((r) => r.id === roomId);
+    if (!room || room.zoneId === zone.id) return;
+
+    setMoveError(null);
+    try {
+      await updateRoom(roomId, { zoneId: zone.id, name: room.name });
+      refresh();
+    } catch (err) {
+      setMoveError(err instanceof ApiError ? err.message : "Erreur lors du déplacement de la salle.");
+    }
+  }
+
   return (
     <nav className="tree">
       <ul>
@@ -97,7 +140,15 @@ export function SitesTree() {
                     const zoneExpanded = !collapsedZones.has(zone.id);
                     return (
                       <li key={zone.id}>
-                        <div className={`tree-node${zone.id === activeZoneId ? " active" : ""}`}>
+                        <div
+                          className={`tree-node${zone.id === activeZoneId ? " active" : ""}${
+                            zone.id === dragOverZoneId ? " drag-over" : ""
+                          }`}
+                          onDragOver={handleZoneDragOver}
+                          onDragEnter={() => setDragOverZoneId(zone.id)}
+                          onDragLeave={() => setDragOverZoneId((prev) => (prev === zone.id ? null : prev))}
+                          onDrop={(e) => handleZoneDrop(e, zone)}
+                        >
                           {zoneRooms.length > 0 ? (
                             <button
                               type="button"
@@ -116,7 +167,12 @@ export function SitesTree() {
                           <ul>
                             {zoneRooms.map((room) => (
                               <li key={room.id}>
-                                <div className="tree-node tree-leaf">
+                                <div
+                                  className={`tree-node tree-leaf${room.id === draggingRoomId ? " dragging" : ""}`}
+                                  draggable
+                                  onDragStart={(e) => handleRoomDragStart(e, room)}
+                                  onDragEnd={handleRoomDragEnd}
+                                >
                                   <span className="tree-toggle-spacer" />
                                   <Link
                                     className={room.id === activeRoomId ? "active" : ""}
@@ -139,6 +195,7 @@ export function SitesTree() {
         })}
       </ul>
       {sites.length === 0 && <p className="tree-empty">Aucun site.</p>}
+      {moveError && <p className="error">{moveError}</p>}
     </nav>
   );
 }

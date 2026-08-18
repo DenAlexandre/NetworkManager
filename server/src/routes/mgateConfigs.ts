@@ -33,21 +33,13 @@ function parseId(raw: string) {
 }
 
 router.get("/supported-models", async (_req, res) => {
-  const pairs = Object.entries(MOXA_MODEL_PARSERS).flatMap(([brandName, models]) =>
-    Object.keys(models).map((modelName) => ({ brandName, modelName }))
-  );
-  if (!pairs.length) {
-    return res.json({ hardwareModels: [] });
-  }
-  const conditions = pairs.map((_, i) => `(b.name = $${i * 2 + 1} AND hm.name = $${i * 2 + 2})`).join(" OR ");
-  const params = pairs.flatMap((p) => [p.brandName, p.modelName]);
   const result = await pool.query(
     `SELECT hm.id, hm.name, b.name AS "brandName"
      FROM hardware_models hm
      JOIN brands b ON b.id = hm.brand_id
-     WHERE hm.config_import_enabled = true AND (${conditions})
-     ORDER BY b.name, hm.name`,
-    params
+     JOIN device_types dt ON dt.id = hm.device_type_id
+     WHERE hm.config_import_enabled = true AND dt.name = 'Passerelle MOXA'
+     ORDER BY b.name, hm.name`
   );
   res.json({ hardwareModels: result.rows });
 });
@@ -266,6 +258,135 @@ router.delete("/:id", async (req, res) => {
     return res.status(404).json({ error: "Configuration introuvable." });
   }
   res.status(204).send();
+});
+
+function blank(value: string | null | undefined): string | null {
+  const trimmed = (value ?? "").trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+// Répercute une configuration importée sur le matériel (Gestion du matériel) : crée ou met à jour
+// l'équipement correspondant (nommé d'après le nom d'appareil de la passerelle), et configure
+// l'adresse IP/passerelle/masque de gestion sur le port TCP/IP du modèle de catalogue.
+router.post("/:id/apply-to-equipment", async (req, res) => {
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ error: "Identifiant invalide." });
+  }
+
+  const configResult = await pool.query(
+    `SELECT hardware_model_id AS "hardwareModelId", device_name AS "deviceName", location,
+            ip_address AS "ipAddress", default_gateway AS "defaultGateway", subnet_mask AS "subnetMask"
+     FROM mgate_configurations WHERE id = $1`,
+    [id]
+  );
+  const config = configResult.rows[0];
+  if (!config) {
+    return res.status(404).json({ error: "Configuration introuvable." });
+  }
+  if (!config.deviceName) {
+    return res.status(400).json({ error: "Cette configuration n'a pas de nom d'appareil exploitable." });
+  }
+
+  const hardwareModelResult = await pool.query(
+    "SELECT device_type_id AS \"deviceTypeId\" FROM hardware_models WHERE id = $1",
+    [config.hardwareModelId]
+  );
+  const hardwareModel = hardwareModelResult.rows[0];
+  if (!hardwareModel) {
+    return res.status(404).json({ error: "Modèle de catalogue introuvable." });
+  }
+
+  const existingEquipmentResult = await pool.query(
+    "SELECT id, room_id AS \"roomId\" FROM equipment WHERE name = $1",
+    [config.deviceName]
+  );
+  if (existingEquipmentResult.rowCount && existingEquipmentResult.rowCount > 1) {
+    return res.status(409).json({
+      error: `Plusieurs équipements portent déjà le nom "${config.deviceName}", mise à jour impossible.`,
+    });
+  }
+  const existingEquipment = existingEquipmentResult.rows[0] ?? null;
+
+  const rawRoomId = req.body?.roomId;
+  let roomId: number | null = typeof rawRoomId === "number" && Number.isInteger(rawRoomId) ? rawRoomId : null;
+  if (roomId === null) {
+    if (existingEquipment) {
+      roomId = existingEquipment.roomId;
+    } else if (config.location) {
+      const roomMatchResult = await pool.query("SELECT id FROM rooms WHERE lower(name) = lower($1)", [
+        config.location,
+      ]);
+      if (roomMatchResult.rowCount === 1) {
+        roomId = roomMatchResult.rows[0].id;
+      }
+    }
+  }
+
+  if (roomId === null) {
+    const roomsResult = await pool.query(
+      `SELECT r.id, r.name, z.name AS "zoneName", s.name AS "siteName"
+       FROM rooms r JOIN zones z ON z.id = r.zone_id JOIN sites s ON s.id = z.site_id
+       ORDER BY s.name, z.name, r.name`
+    );
+    return res.json({ requiresRoomSelection: true, rooms: roomsResult.rows });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    let equipmentId: number;
+    if (existingEquipment) {
+      await client.query(
+        "UPDATE equipment SET room_id = $1, device_type_id = $2, hardware_model_id = $3 WHERE id = $4",
+        [roomId, hardwareModel.deviceTypeId, config.hardwareModelId, existingEquipment.id]
+      );
+      equipmentId = existingEquipment.id;
+    } else {
+      const insertedEquipment = await client.query(
+        "INSERT INTO equipment (room_id, device_type_id, hardware_model_id, name) VALUES ($1, $2, $3, $4) RETURNING id",
+        [roomId, hardwareModel.deviceTypeId, config.hardwareModelId, config.deviceName]
+      );
+      equipmentId = insertedEquipment.rows[0].id;
+    }
+
+    const ipPortResult = await client.query(
+      `SELECT hmp.id FROM hardware_model_ports hmp
+       JOIN link_types lt ON lt.id = hmp.link_type_id
+       WHERE hmp.hardware_model_id = $1 AND lt.name = 'TCP/IP'
+       ORDER BY hmp.id LIMIT 1`,
+      [config.hardwareModelId]
+    );
+    const ipPortId = ipPortResult.rows[0]?.id ?? null;
+    if (ipPortId) {
+      await client.query(
+        `INSERT INTO equipment_port_settings
+           (equipment_id, hardware_model_port_id, modbus_address, vlan, ip_address, gateway, subnet_mask)
+         VALUES ($1, $2, NULL, NULL, $3, $4, $5)
+         ON CONFLICT (equipment_id, hardware_model_port_id)
+         DO UPDATE SET ip_address = $3, gateway = $4, subnet_mask = $5`,
+        [equipmentId, ipPortId, blank(config.ipAddress), blank(config.defaultGateway), blank(config.subnetMask)]
+      );
+    }
+
+    await client.query("COMMIT");
+    res.json({
+      equipmentId,
+      equipmentName: config.deviceName,
+      roomId,
+      created: !existingEquipment,
+      ipPortConfigured: !!ipPortId,
+    });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    if ((err as { code?: string }).code === "23503") {
+      return res.status(400).json({ error: "Salle, type de matériel ou modèle introuvable." });
+    }
+    throw err;
+  } finally {
+    client.release();
+  }
 });
 
 router.get("/:id/cfg", async (req, res) => {

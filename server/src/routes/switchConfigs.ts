@@ -44,22 +44,20 @@ function splitPorts(csv: string | null): string[] {
     .filter(Boolean);
 }
 
+// Heuristique : les libellés/OID de type FX/SX/LX désignent un transceiver optique (fibre),
+// tout le reste (TX/T/T4, OID inconnu...) est considéré comme du cuivre (TCP/IP).
+function isFiberPort(speedLabel: string, mauTypeOid: string): boolean {
+  return /FX|SX|LX/i.test(speedLabel || mauTypeOid || "");
+}
+
 router.get("/supported-models", async (_req, res) => {
-  const pairs = Object.entries(SWITCH_MODEL_PARSERS).flatMap(([brandName, models]) =>
-    Object.keys(models).map((modelName) => ({ brandName, modelName }))
-  );
-  if (!pairs.length) {
-    return res.json({ hardwareModels: [] });
-  }
-  const conditions = pairs.map((_, i) => `(b.name = $${i * 2 + 1} AND hm.name = $${i * 2 + 2})`).join(" OR ");
-  const params = pairs.flatMap((p) => [p.brandName, p.modelName]);
   const result = await pool.query(
     `SELECT hm.id, hm.name, b.name AS "brandName"
      FROM hardware_models hm
      JOIN brands b ON b.id = hm.brand_id
-     WHERE hm.config_import_enabled = true AND (${conditions})
-     ORDER BY b.name, hm.name`,
-    params
+     JOIN device_types dt ON dt.id = hm.device_type_id
+     WHERE hm.config_import_enabled = true AND dt.name = 'Switch'
+     ORDER BY b.name, hm.name`
   );
   res.json({ hardwareModels: result.rows });
 });
@@ -323,6 +321,184 @@ router.get("/:id/xml", async (req, res) => {
   }
   res.setHeader("Content-Disposition", `attachment; filename="${config.sys_name || "switch"}.xml"`);
   res.type("application/xml").send(config.raw_xml);
+});
+
+/** Convertit une longueur de préfixe CIDR (ex. 24) en masque décimal pointé (ex. "255.255.255.0"). */
+function prefixToSubnetMask(prefixLength: number): string | null {
+  if (!Number.isInteger(prefixLength) || prefixLength < 0 || prefixLength > 32) return null;
+  const bits = "1".repeat(prefixLength).padEnd(32, "0");
+  const octets = [0, 1, 2, 3].map((i) => Number.parseInt(bits.slice(i * 8, i * 8 + 8), 2));
+  return octets.join(".");
+}
+
+function blank(value: string | null | undefined): string | null {
+  const trimmed = (value ?? "").trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+// Répercute une configuration importée sur le matériel (Gestion du matériel) : crée ou met à jour
+// l'équipement correspondant (nommé d'après le sysName du switch), crée au passage les ports du
+// modèle de catalogue qui manqueraient encore, et configure chaque port (VLAN, et adresse IP/passerelle/
+// masque de gestion sur le port qui porte le VLAN de management).
+router.post("/:id/apply-to-equipment", async (req, res) => {
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ error: "Identifiant invalide." });
+  }
+
+  const configResult = await pool.query(
+    `SELECT hardware_model_id AS "hardwareModelId", sys_name AS "sysName", sys_location AS "sysLocation",
+            management_ip AS "managementIp", gateway_ip AS "gatewayIp", prefix_length AS "prefixLength",
+            management_vlan_id AS "managementVlanId"
+     FROM switch_configurations WHERE id = $1`,
+    [id]
+  );
+  const config = configResult.rows[0];
+  if (!config) {
+    return res.status(404).json({ error: "Configuration introuvable." });
+  }
+  if (!config.sysName) {
+    return res.status(400).json({ error: "Cette configuration n'a pas de nom (sysName) exploitable." });
+  }
+
+  const portsResult = await pool.query(
+    `SELECT port_name AS "portName", mau_type_oid AS "mauTypeOid", speed_label AS "speedLabel", pvid
+     FROM switch_ports WHERE switch_configuration_id = $1 ORDER BY id`,
+    [id]
+  );
+  if (!portsResult.rowCount) {
+    return res.status(400).json({ error: "Cette configuration ne contient aucun port." });
+  }
+
+  const hardwareModelResult = await pool.query(
+    "SELECT device_type_id AS \"deviceTypeId\" FROM hardware_models WHERE id = $1",
+    [config.hardwareModelId]
+  );
+  const hardwareModel = hardwareModelResult.rows[0];
+  if (!hardwareModel) {
+    return res.status(404).json({ error: "Modèle de catalogue introuvable." });
+  }
+
+  const linkTypesResult = await pool.query("SELECT id, name FROM link_types WHERE name IN ('Fibre', 'TCP/IP')");
+  const fiberLinkTypeId = linkTypesResult.rows.find((r) => r.name === "Fibre")?.id;
+  const copperLinkTypeId = linkTypesResult.rows.find((r) => r.name === "TCP/IP")?.id;
+  if (!fiberLinkTypeId || !copperLinkTypeId) {
+    return res.status(400).json({
+      error: "Les types de liaison \"Fibre\" et \"TCP/IP\" doivent exister dans le catalogue (Type des données).",
+    });
+  }
+
+  const existingEquipmentResult = await pool.query(
+    "SELECT id, room_id AS \"roomId\" FROM equipment WHERE name = $1",
+    [config.sysName]
+  );
+  if (existingEquipmentResult.rowCount && existingEquipmentResult.rowCount > 1) {
+    return res.status(409).json({
+      error: `Plusieurs équipements portent déjà le nom "${config.sysName}", mise à jour impossible.`,
+    });
+  }
+  const existingEquipment = existingEquipmentResult.rows[0] ?? null;
+
+  const rawRoomId = req.body?.roomId;
+  let roomId: number | null = typeof rawRoomId === "number" && Number.isInteger(rawRoomId) ? rawRoomId : null;
+  if (roomId === null) {
+    if (existingEquipment) {
+      roomId = existingEquipment.roomId;
+    } else if (config.sysLocation) {
+      const roomMatchResult = await pool.query("SELECT id FROM rooms WHERE lower(name) = lower($1)", [
+        config.sysLocation,
+      ]);
+      if (roomMatchResult.rowCount === 1) {
+        roomId = roomMatchResult.rows[0].id;
+      }
+    }
+  }
+
+  if (roomId === null) {
+    const roomsResult = await pool.query(
+      `SELECT r.id, r.name, z.name AS "zoneName", s.name AS "siteName"
+       FROM rooms r JOIN zones z ON z.id = r.zone_id JOIN sites s ON s.id = z.site_id
+       ORDER BY s.name, z.name, r.name`
+    );
+    return res.json({ requiresRoomSelection: true, rooms: roomsResult.rows });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const existingPortsResult = await client.query(
+      "SELECT id, label FROM hardware_model_ports WHERE hardware_model_id = $1",
+      [config.hardwareModelId]
+    );
+    const portIdByLabel = new Map<string, number>(existingPortsResult.rows.map((r) => [r.label, r.id]));
+    let createdPortCount = 0;
+    for (const p of portsResult.rows) {
+      if (portIdByLabel.has(p.portName)) continue;
+      const linkTypeId = isFiberPort(p.speedLabel, p.mauTypeOid) ? fiberLinkTypeId : copperLinkTypeId;
+      const inserted = await client.query(
+        "INSERT INTO hardware_model_ports (hardware_model_id, link_type_id, label) VALUES ($1, $2, $3) RETURNING id",
+        [config.hardwareModelId, linkTypeId, p.portName]
+      );
+      portIdByLabel.set(p.portName, inserted.rows[0].id);
+      createdPortCount++;
+    }
+
+    let equipmentId: number;
+    if (existingEquipment) {
+      await client.query(
+        "UPDATE equipment SET room_id = $1, device_type_id = $2, hardware_model_id = $3 WHERE id = $4",
+        [roomId, hardwareModel.deviceTypeId, config.hardwareModelId, existingEquipment.id]
+      );
+      equipmentId = existingEquipment.id;
+    } else {
+      const insertedEquipment = await client.query(
+        "INSERT INTO equipment (room_id, device_type_id, hardware_model_id, name) VALUES ($1, $2, $3, $4) RETURNING id",
+        [roomId, hardwareModel.deviceTypeId, config.hardwareModelId, config.sysName]
+      );
+      equipmentId = insertedEquipment.rows[0].id;
+    }
+
+    const subnetMask = prefixToSubnetMask(config.prefixLength);
+    for (const p of portsResult.rows) {
+      const hardwareModelPortId = portIdByLabel.get(p.portName)!;
+      const isManagementPort =
+        !!config.managementVlanId && p.pvid === config.managementVlanId && !!blank(config.managementIp);
+      await client.query(
+        `INSERT INTO equipment_port_settings
+           (equipment_id, hardware_model_port_id, modbus_address, vlan, ip_address, gateway, subnet_mask)
+         VALUES ($1, $2, NULL, $3, $4, $5, $6)
+         ON CONFLICT (equipment_id, hardware_model_port_id)
+         DO UPDATE SET modbus_address = NULL, vlan = $3, ip_address = $4, gateway = $5, subnet_mask = $6`,
+        [
+          equipmentId,
+          hardwareModelPortId,
+          blank(p.pvid ? String(p.pvid) : null),
+          isManagementPort ? blank(config.managementIp) : null,
+          isManagementPort ? blank(config.gatewayIp) : null,
+          isManagementPort ? subnetMask : null,
+        ]
+      );
+    }
+
+    await client.query("COMMIT");
+    res.json({
+      equipmentId,
+      equipmentName: config.sysName,
+      roomId,
+      created: !existingEquipment,
+      portCount: portsResult.rowCount,
+      createdPortCount,
+    });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    if ((err as { code?: string }).code === "23503") {
+      return res.status(400).json({ error: "Salle, type de matériel ou modèle introuvable." });
+    }
+    throw err;
+  } finally {
+    client.release();
+  }
 });
 
 export default router;

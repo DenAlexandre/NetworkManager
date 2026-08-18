@@ -6,7 +6,13 @@ import { deleteZone, listZones } from "../../api/zones";
 import type { Zone } from "../../api/zones";
 import { ApiError } from "../../api/client";
 import { useSitesTree } from "../../context/SitesTreeContext";
+import { useTableQuery } from "../../hooks/useTableQuery";
+import { SortableHeader } from "../../components/SortableHeader";
 import { ZoneFormModal } from "./ZoneFormModal";
+
+function searchFields(item: Zone) {
+  return [item.name];
+}
 
 export function SiteDetailPage() {
   const { siteId } = useParams();
@@ -15,6 +21,7 @@ export function SiteDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { refresh } = useSitesTree();
+  const { search, setSearch, sortKey, sortDir, toggleSort, rows } = useTableQuery(zones, searchFields);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -77,15 +84,23 @@ export function SiteDetailPage() {
           Ajouter une zone
         </button>
       </div>
+      <div className="table-toolbar">
+        <input
+          type="search"
+          placeholder="Filtrer..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
       <table className="table">
         <thead>
           <tr>
-            <th>Zone</th>
+            <SortableHeader label="Zone" field="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
             <th></th>
           </tr>
         </thead>
         <tbody>
-          {zones.map((zone) => (
+          {rows.map((zone) => (
             <tr key={zone.id}>
               <td>
                 <Link to={`/sites/${site.id}/zones/${zone.id}`}>{zone.name}</Link>
@@ -102,7 +117,7 @@ export function SiteDetailPage() {
           ))}
         </tbody>
       </table>
-      {zones.length === 0 && <p className="muted">Aucune zone pour ce site.</p>}
+      {rows.length === 0 && <p className="muted">Aucune zone pour ce site.</p>}
       {modalOpen && (
         <ZoneFormModal
           siteId={site.id}
