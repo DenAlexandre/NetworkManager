@@ -729,10 +729,15 @@ export function DesignPage() {
         childEquipmentId: equipmentId,
         childPortId: portId,
       });
-      // Whatever waypoints the user actually clicked win, exactly as drawn; a direct port-to-port
-      // click with no intermediate waypoint still gets one default ortho "L" corner so it doesn't
-      // render as a diagonal line (no auto-avoidance here — this manual path is authoritative).
-      const points = from.points.length > 0 ? from.points : [orthoConstrain(from.from, to)];
+      // Every waypoint the user actually clicked is already ortho-constrained relative to the
+      // previous one (see handleCanvasMouseDown) — but the very last segment, into the destination
+      // port itself, was never constrained since that click selects a port, not a canvas point.
+      // Add one final ortho corner there too, unless the last point already lines up with the
+      // port on one axis, so the whole path (including a direct port-to-port click) is always
+      // strictly horizontal/vertical, never diagonal.
+      const lastAnchor = from.points[from.points.length - 1] ?? from.from;
+      const needsFinalCorner = lastAnchor.x !== to.x && lastAnchor.y !== to.y;
+      const points = needsFinalCorner ? [...from.points, orthoConstrain(lastAnchor, to)] : from.points;
       const path = points.map((p) => ({ dx: (p.x - from.from.x) / zoom, dy: (p.y - from.from.y) / zoom }));
       setLinkPaths((prev) => ({ ...prev, [link.id]: path }));
       await loadLinks();
