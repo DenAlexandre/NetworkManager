@@ -71,20 +71,13 @@ function App() {
           >
             <Route index element={<EquipmentListPage />} />
             <Route path="links" element={<EquipmentLinksPage />} />
+            <Route path="addressing" element={<AddressingPage />} />
           </Route>
           <Route
             path="apis"
             element={
               <AdminRoute>
                 <ApisListPage />
-              </AdminRoute>
-            }
-          />
-          <Route
-            path="addressing"
-            element={
-              <AdminRoute>
-                <AddressingPage />
               </AdminRoute>
             }
           />

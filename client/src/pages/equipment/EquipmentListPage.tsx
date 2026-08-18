@@ -3,7 +3,9 @@ import { deleteEquipment, listEquipment } from "../../api/equipment";
 import type { Equipment } from "../../api/equipment";
 import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
+import { usePagination } from "../../hooks/usePagination";
 import { SortableHeader } from "../../components/SortableHeader";
+import { Pagination } from "../../components/Pagination";
 import { EquipmentFormModal } from "./EquipmentFormModal";
 
 function searchFields(item: Equipment) {
@@ -53,6 +55,7 @@ export function EquipmentListPage() {
   }, [items, roomFilter, apiFilter]);
 
   const { search, setSearch, sortKey, sortDir, toggleSort, rows } = useTableQuery(filteredItems, searchFields);
+  const { page, setPage, pageCount, pagedItems } = usePagination(rows);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -149,7 +152,7 @@ export function EquipmentListPage() {
           </tr>
         </thead>
         <tbody>
-          {rows.map((item) => (
+          {pagedItems.map((item) => (
             <tr key={item.id}>
               <td>{item.name}</td>
               <td>{item.deviceType}</td>
@@ -173,6 +176,7 @@ export function EquipmentListPage() {
         </tbody>
       </table>
       {rows.length === 0 && <p className="muted">Aucun matériel enregistré.</p>}
+      <Pagination page={page} pageCount={pageCount} onChange={setPage} />
       {modalOpen && (
         <EquipmentFormModal equipmentId={editingId} onClose={() => setModalOpen(false)} onSaved={handleSaved} />
       )}

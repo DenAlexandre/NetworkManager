@@ -3,7 +3,9 @@ import { listAddressing } from "../../api/equipmentPortSettings";
 import type { AddressingEquipment, AddressingPort } from "../../api/equipmentPortSettings";
 import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
+import { usePagination } from "../../hooks/usePagination";
 import { SortableHeader } from "../../components/SortableHeader";
+import { Pagination } from "../../components/Pagination";
 import { AddressingConfigModal } from "./AddressingConfigModal";
 
 function searchFields(item: AddressingEquipment) {
@@ -49,6 +51,7 @@ export function AddressingPage() {
   }, [items, roomFilter, apiFilter]);
 
   const { search, setSearch, sortKey, sortDir, toggleSort, rows } = useTableQuery(filteredItems, searchFields);
+  const { page, setPage, pageCount, pagedItems } = usePagination(rows);
 
   useEffect(() => {
     load();
@@ -78,7 +81,7 @@ export function AddressingPage() {
   return (
     <div className="card">
       <div className="page-header">
-        <h2>Gestion de l'adressage</h2>
+        <h2>Adressage</h2>
       </div>
       {error && <p className="error">{error}</p>}
       <div className="table-toolbar">
@@ -116,7 +119,7 @@ export function AddressingPage() {
           </tr>
         </thead>
         <tbody>
-          {rows.map((item) => (
+          {pagedItems.map((item) => (
             <tr key={item.equipmentId}>
               <td>{item.equipmentName}</td>
               <td>{item.deviceType}</td>
@@ -139,6 +142,7 @@ export function AddressingPage() {
         </tbody>
       </table>
       {rows.length === 0 && <p className="muted">Aucun matériel ne possède de port ModBus ou TCP/IP.</p>}
+      <Pagination page={page} pageCount={pageCount} onChange={setPage} />
       {selected && <AddressingConfigModal equipment={selected} onClose={handleCloseModal} />}
     </div>
   );

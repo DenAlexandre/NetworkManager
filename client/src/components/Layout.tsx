@@ -52,9 +52,6 @@ export function Layout() {
               <NavLink to="/equipment" className="sidebar-link">
                 Gestion du matériel
               </NavLink>
-              <NavLink to="/addressing" className="sidebar-link">
-                Gestion de l'adressage
-              </NavLink>
               <NavLink to="/plans" className="sidebar-link">
                 Gestion des plans
               </NavLink>

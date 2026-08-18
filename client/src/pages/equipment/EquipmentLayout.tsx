@@ -11,6 +11,9 @@ export function EquipmentLayout() {
         <NavLink to="/equipment/links" className="tab">
           Liaisons
         </NavLink>
+        <NavLink to="/equipment/addressing" className="tab">
+          Adressage
+        </NavLink>
       </nav>
       <Outlet />
     </div>
