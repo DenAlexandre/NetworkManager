@@ -1221,6 +1221,10 @@ textarea {
   overflow: auto;
 }
 
+.design-canvas-linkmode {
+  cursor: crosshair;
+}
+
 .design-canvas-zoom-layer {
   position: relative;
   transform-origin: 0 0;
@@ -1253,14 +1257,6 @@ textarea {
   r: 8;
 }
 
-.design-link-corner-x {
-  cursor: ew-resize;
-}
-
-.design-link-corner-y {
-  cursor: ns-resize;
-}
-
 .design-link-corner-both {
   cursor: move;
 }
@@ -1277,6 +1273,12 @@ textarea {
   stroke-width: 1px;
   stroke-dasharray: 4 3;
   pointer-events: none;
+}
+
+.design-link-preview {
+  stroke: var(--accent-dark);
+  stroke-width: 2px;
+  stroke-dasharray: 6 4;
 }
 
 .design-canvas-empty {

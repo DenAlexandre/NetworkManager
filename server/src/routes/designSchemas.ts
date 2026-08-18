@@ -17,6 +17,7 @@ const layoutSchema = z.object({
   ),
   bends: z.record(z.string(), z.number()),
   bendsY: z.record(z.string(), z.number()).optional(),
+  paths: z.record(z.string(), z.array(z.object({ dx: z.number(), dy: z.number() }))).optional(),
   zoom: z.number().optional(),
   textBlocks: z
     .array(

@@ -36,12 +36,21 @@ function textBlockSize(block: Pick<TextBlock, "text" | "fontSize">) {
   };
 }
 
-interface PendingPort {
-  equipmentId: number;
-  portId: number;
+interface LinkDraw {
+  fromEquipmentId: number;
+  fromPortId: number;
+  from: { x: number; y: number };
+  points: { x: number; y: number }[];
 }
 
+// A link's custom path is stored as a list of waypoints relative to its parent port, in
+// zoom-independent units (divide by zoom to store, multiply by zoom to render), so a hand-drawn
+// route stays visually identical as the canvas is zoomed and moves rigidly with the start card.
+type LinkPaths = Record<number, { dx: number; dy: number }[]>;
+
 type Endpoints = Record<string, { x: number; y: number }>;
+type Rect = { x: number; y: number; width: number; height: number };
+type PortRects = Record<string, Rect>;
 
 function endpointKey(equipmentId: number, portId: number) {
   return `${equipmentId}:${portId}`;
@@ -50,6 +59,70 @@ function endpointKey(equipmentId: number, portId: number) {
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
+
+// Axis-aligned segment vs. axis-aligned rect: for a purely horizontal or vertical segment, a
+// simple bounding-box overlap test is exact (the segment's zero-width axis collapses to a
+// point-in-range check, the other axis to a range overlap).
+function segmentIntersectsRect(a: { x: number; y: number }, b: { x: number; y: number }, rect: Rect) {
+  const minX = Math.min(a.x, b.x);
+  const maxX = Math.max(a.x, b.x);
+  const minY = Math.min(a.y, b.y);
+  const maxY = Math.max(a.y, b.y);
+  return minX <= rect.x + rect.width && maxX >= rect.x && minY <= rect.y + rect.height && maxY >= rect.y;
+}
+
+// The rendered link path is always a horizontal/vertical/horizontal (/vertical) elbow through
+// (midX, from.y) and (midX, midY) — see the polyline rendering below.
+function elbowHitsObstacles(
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+  midX: number,
+  midY: number,
+  obstacles: Rect[]
+) {
+  const corner1 = { x: midX, y: from.y };
+  const corner2 = { x: midX, y: midY };
+  const corner3 = { x: to.x, y: midY };
+  const segments: [{ x: number; y: number }, { x: number; y: number }][] = [
+    [from, corner1],
+    [corner1, corner2],
+    [corner2, corner3],
+    [corner3, to],
+  ];
+  return obstacles.some((rect) => segments.some(([a, b]) => segmentIntersectsRect(a, b, rect)));
+}
+
+const AUTO_ROUTE_RATIOS = [0.5, 0.35, 0.65, 0.2, 0.8, 0.1, 0.9, 0.05, 0.95];
+const AUTO_ROUTE_Y_OFFSETS = [0, -40, 40, -80, 80, -140, 140, -220, 220];
+
+// Picks a bend point (midX on the horizontal ratio between the two ports, midY as an offset from
+// the child port) that keeps the elbow clear of every port rectangle it doesn't actually connect
+// to, so a link routed between two cards doesn't visually appear to terminate on an unrelated
+// port in between. Falls back to the plain default (ratio 0.5, no Y offset) if nothing is clear.
+function findAutoRoute(from: { x: number; y: number }, to: { x: number; y: number }, obstacles: Rect[], zoom: number) {
+  const defaultMidX = from.x + 0.5 * (to.x - from.x);
+  if (obstacles.length === 0) return { midX: defaultMidX, midY: to.y };
+  for (const yOffset of AUTO_ROUTE_Y_OFFSETS) {
+    const midY = to.y + yOffset * zoom;
+    for (const ratio of AUTO_ROUTE_RATIOS) {
+      const midX = from.x + ratio * (to.x - from.x);
+      if (!elbowHitsObstacles(from, to, midX, midY, obstacles)) return { midX, midY };
+    }
+  }
+  return { midX: defaultMidX, midY: to.y };
+}
+
+// Inkscape-style ortho constraint for the manual link-drawing mode: snaps the free point to a
+// horizontal or vertical line from the anchor, picking whichever axis has the larger cursor delta.
+function orthoConstrain(anchor: { x: number; y: number }, cursor: { x: number; y: number }) {
+  const dx = cursor.x - anchor.x;
+  const dy = cursor.y - anchor.y;
+  return Math.abs(dx) >= Math.abs(dy) ? { x: cursor.x, y: anchor.y } : { x: anchor.x, y: cursor.y };
+}
+
+// Remembers which API was last being worked on so it's restored automatically after navigating
+// away and back (the component unmounts, losing all React state, on every route change).
+const SELECTED_API_STORAGE_KEY = "design.selectedApiId";
 
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 1;
@@ -87,21 +160,25 @@ export function DesignPage() {
 
   const [cards, setCards] = useState<Card[]>([]);
   const [addEquipmentId, setAddEquipmentId] = useState<number | "">("");
-  const [pendingPort, setPendingPort] = useState<PendingPort | null>(null);
+  const [linkMode, setLinkMode] = useState(false);
+  const [linkDraw, setLinkDraw] = useState<LinkDraw | null>(null);
+  const [linkPreview, setLinkPreview] = useState<{ x: number; y: number } | null>(null);
   const [resizing, setResizing] = useState<{ equipmentId: number; startX: number; startWidth: number } | null>(null);
 
   const [textBlocks, setTextBlocks] = useState<TextBlock[]>([]);
   const [resizingText, setResizingText] = useState<{ id: number; startX: number; startFontSize: number } | null>(null);
   const [endpoints, setEndpoints] = useState<Endpoints>({});
+  const [portRects, setPortRects] = useState<PortRects>({});
   const [naturalSizes, setNaturalSizes] = useState<Record<number, { width: number; height: number }>>({});
+  // Legacy single-bend data from schemas saved before free-form tracing: read-only, used as a
+  // rendering fallback for links that have no entry in linkPaths (never written to anymore).
   const [bendOverrides, setBendOverrides] = useState<Record<number, number>>({});
   const [bendYOverrides, setBendYOverrides] = useState<Record<number, number>>({});
+  const [linkPaths, setLinkPaths] = useState<LinkPaths>({});
   const [selectedCardIds, setSelectedCardIds] = useState<Set<number>>(new Set());
   const [selectedTextIds, setSelectedTextIds] = useState<Set<number>>(new Set());
   const [selectedLinkIds, setSelectedLinkIds] = useState<Set<number>>(new Set());
-  const [bendDrag, setBendDrag] = useState<{ linkId: number; startX: number; startY: number; axis: "x" | "y" | "both" } | null>(
-    null
-  );
+  const [waypointDrag, setWaypointDrag] = useState<{ linkId: number; index: number } | null>(null);
   const [zoom, setZoom] = useState(1);
 
   // Group drag: moves every selected card/text block together, preserving their relative
@@ -130,6 +207,7 @@ export function DesignPage() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const imgRefs = useRef<Record<number, HTMLImageElement | null>>({});
   const cardRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const hasRestoredSavedApi = useRef(false);
 
   useEffect(() => {
     Promise.all([listEquipment(), listPorts(), listEquipmentLinks(), listApis()])
@@ -142,6 +220,18 @@ export function DesignPage() {
       .catch((err) => setError(err instanceof ApiError ? err.message : "Erreur de chargement."))
       .finally(() => setLoading(false));
   }, []);
+
+  // Runs once the initial data load has landed (so `apis` is populated and `handleSelectApi`'s
+  // closure over `equipmentList` isn't stale), restoring whichever API was last worked on.
+  useEffect(() => {
+    if (hasRestoredSavedApi.current || loading) return;
+    hasRestoredSavedApi.current = true;
+    const saved = Number(localStorage.getItem(SELECTED_API_STORAGE_KEY));
+    if (saved && apis.some((a) => a.id === saved)) {
+      handleSelectApi(String(saved));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, apis]);
 
   const equipmentById = useMemo(() => new Map(equipmentList.map((e) => [e.id, e])), [equipmentList]);
   const portsById = useMemo(() => new Map(allPorts.map((p) => [p.id, p])), [allPorts]);
@@ -176,6 +266,7 @@ export function DesignPage() {
     const canvasRect = canvasRef.current?.getBoundingClientRect();
     if (!canvasRect) return;
     const next: Endpoints = {};
+    const nextRects: PortRects = {};
     for (const card of cards) {
       const img = imgRefs.current[card.equipmentId];
       if (!img) continue;
@@ -186,12 +277,16 @@ export function DesignPage() {
       if (!img.naturalWidth || !img.naturalHeight) continue;
       for (const p of modelPorts) {
         if (p.regionX === null || p.regionY === null || p.regionWidth === null || p.regionHeight === null) continue;
-        next[endpointKey(card.equipmentId, p.id)] = {
-          x: imgRect.left - canvasRect.left + ((p.regionX + p.regionWidth / 2) / img.naturalWidth) * imgRect.width,
-          y: imgRect.top - canvasRect.top + ((p.regionY + p.regionHeight / 2) / img.naturalHeight) * imgRect.height,
-        };
+        const key = endpointKey(card.equipmentId, p.id);
+        const rectX = imgRect.left - canvasRect.left + (p.regionX / img.naturalWidth) * imgRect.width;
+        const rectY = imgRect.top - canvasRect.top + (p.regionY / img.naturalHeight) * imgRect.height;
+        const rectWidth = (p.regionWidth / img.naturalWidth) * imgRect.width;
+        const rectHeight = (p.regionHeight / img.naturalHeight) * imgRect.height;
+        next[key] = { x: rectX + rectWidth / 2, y: rectY + rectHeight / 2 };
+        nextRects[key] = { x: rectX, y: rectY, width: rectWidth, height: rectHeight };
       }
     }
+    setPortRects(nextRects);
     setEndpoints(next);
   }
 
@@ -199,6 +294,18 @@ export function DesignPage() {
     recomputeEndpoints();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cards, portsByModel, equipmentById, zoom]);
+
+  useEffect(() => {
+    if (!linkDraw) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setLinkDraw(null);
+        setLinkPreview(null);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [linkDraw]);
 
   useEffect(() => {
     window.addEventListener("resize", recomputeEndpoints);
@@ -397,41 +504,27 @@ export function DesignPage() {
   }
 
   useEffect(() => {
-    if (!bendDrag) return;
+    if (!waypointDrag) return;
     function onMove(e: MouseEvent) {
       const canvasEl = canvasRef.current;
       const canvasRect = canvasEl?.getBoundingClientRect();
-      if (!canvasEl || !canvasRect || !bendDrag) return;
-      const link = links.find((l) => l.id === bendDrag.linkId);
+      if (!canvasEl || !canvasRect || !waypointDrag) return;
+      const link = links.find((l) => l.id === waypointDrag.linkId);
       if (!link) return;
       const from = endpoints[endpointKey(link.parentEquipmentId, link.parentPortId)];
-      const to = endpoints[endpointKey(link.childEquipmentId, link.childPortId)];
-      if (!from || !to) return;
-      // Clamp to the canvas's own scrollable extent (the real frame) rather than the span
-      // between the two ports, so the bend can be dragged out past the equipment cards to
-      // route the link around them, while still staying reachable/visible on the canvas.
-      if (bendDrag.axis !== "y") {
-        const x = clamp(e.clientX - canvasRect.left, 0, canvasEl.scrollWidth);
-        // The horizontal position is stored as a ratio between the two endpoints (not an
-        // absolute pixel position) so it stays proportionally in place, and the link stays
-        // visually identical, when the canvas is zoomed in/out and the endpoints move.
-        const ratio = to.x === from.x ? 0.5 : (x - from.x) / (to.x - from.x);
-        setBendOverrides((prev) => ({ ...prev, [bendDrag.linkId]: ratio }));
-      }
-      if (bendDrag.axis !== "x") {
-        const y = clamp(e.clientY - canvasRect.top, 0, canvasEl.scrollHeight);
-        // The vertical position can't use the same ratio trick: when the two ports are at
-        // (near) the same height, to.y - from.y is ~0 and any ratio would collapse back to the
-        // same point, making a vertical detour impossible for the exact links that need one
-        // most. Instead it's stored as an offset from "to.y", normalized by the current zoom
-        // (like card x/y/width) so it scales correctly if the canvas is later zoomed. An offset
-        // of 0 exactly reproduces the previous 3-segment elbow (no vertical detour).
-        const yOffset = (y - to.y) / zoom;
-        setBendYOverrides((prev) => ({ ...prev, [bendDrag.linkId]: yOffset }));
-      }
+      if (!from) return;
+      const x = clamp(e.clientX - canvasRect.left, 0, canvasEl.scrollWidth);
+      const y = clamp(e.clientY - canvasRect.top, 0, canvasEl.scrollHeight);
+      const dx = (x - from.x) / zoom;
+      const dy = (y - from.y) / zoom;
+      setLinkPaths((prev) => {
+        const path = [...(prev[waypointDrag.linkId] ?? [])];
+        path[waypointDrag.index] = { dx, dy };
+        return { ...prev, [waypointDrag.linkId]: path };
+      });
     }
     function onUp() {
-      setBendDrag(null);
+      setWaypointDrag(null);
     }
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
@@ -439,12 +532,26 @@ export function DesignPage() {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bendDrag]);
+  }, [waypointDrag, links, endpoints, zoom]);
 
-  function handleBendMouseDown(e: ReactMouseEvent, linkId: number, axis: "x" | "y" | "both") {
+  // The very first drag of a waypoint on a link that has no explicit path yet (legacy
+  // bend-based or freshly auto-routed) "bakes in" whatever is currently rendered as an editable
+  // path, so dragging always feels like moving a real point rather than jumping unexpectedly.
+  function handleWaypointMouseDown(
+    e: ReactMouseEvent,
+    linkId: number,
+    index: number,
+    currentPoints: { x: number; y: number }[],
+    from: { x: number; y: number }
+  ) {
     e.stopPropagation();
-    setBendDrag({ linkId, startX: e.clientX, startY: e.clientY, axis });
+    if (!(linkId in linkPaths)) {
+      setLinkPaths((prev) => ({
+        ...prev,
+        [linkId]: currentPoints.map((p) => ({ dx: (p.x - from.x) / zoom, dy: (p.y - from.y) / zoom })),
+      }));
+    }
+    setWaypointDrag({ linkId, index });
   }
 
   async function loadLinks() {
@@ -467,7 +574,10 @@ export function DesignPage() {
 
   function handleRemoveCard(equipmentId: number) {
     setCards((prev) => prev.filter((c) => c.equipmentId !== equipmentId));
-    if (pendingPort?.equipmentId === equipmentId) setPendingPort(null);
+    if (linkDraw?.fromEquipmentId === equipmentId) {
+      setLinkDraw(null);
+      setLinkPreview(null);
+    }
     setSelectedCardIds((prev) => {
       if (!prev.has(equipmentId)) return prev;
       const next = new Set(prev);
@@ -482,6 +592,12 @@ export function DesignPage() {
 
   function handleZoomChange(next: number) {
     setZoom(clamp(next, MIN_ZOOM, MAX_ZOOM));
+  }
+
+  function handleToggleLinkMode() {
+    setLinkMode((prev) => !prev);
+    setLinkDraw(null);
+    setLinkPreview(null);
   }
 
   // Selects everything (cards, text blocks, links) whose canvas position falls inside the
@@ -524,16 +640,16 @@ export function DesignPage() {
     }
 
     const linkIds = new Set<number>();
-    for (const { link, from, to } of visibleLinks) {
-      // endpoints are stored in already-zoomed canvas pixels; convert back to the unzoomed
-      // layer space the marquee rectangle is expressed in.
-      const fx = from.x / zoom;
-      const fy = from.y / zoom;
-      const tx = to.x / zoom;
-      const ty = to.y / zoom;
-      if (fx >= left && fx <= right && fy >= top && fy <= bottom && tx >= left && tx <= right && ty >= top && ty <= bottom) {
-        linkIds.add(link.id);
-      }
+    for (const { link, from, to, points } of visibleLinks) {
+      // endpoints/waypoints are stored in already-zoomed canvas pixels; convert back to the
+      // unzoomed layer space the marquee rectangle is expressed in. The whole path (both ports
+      // plus every waypoint) must fall inside the rectangle for the link to be selected.
+      const allInside = [from, ...points, to].every((p) => {
+        const x = p.x / zoom;
+        const y = p.y / zoom;
+        return x >= left && x <= right && y >= top && y <= bottom;
+      });
+      if (allInside) linkIds.add(link.id);
     }
 
     setSelectedCardIds(cardIds);
@@ -545,6 +661,18 @@ export function DesignPage() {
     if (e.button !== 0) return;
     const canvasRect = canvasRef.current?.getBoundingClientRect();
     if (!canvasRect) return;
+
+    if (linkDraw) {
+      // A click anywhere on the canvas (not on a port) adds a new waypoint, constrained
+      // horizontal/vertical from the last placed point (Inkscape ortho line-tool style).
+      const cursor = { x: e.clientX - canvasRect.left, y: e.clientY - canvasRect.top };
+      const anchor = linkDraw.points[linkDraw.points.length - 1] ?? linkDraw.from;
+      const point = orthoConstrain(anchor, cursor);
+      setLinkDraw({ ...linkDraw, points: [...linkDraw.points, point] });
+      setLinkPreview(point);
+      return;
+    }
+
     const x = (e.clientX - canvasRect.left) / zoom;
     const y = (e.clientY - canvasRect.top) / zoom;
     if (!e.shiftKey) {
@@ -556,30 +684,57 @@ export function DesignPage() {
     setMarqueeRect({ x, y, width: 0, height: 0 });
   }
 
+  function handleCanvasMouseMove(e: ReactMouseEvent) {
+    if (!linkDraw) return;
+    const canvasRect = canvasRef.current?.getBoundingClientRect();
+    if (!canvasRect) return;
+    const cursor = { x: e.clientX - canvasRect.left, y: e.clientY - canvasRect.top };
+    const anchor = linkDraw.points[linkDraw.points.length - 1] ?? linkDraw.from;
+    setLinkPreview(orthoConstrain(anchor, cursor));
+  }
+
   async function handlePortMouseDown(e: ReactMouseEvent, equipmentId: number, portId: number) {
     e.stopPropagation();
-    if (!pendingPort) {
-      setPendingPort({ equipmentId, portId });
+    if (!linkMode) return;
+    const portPosition = endpoints[endpointKey(equipmentId, portId)];
+
+    if (!linkDraw) {
+      if (!portPosition) return;
+      setLinkDraw({ fromEquipmentId: equipmentId, fromPortId: portId, from: portPosition, points: [] });
+      setLinkPreview(portPosition);
       return;
     }
-    if (pendingPort.equipmentId === equipmentId && pendingPort.portId === portId) {
-      setPendingPort(null);
+    if (linkDraw.fromEquipmentId === equipmentId && linkDraw.fromPortId === portId) {
+      setLinkDraw(null);
+      setLinkPreview(null);
       return;
     }
-    if (pendingPort.equipmentId === equipmentId) {
-      setPendingPort({ equipmentId, portId });
+    if (linkDraw.fromEquipmentId === equipmentId) {
+      if (!portPosition) return;
+      setLinkDraw({ fromEquipmentId: equipmentId, fromPortId: portId, from: portPosition, points: [] });
+      setLinkPreview(portPosition);
       return;
     }
-    const from = pendingPort;
-    setPendingPort(null);
+
+    const from = linkDraw;
+    const to = portPosition;
+    setLinkDraw(null);
+    setLinkPreview(null);
+    if (!to) return;
     setError(null);
     try {
-      await createEquipmentLink({
-        parentEquipmentId: from.equipmentId,
-        parentPortId: from.portId,
+      const { link } = await createEquipmentLink({
+        parentEquipmentId: from.fromEquipmentId,
+        parentPortId: from.fromPortId,
         childEquipmentId: equipmentId,
         childPortId: portId,
       });
+      // Whatever waypoints the user actually clicked win, exactly as drawn; a direct port-to-port
+      // click with no intermediate waypoint still gets one default ortho "L" corner so it doesn't
+      // render as a diagonal line (no auto-avoidance here — this manual path is authoritative).
+      const points = from.points.length > 0 ? from.points : [orthoConstrain(from.from, to)];
+      const path = points.map((p) => ({ dx: (p.x - from.from.x) / zoom, dy: (p.y - from.from.y) / zoom }));
+      setLinkPaths((prev) => ({ ...prev, [link.id]: path }));
       await loadLinks();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Erreur lors de la création de la liaison.");
@@ -597,6 +752,11 @@ export function DesignPage() {
         return next;
       });
       setBendYOverrides((prev) => {
+        const next = { ...prev };
+        delete next[linkId];
+        return next;
+      });
+      setLinkPaths((prev) => {
         const next = { ...prev };
         delete next[linkId];
         return next;
@@ -621,16 +781,20 @@ export function DesignPage() {
   async function handleSelectApi(value: string) {
     const apiId = value ? Number(value) : "";
     setSelectedApiId(apiId);
-    setPendingPort(null);
+    setLinkDraw(null);
+    setLinkPreview(null);
     clearSelection();
     if (apiId === "") {
+      localStorage.removeItem(SELECTED_API_STORAGE_KEY);
       setCards([]);
       setBendOverrides({});
       setBendYOverrides({});
+      setLinkPaths({});
       setTextBlocks([]);
       setZoom(1);
       return;
     }
+    localStorage.setItem(SELECTED_API_STORAGE_KEY, String(apiId));
     setSchemaLoading(true);
     setError(null);
     try {
@@ -640,12 +804,14 @@ export function DesignPage() {
         setCards(schema.layout.cards.filter((c) => validEquipmentIds.has(c.equipmentId)));
         setBendOverrides(schema.layout.bends ?? {});
         setBendYOverrides(schema.layout.bendsY ?? {});
+        setLinkPaths(schema.layout.paths ?? {});
         setTextBlocks(schema.layout.textBlocks ?? []);
         setZoom(clamp(schema.layout.zoom ?? 1, MIN_ZOOM, MAX_ZOOM));
       } else {
         setCards([]);
         setBendOverrides({});
         setBendYOverrides({});
+        setLinkPaths({});
         setTextBlocks([]);
         setZoom(1);
       }
@@ -661,7 +827,14 @@ export function DesignPage() {
     setSchemaSaving(true);
     setError(null);
     try {
-      await saveDesignSchema(selectedApiId, { cards, bends: bendOverrides, bendsY: bendYOverrides, zoom, textBlocks });
+      await saveDesignSchema(selectedApiId, {
+        cards,
+        bends: bendOverrides,
+        bendsY: bendYOverrides,
+        paths: linkPaths,
+        zoom,
+        textBlocks,
+      });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Erreur lors de l'enregistrement du schéma.");
     } finally {
@@ -678,16 +851,45 @@ export function DesignPage() {
         const to = endpoints[endpointKey(l.childEquipmentId, l.childPortId)];
         if (!from || !to) return null;
         const parentPort = portsById.get(l.parentPortId);
-        const bendRatio = bendOverrides[l.id] ?? 0.5;
-        const midX = from.x + bendRatio * (to.x - from.x);
-        const bendYOffset = bendYOverrides[l.id] ?? 0;
-        const midY = to.y + bendYOffset * zoom;
+
+        // Intermediate waypoints only (not from/to themselves), in priority order: an explicit
+        // hand-drawn path always wins; a legacy single-bend schema still renders as before;
+        // otherwise a single auto-avoided corner is derived, same as a fresh 2-click link.
+        let points: { x: number; y: number }[];
+        const explicitPath = linkPaths[l.id];
+        if (explicitPath) {
+          points = explicitPath.map((p) => ({ x: from.x + p.dx * zoom, y: from.y + p.dy * zoom }));
+        } else if (l.id in bendOverrides || l.id in bendYOverrides) {
+          const bendRatio = bendOverrides[l.id] ?? 0.5;
+          const midX = from.x + bendRatio * (to.x - from.x);
+          const bendYOffset = bendYOverrides[l.id] ?? 0;
+          const midY = to.y + bendYOffset * zoom;
+          points = [
+            { x: midX, y: from.y },
+            { x: midX, y: midY },
+            { x: to.x, y: midY },
+          ];
+        } else {
+          const ownKeys = new Set([
+            endpointKey(l.parentEquipmentId, l.parentPortId),
+            endpointKey(l.childEquipmentId, l.childPortId),
+          ]);
+          const obstacles = Object.entries(portRects)
+            .filter(([key]) => !ownKeys.has(key))
+            .map(([, rect]) => rect);
+          const auto = findAutoRoute(from, to, obstacles, zoom);
+          points = [
+            { x: auto.midX, y: from.y },
+            { x: auto.midX, y: auto.midY },
+          ];
+        }
+
         return {
           link: l,
           from,
           to,
-          midX,
-          midY,
+          points,
+          isCustomPath: !!explicitPath,
           color: parentPort?.linkTypeColor ?? "#8b5cf6",
           strokeWidth: parentPort?.linkTypeStrokeWidth ?? 3,
         };
@@ -697,13 +899,13 @@ export function DesignPage() {
           link: EquipmentLink;
           from: { x: number; y: number };
           to: { x: number; y: number };
-          midX: number;
-          midY: number;
+          points: { x: number; y: number }[];
+          isCustomPath: boolean;
           color: string;
           strokeWidth: number;
         } => v !== null
       );
-  }, [cards, links, endpoints, portsById, bendOverrides, bendYOverrides, zoom]);
+  }, [cards, links, endpoints, portRects, portsById, linkPaths, bendOverrides, bendYOverrides, zoom]);
 
   async function handleExportSvg() {
     const canvasEl = canvasRef.current;
@@ -780,11 +982,10 @@ export function DesignPage() {
         cardGeoms.push(geom);
       }
 
-      const linkGeoms = visibleLinks.map(({ from, to, midX, midY, color, strokeWidth }) => ({
+      const linkGeoms = visibleLinks.map(({ from, to, points, color, strokeWidth }) => ({
         from,
         to,
-        midX,
-        midY,
+        points,
         color,
         strokeWidth,
       }));
@@ -803,11 +1004,11 @@ export function DesignPage() {
 
       const xs = cardGeoms
         .flatMap((c) => [c.x, c.x + c.width])
-        .concat(linkGeoms.flatMap((l) => [l.from.x, l.to.x, l.midX]))
+        .concat(linkGeoms.flatMap((l) => [l.from.x, l.to.x, ...l.points.map((p) => p.x)]))
         .concat(textGeoms.flatMap((t) => [t.x, t.x + t.width]));
       const ys = cardGeoms
         .flatMap((c) => [c.y, c.y + c.height])
-        .concat(linkGeoms.flatMap((l) => [l.from.y, l.to.y, l.midY]))
+        .concat(linkGeoms.flatMap((l) => [l.from.y, l.to.y, ...l.points.map((p) => p.y)]))
         .concat(textGeoms.flatMap((t) => [t.y, t.y + t.height]));
       const minX = Math.min(0, ...xs);
       const minY = Math.min(0, ...ys);
@@ -820,17 +1021,11 @@ export function DesignPage() {
       const height = Math.ceil(maxY - minY + margin * 2);
 
       const linkMarkup = linkGeoms
-        .map(({ from, to, midX, midY, color, strokeWidth }) => {
-          const points = [
-            [from.x + offsetX, from.y + offsetY],
-            [midX + offsetX, from.y + offsetY],
-            [midX + offsetX, midY + offsetY],
-            [to.x + offsetX, midY + offsetY],
-            [to.x + offsetX, to.y + offsetY],
-          ]
-            .map(([px, py]) => `${px},${py}`)
+        .map(({ from, to, points, color, strokeWidth }) => {
+          const svgPoints = [from, ...points, to]
+            .map(({ x, y }) => `${x + offsetX},${y + offsetY}`)
             .join(" ");
-          return `<polyline points="${points}" fill="none" stroke="${color}" stroke-width="${strokeWidth}" />`;
+          return `<polyline points="${svgPoints}" fill="none" stroke="${color}" stroke-width="${strokeWidth}" />`;
         })
         .join("\n  ");
 
@@ -951,6 +1146,18 @@ export function DesignPage() {
         <span className="design-toolbar-sep" />
 
         <div className="design-toolbar-group">
+          <button
+            type="button"
+            className={linkMode ? "btn btn-sm" : "btn-outline btn-sm"}
+            onClick={handleToggleLinkMode}
+          >
+            {linkMode ? "Mode liaison actif" : "Mode liaison"}
+          </button>
+        </div>
+
+        <span className="design-toolbar-sep" />
+
+        <div className="design-toolbar-group">
           <button type="button" className="btn-outline btn-sm" onClick={handleAddTextBlock}>
             + Texte
           </button>
@@ -990,13 +1197,22 @@ export function DesignPage() {
         </div>
       </div>
 
-      {pendingPort && (
+      {linkMode && !linkDraw && (
+        <p className="muted">Mode liaison actif : cliquez sur un port pour démarrer une liaison.</p>
+      )}
+      {linkDraw && (
         <p className="muted">
-          Cliquez sur un second port pour créer la liaison, ou recliquez sur le premier port pour annuler.
+          Cliquez sur le canevas pour ajouter des points de passage (contraints horizontal/vertical), ou directement
+          sur le port d'arrivée pour terminer la liaison. Échap pour annuler.
         </p>
       )}
 
-      <div className="design-canvas" ref={canvasRef} onMouseDown={handleCanvasMouseDown}>
+      <div
+        className={`design-canvas${linkMode ? " design-canvas-linkmode" : ""}`}
+        ref={canvasRef}
+        onMouseDown={handleCanvasMouseDown}
+        onMouseMove={handleCanvasMouseMove}
+      >
         <div className="design-canvas-zoom-layer" style={{ transform: `scale(${zoom})` }}>
           {cards.map((card) => {
             const equipment = equipmentById.get(card.equipmentId);
@@ -1045,7 +1261,7 @@ export function DesignPage() {
                         <div
                           key={p.id}
                           className={`port-region${
-                            pendingPort?.equipmentId === card.equipmentId && pendingPort.portId === p.id ? " selected" : ""
+                            linkDraw?.fromEquipmentId === card.equipmentId && linkDraw.fromPortId === p.id ? " selected" : ""
                           }${linkedPortIds.has(p.id) ? " linked" : ""}`}
                           style={{
                             left: `${(p.regionX! / naturalSize.width) * 100}%`,
@@ -1122,10 +1338,16 @@ export function DesignPage() {
               height={marqueeRect.height * zoom}
             />
           )}
-          {visibleLinks.map(({ link, from, to, midX, midY, color, strokeWidth }) => {
-            const corner1 = { x: midX, y: from.y };
-            const corner2 = { x: midX, y: midY };
-            const corner3 = { x: to.x, y: midY };
+          {linkDraw && linkPreview && (
+            <polyline
+              className="design-link-preview"
+              points={[linkDraw.from, ...linkDraw.points, linkPreview].map((p) => `${p.x},${p.y}`).join(" ")}
+              fill="none"
+              pointerEvents="none"
+            />
+          )}
+          {visibleLinks.map(({ link, from, to, points, color, strokeWidth }) => {
+            const path = [from, ...points, to];
             const tooltip = `${link.parentEquipmentName} (${link.parentPortLabel}) ↔ ${link.childEquipmentName} (${link.childPortLabel})`;
             const selected = selectedLinkIds.has(link.id);
             const showHandles = selected && selectedLinkIds.size === 1;
@@ -1152,80 +1374,45 @@ export function DesignPage() {
               <g key={link.id}>
                 <polyline
                   className={selected ? "design-link-selected" : undefined}
-                  points={`${from.x},${from.y} ${corner1.x},${corner1.y} ${corner2.x},${corner2.y} ${corner3.x},${corner3.y} ${to.x},${to.y}`}
+                  points={path.map((p) => `${p.x},${p.y}`).join(" ")}
                   fill="none"
                   stroke={color}
                   strokeWidth={strokeWidth}
                   pointerEvents="none"
                 />
-                <line x1={from.x} y1={from.y} x2={corner1.x} y2={corner1.y} className="design-link-hit" onClick={selectLink} onDoubleClick={deleteLink}>
-                  <title>{tooltip}</title>
-                </line>
-                <line
-                  x1={corner1.x}
-                  y1={corner1.y}
-                  x2={corner2.x}
-                  y2={corner2.y}
-                  className="design-link-hit"
-                  onClick={selectLink}
-                  onDoubleClick={deleteLink}
-                >
-                  <title>{tooltip}</title>
-                </line>
-                <line
-                  x1={corner2.x}
-                  y1={corner2.y}
-                  x2={corner3.x}
-                  y2={corner3.y}
-                  className="design-link-hit"
-                  onClick={selectLink}
-                  onDoubleClick={deleteLink}
-                >
-                  <title>{tooltip}</title>
-                </line>
-                <line x1={corner3.x} y1={corner3.y} x2={to.x} y2={to.y} className="design-link-hit" onClick={selectLink} onDoubleClick={deleteLink}>
-                  <title>{tooltip}</title>
-                </line>
-                {showHandles && (
-                  <>
-                    <circle
-                      cx={corner1.x}
-                      cy={corner1.y}
-                      r={6}
-                      className="design-link-corner design-link-corner-x"
-                      style={{ fill: color }}
-                      onMouseDown={(e) => handleBendMouseDown(e, link.id, "x")}
-                      onClick={(e) => e.stopPropagation()}
+                {path.slice(0, -1).map((point, i) => {
+                  const next = path[i + 1];
+                  return (
+                    <line
+                      key={i}
+                      x1={point.x}
+                      y1={point.y}
+                      x2={next.x}
+                      y2={next.y}
+                      className="design-link-hit"
+                      onClick={selectLink}
                       onDoubleClick={deleteLink}
                     >
-                      <title>Glisser pour déplacer horizontalement, double-cliquer pour supprimer</title>
-                    </circle>
+                      <title>{tooltip}</title>
+                    </line>
+                  );
+                })}
+                {showHandles &&
+                  points.map((point, i) => (
                     <circle
-                      cx={corner2.x}
-                      cy={corner2.y}
+                      key={i}
+                      cx={point.x}
+                      cy={point.y}
                       r={6}
                       className="design-link-corner design-link-corner-both"
                       style={{ fill: color }}
-                      onMouseDown={(e) => handleBendMouseDown(e, link.id, "both")}
+                      onMouseDown={(e) => handleWaypointMouseDown(e, link.id, i, points, from)}
                       onClick={(e) => e.stopPropagation()}
                       onDoubleClick={deleteLink}
                     >
-                      <title>Glisser pour déplacer horizontalement ou verticalement, double-cliquer pour supprimer</title>
+                      <title>Glisser pour déplacer, double-cliquer pour supprimer la liaison</title>
                     </circle>
-                    <circle
-                      cx={corner3.x}
-                      cy={corner3.y}
-                      r={6}
-                      className="design-link-corner design-link-corner-y"
-                      style={{ fill: color }}
-                      onMouseDown={(e) => handleBendMouseDown(e, link.id, "y")}
-                      onClick={(e) => e.stopPropagation()}
-                      onDoubleClick={deleteLink}
-                    >
-                      <title>Glisser pour déplacer verticalement, double-cliquer pour supprimer</title>
-                    </circle>
-                  </>
-                )}
+                  ))}
               </g>
             );
           })}

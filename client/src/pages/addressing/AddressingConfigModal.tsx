@@ -43,42 +43,47 @@ export function AddressingConfigModal({ equipment, onClose }: AddressingConfigMo
     }
     return initial;
   });
-  const [savingPortId, setSavingPortId] = useState<number | null>(null);
-  const [savedPortId, setSavedPortId] = useState<number | null>(null);
   const [portErrors, setPortErrors] = useState<Record<number, string>>({});
+  const [savingAll, setSavingAll] = useState(false);
+  const [saveAllError, setSaveAllError] = useState<string | null>(null);
 
   function updateDraft(portId: number, field: keyof PortFields, value: string) {
     setDrafts((prev) => ({ ...prev, [portId]: { ...prev[portId], [field]: value } }));
   }
 
-  async function handleSave(port: AddressingPort) {
-    const draft = drafts[port.hardwareModelPortId];
-    setSavingPortId(port.hardwareModelPortId);
-    setPortErrors((prev) => {
-      const next = { ...prev };
-      delete next[port.hardwareModelPortId];
-      return next;
-    });
-    try {
-      const { port: updated } = await saveEquipmentPortSetting({
-        equipmentId: equipment.equipmentId,
-        hardwareModelPortId: port.hardwareModelPortId,
-        modbusAddress: draft.modbusAddress,
-        vlan: draft.vlan,
-        ipAddress: draft.ipAddress,
-        gateway: draft.gateway,
-        subnetMask: draft.subnetMask,
-      });
-      setDrafts((prev) => ({ ...prev, [updated.hardwareModelPortId]: fieldsFromPort(updated) }));
-      setSavedPortId(port.hardwareModelPortId);
-      setTimeout(() => setSavedPortId((cur) => (cur === port.hardwareModelPortId ? null : cur)), 1500);
-    } catch (err) {
-      setPortErrors((prev) => ({
-        ...prev,
-        [port.hardwareModelPortId]: err instanceof ApiError ? err.message : "Erreur lors de l'enregistrement.",
-      }));
-    } finally {
-      setSavingPortId(null);
+  async function handleSaveAll() {
+    setSavingAll(true);
+    setSaveAllError(null);
+    const errors: string[] = [];
+    for (const port of equipment.ports) {
+      const draft = drafts[port.hardwareModelPortId];
+      try {
+        const { port: updated } = await saveEquipmentPortSetting({
+          equipmentId: equipment.equipmentId,
+          hardwareModelPortId: port.hardwareModelPortId,
+          modbusAddress: draft.modbusAddress,
+          vlan: draft.vlan,
+          ipAddress: draft.ipAddress,
+          gateway: draft.gateway,
+          subnetMask: draft.subnetMask,
+        });
+        setDrafts((prev) => ({ ...prev, [updated.hardwareModelPortId]: fieldsFromPort(updated) }));
+        setPortErrors((prev) => {
+          const next = { ...prev };
+          delete next[port.hardwareModelPortId];
+          return next;
+        });
+      } catch (err) {
+        const message = err instanceof ApiError ? err.message : "Erreur lors de l'enregistrement.";
+        errors.push(`${port.label} : ${message}`);
+        setPortErrors((prev) => ({ ...prev, [port.hardwareModelPortId]: message }));
+      }
+    }
+    setSavingAll(false);
+    if (errors.length === 0) {
+      onClose();
+    } else {
+      setSaveAllError(errors.join("\n"));
     }
   }
 
@@ -94,7 +99,6 @@ export function AddressingConfigModal({ equipment, onClose }: AddressingConfigMo
             <th>Port</th>
             <th>Type</th>
             <th>Configuration</th>
-            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -155,24 +159,24 @@ export function AddressingConfigModal({ equipment, onClose }: AddressingConfigMo
                   </div>
                   {portErrors[port.hardwareModelPortId] && <p className="error">{portErrors[port.hardwareModelPortId]}</p>}
                 </td>
-                <td className="table-actions">
-                  <button
-                    type="button"
-                    className="btn"
-                    disabled={savingPortId === port.hardwareModelPortId}
-                    onClick={() => handleSave(port)}
-                  >
-                    {savedPortId === port.hardwareModelPortId ? "Enregistré ✓" : "Enregistrer"}
-                  </button>
-                </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+      {saveAllError && (
+        <p className="error">
+          {saveAllError.split("\n").map((line, i) => (
+            <span key={i}>
+              {line}
+              <br />
+            </span>
+          ))}
+        </p>
+      )}
       <div className="form-actions">
-        <button type="button" className="btn-outline" onClick={onClose}>
-          Fermer
+        <button type="button" className="btn" disabled={savingAll} onClick={handleSaveAll}>
+          {savingAll ? "Enregistrement..." : "Enregistrer"}
         </button>
       </div>
     </Modal>

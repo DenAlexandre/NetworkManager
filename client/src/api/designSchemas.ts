@@ -4,6 +4,7 @@ export interface DesignSchemaLayout {
   cards: { equipmentId: number; x: number; y: number; width?: number }[];
   bends: Record<number, number>;
   bendsY?: Record<number, number>;
+  paths?: Record<number, { dx: number; dy: number }[]>;
   zoom?: number;
   textBlocks?: { id: number; x: number; y: number; fontSize: number; text: string }[];
 }
