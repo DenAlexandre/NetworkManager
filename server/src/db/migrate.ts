@@ -213,6 +213,130 @@ CREATE TABLE IF NOT EXISTS design_schemas (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_design_schemas_api ON design_schemas(api_id);
+
+-- Gestion des configurations : import de fichiers de configuration MOXA (switchs BRS30 en XML,
+-- passerelles MGate en binaire .cfg MGateManager). Liste independante, non liee a l'inventaire
+-- "equipment" existant.
+CREATE TABLE IF NOT EXISTS switch_configurations (
+  id SERIAL PRIMARY KEY,
+  product_id VARCHAR(100) NOT NULL DEFAULT '',
+  firmware_version VARCHAR(50) NOT NULL DEFAULT '',
+  sys_name VARCHAR(200) NOT NULL DEFAULT '',
+  sys_contact VARCHAR(200) NOT NULL DEFAULT '',
+  sys_location VARCHAR(200) NOT NULL DEFAULT '',
+  management_ip VARCHAR(45) NOT NULL DEFAULT '',
+  prefix_length INTEGER NOT NULL DEFAULT 0,
+  gateway_ip VARCHAR(45) NOT NULL DEFAULT '',
+  management_vlan_id INTEGER NOT NULL DEFAULT 0,
+  raw_xml TEXT NOT NULL,
+  imported_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  imported_by_id INTEGER NOT NULL REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS switch_vlans (
+  id SERIAL PRIMARY KEY,
+  switch_configuration_id INTEGER NOT NULL REFERENCES switch_configurations(id) ON DELETE CASCADE,
+  vlan_index INTEGER NOT NULL,
+  name VARCHAR(200) NOT NULL DEFAULT '',
+  egress_ports TEXT NOT NULL DEFAULT '',
+  forbidden_ports TEXT NOT NULL DEFAULT '',
+  untagged_ports TEXT NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS ix_switch_vlans_config ON switch_vlans(switch_configuration_id);
+
+CREATE TABLE IF NOT EXISTS switch_ports (
+  id SERIAL PRIMARY KEY,
+  switch_configuration_id INTEGER NOT NULL REFERENCES switch_configurations(id) ON DELETE CASCADE,
+  port_name VARCHAR(50) NOT NULL DEFAULT '',
+  admin_status INTEGER NOT NULL DEFAULT 0,
+  power_state INTEGER NOT NULL DEFAULT 0,
+  auto_power_down INTEGER NOT NULL DEFAULT 0,
+  cable_crossing INTEGER NOT NULL DEFAULT 0,
+  mau_type_oid VARCHAR(100) NOT NULL DEFAULT '',
+  speed_label VARCHAR(50) NOT NULL DEFAULT '',
+  auto_neg_admin_status INTEGER NOT NULL DEFAULT 0,
+  pvid INTEGER NOT NULL DEFAULT 0,
+  acceptable_frame_types INTEGER NOT NULL DEFAULT 0,
+  ingress_filtering INTEGER NOT NULL DEFAULT 0,
+  stp_port_state INTEGER NOT NULL DEFAULT 0,
+  lldp_admin_status INTEGER NOT NULL DEFAULT 0,
+  mrp_role VARCHAR(100) NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS ix_switch_ports_config ON switch_ports(switch_configuration_id);
+
+CREATE TABLE IF NOT EXISTS switch_mrp_configs (
+  id SERIAL PRIMARY KEY,
+  switch_configuration_id INTEGER NOT NULL REFERENCES switch_configurations(id) ON DELETE CASCADE,
+  domain_name VARCHAR(200) NOT NULL DEFAULT '',
+  ring_port1 VARCHAR(50) NOT NULL DEFAULT '',
+  ring_port2 VARCHAR(50) NOT NULL DEFAULT '',
+  role_admin_state INTEGER NOT NULL DEFAULT 0,
+  recovery_delay INTEGER NOT NULL DEFAULT 0,
+  vlan_id INTEGER NOT NULL DEFAULT 0,
+  mrm_priority INTEGER NOT NULL DEFAULT 0,
+  row_status INTEGER NOT NULL DEFAULT 0,
+  ring_coupling_port VARCHAR(50) NOT NULL DEFAULT '',
+  ring_coupling_row_status INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS ix_switch_mrp_configs_config ON switch_mrp_configs(switch_configuration_id);
+
+CREATE TABLE IF NOT EXISTS mgate_configurations (
+  id SERIAL PRIMARY KEY,
+  ip_address VARCHAR(45) NOT NULL DEFAULT '',
+  subnet_mask VARCHAR(45) NOT NULL DEFAULT '',
+  default_gateway VARCHAR(45) NOT NULL DEFAULT '',
+  mac_address VARCHAR(17) NOT NULL DEFAULT '',
+  dhcp_enabled BOOLEAN NOT NULL DEFAULT false,
+  dns_server1 VARCHAR(45) NOT NULL DEFAULT '',
+  dns_server2 VARCHAR(45) NOT NULL DEFAULT '',
+  device_name VARCHAR(200) NOT NULL DEFAULT '',
+  description VARCHAR(500) NOT NULL DEFAULT '',
+  location VARCHAR(200) NOT NULL DEFAULT '',
+  contact VARCHAR(200) NOT NULL DEFAULT '',
+  modbus_tcp_port INTEGER NOT NULL DEFAULT 502,
+  max_tcp_sessions INTEGER NOT NULL DEFAULT 16,
+  snmp_enabled BOOLEAN NOT NULL DEFAULT false,
+  snmp_version VARCHAR(20) NOT NULL DEFAULT '',
+  read_community VARCHAR(100) NOT NULL DEFAULT '',
+  write_community VARCHAR(100) NOT NULL DEFAULT '',
+  trap_server VARCHAR(100) NOT NULL DEFAULT '',
+  web_console_enabled BOOLEAN NOT NULL DEFAULT false,
+  telnet_console_enabled BOOLEAN NOT NULL DEFAULT false,
+  raw_cfg BYTEA,
+  imported_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  imported_by_id INTEGER NOT NULL REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS mgate_serial_ports (
+  id SERIAL PRIMARY KEY,
+  mgate_configuration_id INTEGER NOT NULL REFERENCES mgate_configurations(id) ON DELETE CASCADE,
+  port_number INTEGER NOT NULL,
+  enabled BOOLEAN NOT NULL DEFAULT false,
+  interface VARCHAR(20) NOT NULL DEFAULT '',
+  baud_rate INTEGER NOT NULL DEFAULT 0,
+  data_bits INTEGER NOT NULL DEFAULT 0,
+  parity VARCHAR(20) NOT NULL DEFAULT '',
+  stop_bits INTEGER NOT NULL DEFAULT 0,
+  flow_control VARCHAR(20) NOT NULL DEFAULT '',
+  protocol VARCHAR(50) NOT NULL DEFAULT '',
+  operation_mode VARCHAR(50) NOT NULL DEFAULT '',
+  response_timeout INTEGER NOT NULL DEFAULT 0,
+  recovery_time INTEGER NOT NULL DEFAULT 0,
+  delay_between_poll INTEGER NOT NULL DEFAULT 0,
+  termination_enabled BOOLEAN NOT NULL DEFAULT false,
+  pull_high_low VARCHAR(20) NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS ix_mgate_serial_ports_config ON mgate_serial_ports(mgate_configuration_id);
+
+CREATE TABLE IF NOT EXISTS mgate_slave_ids (
+  id SERIAL PRIMARY KEY,
+  mgate_serial_port_id INTEGER NOT NULL REFERENCES mgate_serial_ports(id) ON DELETE CASCADE,
+  slave_number_start INTEGER NOT NULL,
+  slave_number_end INTEGER NOT NULL,
+  modbus_id_start INTEGER NOT NULL,
+  modbus_id_end INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_mgate_slave_ids_port ON mgate_slave_ids(mgate_serial_port_id);
 `;
 
 async function migrate() {

@@ -18,6 +18,8 @@ import equipmentLinkRoutes from "./routes/equipmentLinks";
 import equipmentPortSettingRoutes from "./routes/equipmentPortSettings";
 import apiRoutes from "./routes/apis";
 import designSchemaRoutes from "./routes/designSchemas";
+import switchConfigRoutes from "./routes/switchConfigs";
+import mgateConfigRoutes from "./routes/mgateConfigs";
 import systemRoutes from "./routes/system";
 
 const app = express();
@@ -44,6 +46,8 @@ app.use("/api/equipment-links", equipmentLinkRoutes);
 app.use("/api/equipment-port-settings", equipmentPortSettingRoutes);
 app.use("/api/apis", apiRoutes);
 app.use("/api/design-schemas", designSchemaRoutes);
+app.use("/api/switch-configs", switchConfigRoutes);
+app.use("/api/mgate-configs", mgateConfigRoutes);
 app.use("/api/system", systemRoutes);
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

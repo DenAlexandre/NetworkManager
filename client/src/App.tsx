@@ -22,6 +22,11 @@ import { EquipmentLinksPage } from "./pages/equipment/EquipmentLinksPage";
 import { ApisListPage } from "./pages/apis/ApisListPage";
 import { AddressingPage } from "./pages/addressing/AddressingPage";
 import { DesignPage } from "./pages/plans/DesignPage";
+import { ConfigurationsLayout } from "./pages/configurations/ConfigurationsLayout";
+import { SwitchConfigPage } from "./pages/configurations/SwitchConfigPage";
+import { SwitchConfigDetailPage } from "./pages/configurations/SwitchConfigDetailPage";
+import { MoxaConfigPage } from "./pages/configurations/MoxaConfigPage";
+import { MoxaConfigDetailPage } from "./pages/configurations/MoxaConfigDetailPage";
 import { SystemLayout } from "./pages/system/SystemLayout";
 import { DatabasePage } from "./pages/system/DatabasePage";
 import { ImportExportPage } from "./pages/system/ImportExportPage";
@@ -89,6 +94,19 @@ function App() {
               </AdminRoute>
             }
           />
+          <Route
+            path="configurations"
+            element={
+              <AdminRoute>
+                <ConfigurationsLayout />
+              </AdminRoute>
+            }
+          >
+            <Route index element={<SwitchConfigPage />} />
+            <Route path="moxa" element={<MoxaConfigPage />} />
+            <Route path="moxa/:id" element={<MoxaConfigDetailPage />} />
+            <Route path=":id" element={<SwitchConfigDetailPage />} />
+          </Route>
           <Route
             path="system"
             element={

@@ -1,0 +1,10 @@
+-------
+Script "manual-firewall-backup.script" executed on July 7th 2026, 15:08:44 (UTC+02:00) by admin
+-------
+######## Starting Preprocessing ########
+######### Ending Preprocessing #########
+CONFIG BACKUP list=all
+=> File downloaded: FWL-MN-GTB14.na
+101 code=00a01c00 msg="Les données suivent" format="raw"
+format=base64,crc=18E4673C,size=172714
+

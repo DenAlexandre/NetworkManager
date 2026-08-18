@@ -1,0 +1,1395 @@
+﻿ ;Variables en supervision;;;;;;;;;;;;;;;Tests Variables Supervision J-10;;;;;;Tests Variables Supervision Migration SEMERU;;;;;;Recettes Variables Supervision MOE/Client;;;;;;;Tests Variables IHM;;;;;;Tests Variables Archivage;;;;;;Description Variables en supervision;;;;;;;;;;;;;;;;;;;;;   ;"DOUBLON A VERIFIER
+( si ligne 5 > 0 )";;;;Commentaire;;;   ;"Automate 
+CONCENTRATEURS";;;;;IHM;;;;"Switch
+Terrain";;;"API 
+PASSERELLE";;API PROCESS;;;"Equipement
+Esclave";;;;;"PASSERELLE 
+MOXA";;"API Passerelle 
+RTU";;;"Equipement 
+Esclave";;;;"AUTOMATE 
+M221";;"Module interface de 
+précâblage (Wago)";;;CABLAGE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Ref.;"Mnémonique détaillée
+En supervsion";;;;;;;;;;;…;Mnémonique concaténée;NBR(CAR);"Description
+ En supervsion";"Test Supervision
+OK / NOK / NT";Date du test;"Qui
+a
+testé";Commentaire;Correction;…;"Test Supervision
+OK / NOK / NT";Date du test;"Qui
+a
+testé";Commentaire;Correction;…;"Test Supervision
+OK / NOK / NT";Date du test;"Qui
+a
+testé";Commentaire;Correction;;…;"Test IHM 
+locale";"Date 
+du test";"Qui
+a
+testé";Commentaire;Correction;…;Verification archivage;"Date 
+du test";"Qui
+a
+testé";Commentaire;Correction;…;"TYPE
+TA/TS/TM/CP/TR/TC";"TOR
+Message état
+0 / Repos";"TOR
+Message état
+1 / Alarme";"TOR
+Valeur initiale";Animation synoptique  ;"Couleurs animation à 0 / 
+à 1 / 
+perte de comunication";…;Unités;Adresse soft de la supervision;"Etendue Echelle
+(Min / Max)";Mise à l'échelle;Type de signal;Type de bande morte;Niveau alarme Supervsion;Format d'affichage;Reference / Mnémonique de Alarme Maitre;Tempo alarme en Seconde;1er seuil Alarme Min;2eme seuil Alarme Min;1er seuil Alarme Max;2eme seuil Alarme Max;…;Mnémonique concaténé;"Description
+ En supervsion";"Adresse
+ de la variable";;Date;Auteur;Commentaire;…;Local;"Nom
+ du Switch";Identifiant Concentrateur;"Adresse
+ de la variable";...;"CVC
+/
+CFO";Mnémonique;"Lien
+SYNTHESE";..;Local;"Nom
+ du Switch";..;"Identifiant
+API Passerelle";"Adresse
+ de la variable";Local;"Identifiant
+API Process";"Adresse
+ de la variable";"Port Moxa /
+Offset /
+Esclave";Local;"Identifiant
+Esclave";"Adresse
+ de la variable";...;"Identifiant
+Passerelle MOXA";"Port Moxa
+Offset /
+Esclave";Local;"Identifiant
+API Passerelle RTU";"Adresse
+ de la variable";Local;"Identifiant
+Esclave";"Adresse
+ de la variable";...;"Identifiant
+API M221";"Adresse
+ de la variable";"No
+Module";"No
+Borne";...;Connectique physique du caur ;" Tenant
+fil couleur";"Tenant
+fil du commun";"Cable 
+N° reperage cable";"Cables
+type";"Aboutissant
+
+bornier";" Aboutissant
+Numéro de bornes";Autocontrôle cablâge;;; ; ;;;;;;;;;;;;;;;;;;;;;
+.;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;N;P;BP-BQ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.;M1;M2;M3;M4;M5;M6;M7;M8;M9;M10;M11;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;#REF!;#REF!;#REF!;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+6;MN_;DC1;G;TB;_M6;STH___;TTA_____;NV0R608B;BS;TM;P01;;MN_.DC1.G.TB._M6.STH___.TTA_____.NV0R608B.BS.TM.P01;51;MES TEMPERATURE AMBIANTE SONDE STH R608B;OK;08/06/2026;WMA;Déjà en production;;;;;;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;TM;;;;;;;°C;;0 / 50;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39536;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"4
+0 / 201";;;;R608B;Sonde RTU;%MW1;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 4;;;;;;;;;;;;;;;;;;;;;;;;;;;
+7;MN_;DC1;G;TB;_M6;STH___;SHY_____;NV0R608B;HY;TM;P01;;MN_.DC1.G.TB._M6.STH___.SHY_____.NV0R608B.HY.TM.P01;51;MES HYGROMETRIE AMBIANTE SONDE STH R608B;OK;08/06/2026;WMA;Déjà en production;;;;;;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;TM;;;;;;;%;;0 / 100;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39537;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"4
+0 / 201";;;;R608B;Sonde RTU;%MW3;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 4;;;;;;;;;;;;;;;;;;;;;;;;;;;
+8;MN_;DC1;G;TB;_M6;STH___;________;NV0R608B;WD;TA;P01;;MN_.DC1.G.TB._M6.STH___.________.NV0R608B.WD.TA.P01;51;DEF COMMUNICATION SONDE STH R608B;NT;08/06/2026;WMA;Non testable avec ModbusDoctor;;;;;;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;TA;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW786.0;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"4
+0 / 201";;;;R608B;Sonde RTU;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 4;;;;;;;;;;;;;;;;;;;;;;;;;;;
+9;MN_;DC1;G;TB;_M6;STH___;TTA_____;NV0R606B;BS;TM;P01;;MN_.DC1.G.TB._M6.STH___.TTA_____.NV0R606B.BS.TM.P01;51;MES TEMPERATURE AMBIANTE SONDE STH R606B;OK;08/06/2026;WMA;Déjà en production;;;;;;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;TM;;;;;;;°C;;0 / 50;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39538;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"4
+0 / 202";;;;R608B;Sonde RTU;%MW1;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 4;;;;;;;;;;;;;;;;;;;;;;;;;;;
+10;MN_;DC1;G;TB;_M6;STH___;SHY_____;NV0R606B;HY;TM;P01;;MN_.DC1.G.TB._M6.STH___.SHY_____.NV0R606B.HY.TM.P01;51;MES HYGROMETRIE AMBIANTE SONDE STH R606B;OK;08/06/2026;WMA;Déjà en production;;;;;;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;TM;;;;;;;%;;0 / 100;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39539;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"4
+0 / 202";;;;R608B;Sonde RTU;%MW3;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 4;;;;;;;;;;;;;;;;;;;;;;;;;;;
+11;MN_;DC1;G;TB;_M6;STH___;________;NV0R606B;WD;TA;P01;;MN_.DC1.G.TB._M6.STH___.________.NV0R606B.WD.TA.P01;51;DEF COMMUNICATION SONDE STH R606B;NT;08/06/2026;WMA;Non testable avec ModbusDoctor;;;;;;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;TA;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW786.1;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"4
+0 / 202";;;;R608B;Sonde RTU;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 4;;;;;;;;;;;;;;;;;;;;;;;;;;;
+12;MN_;DC1;G;TB;_M_;STH___;TTA_____;NV0R712_;BS;TM;P01;;MN_.DC1.G.TB._M_.STH___.TTA_____.NV0R712_.BS.TM.P01;51;MES TEMPERATURE AMBIANTE SONDE STH R712;OK;08/06/2026;WMA;Déjà en production;;;;;;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;TM;;;;;;;°C;;0 / 50;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39540;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"4
+0 / 203";;;;R712;Sonde RTU;%MW1;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 4;;;;;;;;;;;;;;;;;;;;;;;;;;;
+13;MN_;DC1;G;TB;_M_;STH___;SHY_____;NV0R712_;HY;TM;P01;;MN_.DC1.G.TB._M_.STH___.SHY_____.NV0R712_.HY.TM.P01;51;MES HYGROMETRIE AMBIANTE SONDE STH R712;OK;08/06/2026;WMA;Déjà en production;;;;;;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;TM;;;;;;;%;;0 / 100;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39541;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"4
+0 / 203";;;;R712;Sonde RTU;%MW3;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 4;;;;;;;;;;;;;;;;;;;;;;;;;;;
+14;MN_;DC1;G;TB;_M_;STH___;________;NV0R712_;WD;TA;P01;;MN_.DC1.G.TB._M_.STH___.________.NV0R712_.WD.TA.P01;51;DEF COMMUNICATION SONDE STH R712;NT;08/06/2026;WMA;Non testable avec ModbusDoctor;;;;;;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;TA;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW786.2;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"4
+0 / 203";;;;R712;Sonde RTU;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 4;;;;;;;;;;;;;;;;;;;;;;;;;;;
+15;MN_;DC1;G;TB;_M_;STH___;TTA_____;NV0R711_;BS;TM;P01;;MN_.DC1.G.TB._M_.STH___.TTA_____.NV0R711_.BS.TM.P01;51;MES TEMPERATURE AMBIANTE SONDE STH R711;OK;08/06/2026;WMA;Déjà en production;;;;;;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;TM;;;;;;;°C;;0 / 50;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39542;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"4
+0 / 204";;;;R711;Sonde RTU;%MW1;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 4;;;;;;;;;;;;;;;;;;;;;;;;;;;
+16;MN_;DC1;G;TB;_M_;STH___;SHY_____;NV0R711_;HY;TM;P01;;MN_.DC1.G.TB._M_.STH___.SHY_____.NV0R711_.HY.TM.P01;51;MES HYGROMETRIE AMBIANTE SONDE STH R711;OK;08/06/2026;WMA;Déjà en production;;;;;;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;TM;;;;;;;%;;0 / 100;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39543;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"4
+0 / 204";;;;R711;Sonde RTU;%MW3;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 4;;;;;;;;;;;;;;;;;;;;;;;;;;;
+17;MN_;DC1;G;TB;_M_;STH___;________;NV0R711_;WD;TA;P01;;MN_.DC1.G.TB._M_.STH___.________.NV0R711_.WD.TA.P01;51;DEF COMMUNICATION SONDE STH R711;NT;08/06/2026;WMA;Non testable avec ModbusDoctor;;;;;;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;TA;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW786.3;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"4
+0 / 204";;;;R711;Sonde RTU;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 4;;;;;;;;;;;;;;;;;;;;;;;;;;;E
+18;MN_;DC1;G;TB;_M_;STH___;TTA_____;NV0R726_;BS;TM;P01;;MN_.DC1.G.TB._M_.STH___.TTA_____.NV0R726_.BS.TM.P01;51;MES TEMPERATURE AMBIANTE SONDE STH R726;OK;08/06/2026;WMA;Déjà en production;;;;;;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;TM;;;;;;;°C;;0 / 50;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39544;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"4
+0 / 205";;;;R726;Sonde RTU;%MW1;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 4;;;;;;;;;;;;;;;;;;;;;;;;;;;
+19;MN_;DC1;G;TB;_M_;STH___;SHY_____;NV0R726_;HY;TM;P01;;MN_.DC1.G.TB._M_.STH___.SHY_____.NV0R726_.HY.TM.P01;51;MES HYGROMETRIE AMBIANTE SONDE STH R726;OK;08/06/2026;WMA;Déjà en production;;;;;;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;TM;;;;;;;%;;0 / 100;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39545;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"4
+0 / 205";;;;R726;Sonde RTU;%MW3;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 4;;;;;;;;;;;;;;;;;;;;;;;;;;;
+20;MN_;DC1;G;TB;_M_;STH___;________;NV0R726_;WD;TA;P01;;MN_.DC1.G.TB._M_.STH___.________.NV0R726_.WD.TA.P01;51;DEF COMMUNICATION SONDE STH R726;NT;08/06/2026;WMA;Non testable avec ModbusDoctor;;;;;;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;TA;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW786.4;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"4
+0 / 205";;;;R726;Sonde RTU;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 4;;;;;;;;;;;;;;;;;;;;;;;;;;;
+21;MN_;DC1;G;TB;_M_;STH___;TTA_____;NV0R703_;BS;TM;P01;;MN_.DC1.G.TB._M_.STH___.TTA_____.NV0R703_.BS.TM.P01;51;MES TEMPERATURE AMBIANTE SONDE STH R703;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;°C;;0 / 50;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39600;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"3
+-100 / 201";;;;R703;Sonde RTU;%MW1;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+22;MN_;DC1;G;TB;_M_;STH___;SHY_____;NV0R703_;HY;TM;P01;;MN_.DC1.G.TB._M_.STH___.SHY_____.NV0R703_.HY.TM.P01;51;MES HYGROMETRIE AMBIANTE SONDE STH R703;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;%;;0 / 100;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39601;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"3
+-100 / 201";;;;R703;Sonde RTU;%MW3;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+23;MN_;DC1;G;TB;_M_;STH___;________;NV0R703_;WD;TA;P01;;MN_.DC1.G.TB._M_.STH___.________.NV0R703_.WD.TA.P01;51;DEF COMMUNICATION SONDE STH R703;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TA;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW795.0;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"3
+-100 / 201";;;;R703;Sonde RTU;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+24;MN_;DC1;G;TB;_M_;STH___;TTA_____;NV0R702_;BS;TM;P01;;MN_.DC1.G.TB._M_.STH___.TTA_____.NV0R702_.BS.TM.P01;51;MES TEMPERATURE AMBIANTE SONDE STH R702;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;°C;;0 / 50;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39602;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"3
+-100 / 202";;;;R702;Sonde RTU;%MW1;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+25;MN_;DC1;G;TB;_M_;STH___;SHY_____;NV0R702_;HY;TM;P01;;MN_.DC1.G.TB._M_.STH___.SHY_____.NV0R702_.HY.TM.P01;51;MES HYGROMETRIE AMBIANTE SONDE STH R702;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;%;;0 / 100;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39603;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"3
+-100 / 202";;;;R702;Sonde RTU;%MW3;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+26;MN_;DC1;G;TB;_M_;STH___;________;NV0R702_;WD;TA;P01;;MN_.DC1.G.TB._M_.STH___.________.NV0R702_.WD.TA.P01;51;DEF COMMUNICATION SONDE STH R702;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TA;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW795.1;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"3
+-100 / 202";;;;R702;Sonde RTU;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+27;MN_;DC1;G;TB;_M_;STH___;TTA_____;NV0R705B;BS;TM;P01;;MN_.DC1.G.TB._M_.STH___.TTA_____.NV0R705B.BS.TM.P01;51;MES TEMPERATURE AMBIANTE SONDE STH R705B;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;°C;;0 / 50;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39610;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"4
+0 / 201";;;;R705B;Sonde RTU;%MW1;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+28;MN_;DC1;G;TB;_M_;STH___;SHY_____;NV0R705B;HY;TM;P01;;MN_.DC1.G.TB._M_.STH___.SHY_____.NV0R705B.HY.TM.P01;51;MES HYGROMETRIE AMBIANTE SONDE STH R705B;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;%;;0 / 100;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39611;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"4
+0 / 201";;;;R705B;Sonde RTU;%MW3;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+29;MN_;DC1;G;TB;_M_;STH___;________;NV0R705B;WD;TA;P01;;MN_.DC1.G.TB._M_.STH___.________.NV0R705B.WD.TA.P01;51;DEF COMMUNICATION SONDE STH R705B;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TA;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW795.5;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"4
+0 / 201";;;;R705B;Sonde RTU;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+30;MN_;DC1;G;TB;_M_;STH___;TTA_____;NV0R705A;BS;TM;P01;;MN_.DC1.G.TB._M_.STH___.TTA_____.NV0R705A.BS.TM.P01;51;MES TEMPERATURE AMBIANTE SONDE STH R705A;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;°C;;0 / 50;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39612;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"4
+0 / 202";;;;R705A;Sonde RTU;%MW1;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+31;MN_;DC1;G;TB;_M_;STH___;SHY_____;NV0R705A;HY;TM;P01;;MN_.DC1.G.TB._M_.STH___.SHY_____.NV0R705A.HY.TM.P01;51;MES HYGROMETRIE AMBIANTE SONDE STH R705A;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;%;;0 / 100;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39613;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"4
+0 / 202";;;;R705A;Sonde RTU;%MW3;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+32;MN_;DC1;G;TB;_M_;STH___;________;NV0R705A;WD;TA;P01;;MN_.DC1.G.TB._M_.STH___.________.NV0R705A.WD.TA.P01;51;DEF COMMUNICATION SONDE STH R705A;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TA;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW795.6;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"4
+0 / 202";;;;R705A;Sonde RTU;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+33;MN_;DC1;G;TB;_M_;STH___;TTA_____;NV0R701_;BS;TM;P01;;MN_.DC1.G.TB._M_.STH___.TTA_____.NV0R701_.BS.TM.P01;51;MES TEMPERATURE AMBIANTE SONDE STH R701;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;°C;;0 / 50;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39604;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"3
+-100 / 203";;;;R701;Sonde RTU;%MW1;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+34;MN_;DC1;G;TB;_M_;STH___;SHY_____;NV0R701_;HY;TM;P01;;MN_.DC1.G.TB._M_.STH___.SHY_____.NV0R701_.HY.TM.P01;51;MES HYGROMETRIE AMBIANTE SONDE STH R701;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;%;;0 / 100;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39605;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"3
+-100 / 203";;;;R701;Sonde RTU;%MW3;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+35;MN_;DC1;G;TB;_M_;STH___;________;NV0R701_;WD;TA;P01;;MN_.DC1.G.TB._M_.STH___.________.NV0R701_.WD.TA.P01;51;DEF COMMUNICATION SONDE STH R701;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TA;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW795.2;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"3
+-100 / 203";;;;R701;Sonde RTU;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+36;MN_;DC1;G;TB;_M_;STH__1;TTA_____;NV0R706_;BS;TM;P01;;MN_.DC1.G.TB._M_.STH__1.TTA_____.NV0R706_.BS.TM.P01;51;MES TEMPERATURE AMBIANTE SONDE STH R706-1;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;°C;;0 / 50;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39606;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"3
+-100 / 204";;;;R706;Sonde RTU;%MW1;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+37;MN_;DC1;G;TB;_M_;STH__1;SHY_____;NV0R706_;HY;TM;P01;;MN_.DC1.G.TB._M_.STH__1.SHY_____.NV0R706_.HY.TM.P01;51;MES HYGROMETRIE AMBIANTE SONDE STH R706-1;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;%;;0 / 100;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39607;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"3
+-100 / 204";;;;R706;Sonde RTU;%MW3;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+38;MN_;DC1;G;TB;_M_;STH__1;________;NV0R706_;WD;TA;P01;;MN_.DC1.G.TB._M_.STH__1.________.NV0R706_.WD.TA.P01;51;DEF COMMUNICATION SONDE STH R706-1;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TA;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW795.3;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"3
+-100 / 204";;;;R706;Sonde RTU;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+39;MN_;DC1;G;TB;_M_;STH__2;TTA_____;NV0R706_;BS;TM;P01;;MN_.DC1.G.TB._M_.STH__2.TTA_____.NV0R706_.BS.TM.P01;51;MES TEMPERATURE AMBIANTE SONDE STH R706-2;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;°C;;0 / 50;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39608;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"3
+-100 / 205";;;;R706;Sonde RTU;%MW1;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+40;MN_;DC1;G;TB;_M_;STH__2;SHY_____;NV0R706_;HY;TM;P01;;MN_.DC1.G.TB._M_.STH__2.SHY_____.NV0R706_.HY.TM.P01;51;MES HYGROMETRIE AMBIANTE SONDE STH R706-2;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;%;;0 / 100;;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW39609;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"3
+-100 / 205";;;;R706;Sonde RTU;%MW3;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+41;MN_;DC1;G;TB;_M_;STH__2;________;NV0R706_;WD;TA;P01;;MN_.DC1.G.TB._M_.STH__2.________.NV0R706_.WD.TA.P01;51;DEF COMMUNICATION SONDE STH R706-2;NT;08/06/2026;WMA;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TA;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW795.4;;;;;;R703;SWI-MN-R703;;;;;;; ; ; ; ;;MOX-MN-R703;"3
+-100 / 205";;;;R706;Sonde RTU;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+42;MN_;DC1;E;HQ;1MC;OND___;BAT_____;NV0R709A;MA;TS;P01;;MN_.DC1.E.HQ.1MC.OND___.BAT_____.NV0R709A.MA.TS.P01;51;FONCTIONNEMENT SUR BATTERIE ONDULEUR CLIMATISATION 709A;NT;08/06/2026;WMA;Déjà en production;;;NT;12/05/2025;PMO;Non testable par Schneider;;;;;;;;;;;;;;;;;;;;;;TS;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33231.0;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW1.0;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+43;MN_;DC1;E;HQ;1MC;OND___;BYP_____;NV0R709A;MA;TS;P01;;MN_.DC1.E.HQ.1MC.OND___.BYP_____.NV0R709A.MA.TS.P01;51;FONCTIONNEMENT SUR BY-PASS ONDULEUR CLIMATISATION 709A;NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TS;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33231.1;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW1.2;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+44;MN_;DC1;E;HQ;1MC;OND___;BAT_____;NV0R709A;S2;TA;P01;;MN_.DC1.E.HQ.1MC.OND___.BAT_____.NV0R709A.S2.TA.P01;51;2EME SEUIL ALARME AUTONOMIE BATTERIE ONDULEUR CLIMATISATION 709A;NT;08/06/2026;WMA;Déjà en production;;;NT;12/05/2025;PMO;Non realisable;;;;;;;;;;;;;;;;;;;;;;TA;NORMAL;ALARME;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33231.2;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW3.6;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+45;MN_;DC1;E;HQ;1MC;OND___;BAT_____;NV0R709A;AL;TA;P01;;MN_.DC1.E.HQ.1MC.OND___.BAT_____.NV0R709A.AL.TA.P01;51;ALARME TEMPERATURE BATTERIES ONDULEUR CLIMATISATION 709A;NT;08/06/2026;WMA;Déjà en production;;;NT;12/05/2025;PMO;Non realisable;;;;;;;;;;;;;;;;;;;;;;TA;NORMAL;ALARME;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33231.3;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW4.0;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+46;MN_;DC1;E;HQ;1MC;OND___;BYP_____;NV0R709A;HT;TA;P01;;MN_.DC1.E.HQ.1MC.OND___.BYP_____.NV0R709A.HT.TA.P01;51;TRANSFERT IMPOSSIBLE ONDULEUR CLIMATISATION 709A;NT;08/06/2026;WMA;Déjà en production;;;OK;14/05/2025;SPA;Point ajouté dans popup bypass;;;;;;;;;;;;;;;;;;;;;;TA;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33231.5;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW5.2;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+47;MN_;DC1;E;HQ;1MC;OND___;________;NV0R709A;MA;TS;P01;;MN_.DC1.E.HQ.1MC.OND___.________.NV0R709A.MA.TS.P01;51;FONCTIONNEMENT NORMAL SUR ONDULEUR CLIMATISATION 709A;NT;08/06/2026;WMA;Déjà en production;;;NT;12/05/2025;PMO;Non réalisable;;;;;;;;;;;;;;;;;;;;;;TS;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33231.6;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW5.8;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+48;MN_;DC1;E;HQ;1MC;OND___;CHB_____;NV0R709A;PT;TA;P01;;MN_.DC1.E.HQ.1MC.OND___.CHB_____.NV0R709A.PT.TA.P01;51;PRESENCE TENSION AMONT (CHARGEUR) ONDULEUR CLIMATISATION 709A;NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TA;NORMAL;ALARME;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33231.7;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW11.0;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+49;MN_;DC1;E;HQ;1MC;OND___;________;NV0R709A;PT;TA;P01;;MN_.DC1.E.HQ.1MC.OND___.________.NV0R709A.PT.TA.P01;51;PRESENCE TENSION AVAL ONDULEUR CLIMATISATION 709A;NT;08/06/2026;WMA;Déjà en production;;;OK;14/05/2025;SPA;Symbole affiche le bon point;;;;;;;;;;;;;;;;;;;;;;TA;NORMAL;ALARME;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33231.8;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW12.0;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+50;MN_;DC1;E;HQ;1MC;OND___;BYP_____;NV0R709A;AL;TA;P01;;MN_.DC1.E.HQ.1MC.OND___.BYP_____.NV0R709A.AL.TA.P01;51;SYNTHESE ALARME BY-PASS ONDULEUR CLIMATISATION 709A;NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;Non réalisable ;;;;;;;;;;;;;;;;;;;;;;TA;NORMAL;ALARME;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33231.9;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW16.2;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+51;MN_;DC1;E;HQ;1MC;OND___;BYP_____;NV0R709A;SD;TA;P01;;MN_.DC1.E.HQ.1MC.OND___.BYP_____.NV0R709A.SD.TA.P01;51;SYNTHESE DEFAUT BY-PASS ONDULEUR CLIMATISATION 709A;NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TA;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33231.10;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW16.3;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+52;MN_;DC1;E;HQ;1MC;OND___;BAT__VEN;NV0R709A;DF;TA;P01;;MN_.DC1.E.HQ.1MC.OND___.BAT__VEN.NV0R709A.DF.TA.P01;51;DEFAUT VENTILATION LOCAL BATTERIE;NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TA;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33231.11;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW17.12;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+53;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;I1;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.I1.TM.P01;51;INTENSITES (PHASE 1);NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;A;;0;/100;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36950;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW4867;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+54;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;I2;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.I2.TM.P01;51;INTENSITES (PHASE 2);NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;A;;0;/100;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36951;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW4868;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+55;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;I3;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.I3.TM.P01;51;INTENSITES (PHASE 3);NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;A;;0;/100;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36952;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW4869;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+56;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;C1;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.C1.TM.P01;51;FACTEUR DE PUISSANCE PHASE 1 (KVA);NT;08/06/2026;WMA;Déjà en production;;;OK;14/05/2025;SPA;Mesure sans unité;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;;;-1;/100;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36956;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW4876;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+57;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;C2;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.C2.TM.P01;51;FACTEUR DE PUISSANCE PHASE 2 (KVA);NT;08/06/2026;WMA;Déjà en production;;;OK;14/05/2025;SPA;Mesure sans unité;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;;;-1;/100;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36957;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW4877;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+58;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;C3;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.C3.TM.P01;51;FACTEUR DE PUISSANCE PHASE 3 (KVA);NT;08/06/2026;WMA;Déjà en production;;;OK;14/05/2025;SPA;Mesure sans unité;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;;;-1;/100;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36958;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW4878;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+59;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;P1;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.P1.TM.P01;51;PUISSANCE ACTIVE MONO PHASE 1 (KW) ONDULEUR CLIMATISATION 709A;NT;08/06/2026;WMA;Déjà en production;;;NT;12/05/2025;PMO;Non testable par Schneider;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;kW;;0;/10;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36959;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW4879;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+60;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;P2;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.P2.TM.P01;51;PUISSANCE ACTIVE MONO PHASE 2 (KW) ONDULEUR CLIMATISATION 709A;NT;08/06/2026;WMA;Déjà en production;;;NT;12/05/2025;PMO;Non testable par Schneider;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;kW;;0;/10;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36960;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW4880;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+61;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;P3;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.P3.TM.P01;51;PUISSANCE ACTIVE MONO PHASE 3 (KW) ONDULEUR CLIMATISATION 709A;NT;08/06/2026;WMA;Déjà en production;;;NT;12/05/2025;PMO;Non testable par Schneider;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;kW;;0;/10;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36961;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW4881;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+62;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;V1;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.V1.TM.P01;51;TENSIONS SIMPLES (V1);NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;V;;0;/10;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36962;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW4882;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+63;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;V2;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.V2.TM.P01;51;TENSIONS SIMPLES (V2);NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;V;;0;/10;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36963;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW4883;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+64;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;V3;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.V3.TM.P01;51;TENSIONS SIMPLES (V3);NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;V;;0;/10;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36964;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW4884;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+65;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;U1;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.U1.TM.P01;51;TENSIONS COMPOSEES (U1);NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;V;;0;/100;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36965;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW4885;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+66;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;U2;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.U2.TM.P01;51;TENSIONS COMPOSEES (U2);NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;V;;0;/100;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36966;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW4886;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+67;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;U3;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.U3.TM.P01;51;TENSIONS COMPOSEES (U3);NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;V;;0;/100;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36967;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW4887;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+68;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;S1;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.S1.TM.P01;51;PUISSANCE APPARENTE  PHASE 1 (KVA) ONDULEUR CLIMATISATION R709A;NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;kVA;;0;/10;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36968;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW5120;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+69;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;S2;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.S2.TM.P01;51;PUISSANCE APPARENTE  PHASE 2 (KVA) ONDULEUR CLIMATISATION R709A;NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;kVA;;0;/10;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36969;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW5121;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+70;MN_;DC1;E;HQ;1MC;OND___;CPE_____;NV0R709A;S3;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.CPE_____.NV0R709A.S3.TM.P01;51;PUISSANCE APPARENTE  PHASE 3 (KVA) ONDULEUR CLIMATISATION R709A;NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;kVA;;0;/10;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36970;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW5122;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+71;MN_;DC1;E;HQ;1MC;OND___;BAT_____;NV0R709A;U1;TM;P01;;MN_.DC1.E.HQ.1MC.OND___.BAT_____.NV0R709A.U1.TM.P01;51;TENSIONS BATTERIES (V) ONDULEUR CLIMATISATION 709A;NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TM;;;;;;;V;;0;/10;;;;#,##u;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW36971;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW5641;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+72;MN_;DC1;E;HQ;1MC;OND___;BAT_____;NV0R709A;OF;TS;P01;;MN_.DC1.E.HQ.1MC.OND___.BAT_____.NV0R709A.OF.TS.P01;51;POSITION DISJONCTEUR BATTERIES;NT;08/06/2026;WMA;Déjà en production;;;OK;14/05/2025;SPA;Nouveau livellé = DISJONCTEUR;;;;;;;;;;;;;;;;;;;;;;TS;FERME;OUVERT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33231.13;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";%MW3.0;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+73;MN_;DC1;E;HQ;1MC;OND___;________;NV0R709A;WD;TA;P01;;MN_.DC1.E.HQ.1MC.OND___.________.NV0R709A.WD.TA.P01;51;DEF COMMUNICATION LT R709A VOIE 1 UPS SCHNEIDER POMPES;NT;08/06/2026;WMA;Déjà en production;;;OK;12/05/2025;PMO;;;;;;;;;;;;;;;;;;;;;;;TA;NORMAL;DEFAUT;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW801.0;;;;;;R608B;SWI-MN-R608B;;;;;;; ; ; ; ;;MOX-MN-R608B;"3
+100 / 1";;;;R709A;"UPS Schneider
+Pompes Voie 1";;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 3;;;;;;;;;;;;;;;;;;;;;;;;;;;
+74;MN_;DC1;E;HQ;_M6;TDI007;INT_____;NV0R608B;OF;TS;P01;;MN_.DC1.E.HQ._M6.TDI007.INT_____.NV0R608B.OF.TS.P01;51;TDHQ 7 S6 - POSITION INTERRUPTEUR ARRIVEE IG R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1501.1;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;0.1;0.1C;;Bornier WAGO HE10;Blanc;Ciel;802;SYT;XE1;2;;;;;;;;;;;;;;;;;;;;;;;;;;
+75;MN_;DC1;E;HQ;_M6;TDI007;DISQM1__;NV0R608B;OF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DISQM1__.NV0R608B.OF.TA.P01;51;TDHQ 7 S6 QM1 COL1 - DEFAUT POSITION FERMEE DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1501.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;0.1;0.2C;;Bornier WAGO HE10;Bleu foncé;Ciel;804;SYT;XE1;3;;;;;;;;;;;;;;;;;;;;;;;;;;
+76;MN_;DC1;E;HQ;_M6;TDI007;DISQM1__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DISQM1__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QM1 COL1 - DEFAUT DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1501.3;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;0.1;0.3C;;Bornier WAGO HE10;Jaune;Ciel;806;SYT;XE1;4;;;;;;;;;;;;;;;;;;;;;;;;;;
+77;MN_;DC1;E;HQ;_M6;TDI007;DIS003__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS003__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF003/004 COL1 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1501.5;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;0.1;0.5C;;Bornier WAGO HE10;Noir;Ciel;810;SYT;XE1;6;;;;;;;;;;;;;;;;;;;;;;;;;;
+78;MN_;DC1;E;HQ;_M6;TDI007;DIS005__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS005__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF005/006 COL1 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1501.6;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;0.1;0.6C;;Bornier WAGO HE10;Rouge;Ciel;812;SYT;XE1;7;;;;;;;;;;;;;;;;;;;;;;;;;;
+79;MN_;DC1;E;HQ;_M6;TDI007;DIS007__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS007__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF007/008 COL1 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1501.7;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;0.1;0.7C;;Bornier WAGO HE10;Vert;Ciel;814;SYT;XE1;8;;;;;;;;;;;;;;;;;;;;;;;;;;
+80;MN_;DC1;E;HQ;_M6;TDI007;DIS001__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS001__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF001/002 COL1 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1501.4;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;0.1;0.4C;;Bornier WAGO HE10;Marron;Ciel;808;SYT;XE1;5;;;;;;;;;;;;;;;;;;;;;;;;;;
+81;MN_;DC1;E;HQ;_M6;TDI007;DIS011__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS011__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF011/012 COL1 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1501.9;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;0.1;1.1C;;Bornier WAGO HE10;Bleu foncé;Gris;818;SYT;XE1;10;;;;;;;;;;;;;;;;;;;;;;;;;;
+82;MN_;DC1;E;HQ;_M6;TDI007;DIS013__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS013__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF013/014 COL1 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1501.10;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;0.1;1.2C;;Bornier WAGO HE10;Jaune;Gris;820;SYT;XE1;11;;;;;;;;;;;;;;;;;;;;;;;;;;
+83;MN_;DC1;E;HQ;_M6;TDI007;DISQM2__;NV0R608B;OF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DISQM2__.NV0R608B.OF.TA.P01;51;TDHQ 7 S6 QM2 COL2 - DEFAUT POSITION FERMEE DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1501.11;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;0.1;1.3C;;Bornier WAGO HE10;Ciel;Blanc;822;SYT;XE1;12;;;;;;;;;;;;;;;;;;;;;;;;;;
+84;MN_;DC1;E;HQ;_M6;TDI007;DIS009__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS009__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF009/010 COL1 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1501.8;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;0.1;1.0C;;Bornier WAGO HE10;Blanc;Gris;816;SYT;XE1;9;;;;;;;;;;;;;;;;;;;;;;;;;;
+85;MN_;DC1;E;HQ;_M6;TDI007;DIS015__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS015__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF015/016 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1501.13;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;0.1;1.5C;;Bornier WAGO HE10;Jaune;Ciel;902;SYT;XE1;14;;;;;;;;;;;;;;;;;;;;;;;;;;
+86;MN_;DC1;E;HQ;_M6;TDI007;DIS017__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS017__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF017/018 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1501.14;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;0.1;1.6C;;Bornier WAGO HE10;Marron;Ciel;904;SYT;XE1;15;;;;;;;;;;;;;;;;;;;;;;;;;;
+87;MN_;DC1;E;HQ;_M6;TDI007;DIS019__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS019__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF019/020 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1501.15;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;0.1;1.7C;;Bornier WAGO HE10;Noir;Ciel;906;SYT;XE1;16;;;;;;;;;;;;;;;;;;;;;;;;;;
+88;MN_;DC1;E;HQ;_M6;TDI007;DISQM2__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DISQM2__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QM2 COL2 - DEFAUT DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1501.12;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;0.1;1.4C;;Bornier WAGO HE10;Bleu foncé;Ciel;900;SYT;XE1;13;;;;;;;;;;;;;;;;;;;;;;;;;;
+89;MN_;DC1;E;HQ;_M6;TDI007;DIS023__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS023__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF023/024 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1502.1;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.1;0.1C;;Bornier WAGO HE10;Vert;Ciel;910;SYT;XE1;18;;;;;;;;;;;;;;;;;;;;;;;;;;
+90;MN_;DC1;E;HQ;_M6;TDI007;DIS025__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS025__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF025/026 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1502.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.1;0.2C;;Bornier WAGO HE10;Blanc;Gris;912;SYT;XE1;19;;;;;;;;;;;;;;;;;;;;;;;;;;
+91;MN_;DC1;E;HQ;_M6;TDI007;DIS027__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS027__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF027/028 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1502.3;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.1;0.3C;;Bornier WAGO HE10;Bleu foncé;Gris;914;SYT;XE1;20;;;;;;;;;;;;;;;;;;;;;;;;;;
+92;MN_;DC1;E;HQ;_M6;TDI007;DIS021__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS021__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF021/022 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1502.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.1;0.0C;;Bornier WAGO HE10;Rouge;Ciel;908;SYT;XE1;17;;;;;;;;;;;;;;;;;;;;;;;;;;
+93;MN_;DC1;E;HQ;_M6;TDI007;DIS031__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS031__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF031/032 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1502.5;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.1;0.5C;;Bornier WAGO HE10;Marron;Gris;918;SYT;XE1;22;;;;;;;;;;;;;;;;;;;;;;;;;;
+94;MN_;DC1;E;HQ;_M6;TDI007;DIS033__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS033__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF033/034 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1502.6;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.1;0.6C;;Bornier WAGO HE10;Noir;Gris;920;SYT;XE1;23;;;;;;;;;;;;;;;;;;;;;;;;;;
+95;MN_;DC1;E;HQ;_M6;TDI007;DIS035__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS035__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF035/036 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1502.7;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.1;0.7C;;Bornier WAGO HE10;Rouge;Gris;922;SYT;XE1;24;;;;;;;;;;;;;;;;;;;;;;;;;;
+96;MN_;DC1;E;HQ;_M6;TDI007;DIS029__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS029__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF029/030 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1502.4;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.1;0.4C;;Bornier WAGO HE10;Jaune;Gris;916;SYT;XE1;21;;;;;;;;;;;;;;;;;;;;;;;;;;
+97;MN_;DC1;E;HQ;_M6;TDI007;DIS039__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS039__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF039/040 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1502.9;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.1;1.1C;;Bornier WAGO HE10;Blanc;Orange;1002;SYT;XE1;26;;;;;;;;;;;;;;;;;;;;;;;;;;
+98;MN_;DC1;E;HQ;_M6;TDI007;DIS041__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS041__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF041/042 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1502.10;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.1;1.2C;;Bornier WAGO HE10;Bleu foncé;Orange;1004;SYT;XE1;27;;;;;;;;;;;;;;;;;;;;;;;;;;
+99;MN_;DC1;E;HQ;_M6;TDI007;DIS043__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS043__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF043/044 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1502.11;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.1;1.3C;;Bornier WAGO HE10;Jaune;Orange;1006;SYT;XE1;28;;;;;;;;;;;;;;;;;;;;;;;;;;
+100;MN_;DC1;E;HQ;_M6;TDI007;DIS037__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS037__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF037/038 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1502.8;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.1;1.0C;;Bornier WAGO HE10;Vert;Gris;1000;SYT;XE1;25;;;;;;;;;;;;;;;;;;;;;;;;;;
+101;MN_;DC1;E;HQ;_M6;TDI007;DISQM3__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DISQM3__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QM3 COL3 - DEFAUT DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1502.13;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.1;1.5C;;Bornier WAGO HE10;BLeu foncé;Ciel;1010;SYT;XE1;30;;;;;;;;;;;;;;;;;;;;;;;;;;
+102;MN_;DC1;E;HQ;_M6;TDI007;DIS045__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS045__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF045/046 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1502.14;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.1;1.6C;;Bornier WAGO HE10;Jaune;Ciel;1012;SYT;XE1;31;;;;;;;;;;;;;;;;;;;;;;;;;;
+103;MN_;DC1;E;HQ;_M6;TDI007;DIS047__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS047__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF047/048 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1502.15;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.1;1.7C;;Bornier WAGO HE10;Marron;Ciel;1014;SYT;XE1;32;;;;;;;;;;;;;;;;;;;;;;;;;;
+104;MN_;DC1;E;HQ;_M6;TDI007;DISQM3__;NV0R608B;OF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DISQM3__.NV0R608B.OF.TA.P01;51;TDHQ 7 S6 QM3 COL3 - DEFAUT POSITION FERMEE DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1502.12;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.1;1.4C;;Bornier WAGO HE10;Blanc;Ciel;1008;SYT;XE1;29;;;;;;;;;;;;;;;;;;;;;;;;;;
+105;MN_;DC1;E;HQ;_M6;TDI007;DIS051__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS051__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF051/052 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1503.1;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.2;0.1C;;Bornier WAGO HE10;Rouge;Ciel;1018;SYT;XE1;34;;;;;;;;;;;;;;;;;;;;;;;;;;
+106;MN_;DC1;E;HQ;_M6;TDI007;DIS053__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS053__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF053/054 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1503.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.2;0.2C;;Bornier WAGO HE10;Vert;Ciel;1020;SYT;XE1;35;;;;;;;;;;;;;;;;;;;;;;;;;;
+107;MN_;DC1;E;HQ;_M6;TDI007;DIS055__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS055__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF055/056 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1503.3;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.2;0.3C;;Bornier WAGO HE10;Blanc;Gris;1022;SYT;XE1;36;;;;;;;;;;;;;;;;;;;;;;;;;;
+108;MN_;DC1;E;HQ;_M6;TDI007;DIS049__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS049__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF049/050 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1503.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.2;0.0C;;Bornier WAGO HE10;Noir;Ciel;1016;SYT;XE1;33;;;;;;;;;;;;;;;;;;;;;;;;;;
+109;MN_;DC1;E;HQ;_M6;TDI007;DIS059__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS059__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF059/060 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1503.5;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.2;0.5C;;Bornier WAGO HE10;Jaune;Gris;1102;SYT;XE1;38;;;;;;;;;;;;;;;;;;;;;;;;;;
+110;MN_;DC1;E;HQ;_M6;TDI007;DIS061__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS061__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF061/062 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1503.6;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.2;0.6C;;Bornier WAGO HE10;Marron;Gris;1104;SYT;XE1;39;;;;;;;;;;;;;;;;;;;;;;;;;;
+111;MN_;DC1;E;HQ;_M6;TDI007;DIS063__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS063__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF063/064 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1503.7;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.2;0.7C;;Bornier WAGO HE10;Noir;Gris;1106;SYT;XE1;40;;;;;;;;;;;;;;;;;;;;;;;;;;
+112;MN_;DC1;E;HQ;_M6;TDI007;DIS057__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS057__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF057/058 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1503.4;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.2;0.4C;;Bornier WAGO HE10;Bleu foncé;Gris;1100;SYT;XE1;37;;;;;;;;;;;;;;;;;;;;;;;;;;
+113;MN_;DC1;E;HQ;_M6;TDI007;DIS067__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS067__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF067/068 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1503.9;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.2;1.1C;;Bornier WAGO HE10;Vert;Gris;1110;SYT;XE1;42;;;;;;;;;;;;;;;;;;;;;;;;;;
+114;MN_;DC1;E;HQ;_M6;TDI007;DIS069__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS069__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF069/070 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1503.10;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.2;1.2C;;Bornier WAGO HE10;Blanc;Orange;1112;SYT;XE1;43;;;;;;;;;;;;;;;;;;;;;;;;;;
+115;MN_;DC1;E;HQ;_M6;TDI007;DIS071__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS071__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF071/072 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1503.11;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.2;1.3C;;Bornier WAGO HE10;Bleu foncé;Orange;1114;SYT;XE1;44;;;;;;;;;;;;;;;;;;;;;;;;;;
+116;MN_;DC1;E;HQ;_M6;TDI007;DIS065__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS065__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF065/066 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1503.8;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.2;1.0C;;Bornier WAGO HE10;Rouge;Gris;1108;SYT;XE1;41;;;;;;;;;;;;;;;;;;;;;;;;;;
+117;MN_;DC1;E;HQ;_M6;TDI007;DISQM4__;NV0R608B;OF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DISQM4__.NV0R608B.OF.TA.P01;51;TDHQ 7 S6 QM4 COL4 - DEFAUT POSITION FERMEE DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1503.13;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.2;1.5C;;Bornier WAGO HE10;Blanc;Ciel;1118;SYT;XE1;46;;;;;;;;;;;;;;;;;;;;;;;;;;
+118;MN_;DC1;E;HQ;_M6;TDI007;DISQM4__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DISQM4__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QM4 COL4 - DEFAUT DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1503.14;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.2;1.6C;;Bornier WAGO HE10;Bleu foncé;Ciel;1120;SYT;XE1;47;;;;;;;;;;;;;;;;;;;;;;;;;;
+119;MN_;DC1;E;HQ;_M6;TDI007;DIS075__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS075__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF075/076 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1503.15;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.2;1.7C;;Bornier WAGO HE10;Jaune;Ciel;1122;SYT;XE1;48;;;;;;;;;;;;;;;;;;;;;;;;;;
+120;MN_;DC1;E;HQ;_M6;TDI007;DIS073__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS073__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF073/074 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1503.12;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;1.2;1.4C;;Bornier WAGO HE10;Jaune;Orange;1116;SYT;XE1;45;;;;;;;;;;;;;;;;;;;;;;;;;;
+121;MN_;DC1;E;HQ;_M6;TDI007;DIS079__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS079__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF079/080 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1504.1;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.1;0.1C;;Bornier WAGO HE10;Noir;Ciel;1202;SYT;XE1;50;;;;;;;;;;;;;;;;;;;;;;;;;;
+122;MN_;DC1;E;HQ;_M6;TDI007;DIS081__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS081__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF081/082 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1504.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.1;0.2C;;Bornier WAGO HE10;Rouge;Ciel;1204;SYT;XE1;51;;;;;;;;;;;;;;;;;;;;;;;;;;
+123;MN_;DC1;E;HQ;_M6;TDI007;DIS083__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS083__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF083/084 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1504.3;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.1;0.3C;;Bornier WAGO HE10;Vert;Ciel;1206;SYT;XE1;52;;;;;;;;;;;;;;;;;;;;;;;;;;
+124;MN_;DC1;E;HQ;_M6;TDI007;DIS077__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS077__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF077/078 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1504.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.1;0.0C;;Bornier WAGO HE10;Marron;Ciel;1200;SYT;XE1;49;;;;;;;;;;;;;;;;;;;;;;;;;;
+125;MN_;DC1;E;HQ;_M6;TDI007;DIS087__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS087__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF087/088 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1504.5;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.1;0.5C;;Bornier WAGO HE10;Bleu foncé;Gris;1210;SYT;XE1;54;;;;;;;;;;;;;;;;;;;;;;;;;;
+126;MN_;DC1;E;HQ;_M6;TDI007;DIS089__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS089__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF089/090 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1504.6;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.1;0.6C;;Bornier WAGO HE10;Jaune;Gris;1212;SYT;XE1;55;;;;;;;;;;;;;;;;;;;;;;;;;;
+127;MN_;DC1;E;HQ;_M6;TDI007;DIS091__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS091__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF091/092 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1504.7;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.1;0.7C;;Bornier WAGO HE10;Marron;Gris;1214;SYT;XE1;56;;;;;;;;;;;;;;;;;;;;;;;;;;
+128;MN_;DC1;E;HQ;_M6;TDI007;DIS085__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS085__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF085/086 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1504.4;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.1;0.4C;;Bornier WAGO HE10;Blanc;Gris;1208;SYT;XE1;53;;;;;;;;;;;;;;;;;;;;;;;;;;
+129;MN_;DC1;E;HQ;_M6;TDI007;DIS095__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS095__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF095/096 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1504.9;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.1;1.1C;;Bornier WAGO HE10;Rouge;Gris;1218;SYT;XE1;58;;;;;;;;;;;;;;;;;;;;;;;;;;
+130;MN_;DC1;E;HQ;_M6;TDI007;DIS097__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS097__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF097/098 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1504.10;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.1;1.2C;;Bornier WAGO HE10;Vert;Gris;1220;SYT;XE1;59;;;;;;;;;;;;;;;;;;;;;;;;;;
+131;MN_;DC1;E;HQ;_M6;TDI007;DIS099__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS099__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF099/100 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1504.11;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.1;1.3C;;Bornier WAGO HE10;Blanc;Orange;1222;SYT;XE1;60;;;;;;;;;;;;;;;;;;;;;;;;;;
+132;MN_;DC1;E;HQ;_M6;TDI007;DIS093__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS093__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF093/094 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1504.8;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.1;1.0C;;Bornier WAGO HE10;Noir;Gris;1216;SYT;XE1;57;;;;;;;;;;;;;;;;;;;;;;;;;;
+133;MN_;DC1;E;HQ;_M6;TDI007;DIS103__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS103__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF103/104 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1504.13;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.1;1.5C;;Bornier WAGO HE10;Jaune;Orange;1302;SYT;XE1;62;;;;;;;;;;;;;;;;;;;;;;;;;;
+134;MN_;DC1;E;HQ;_M6;TDI007;DISQM6__;NV0R608B;OF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DISQM6__.NV0R608B.OF.TA.P01;51;TDHQ 7 S6 QM6 COL6 - DEFAUT POSITION FERMEE DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1504.14;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.1;1.6C;;Bornier WAGO HE10;Blanc;Ciel;1304;SYT;XE1;63;;;;;;;;;;;;;;;;;;;;;;;;;;
+135;MN_;DC1;E;HQ;_M6;TDI007;DISQM6__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DISQM6__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QM6 COL6 - DEFAUT DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1504.15;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.1;1.7C;;Bornier WAGO HE10;Bleu foncé;Ciel;1306;SYT;XE1;64;;;;;;;;;;;;;;;;;;;;;;;;;;
+136;MN_;DC1;E;HQ;_M6;TDI007;DIS101__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS101__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF101/102 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1504.12;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.1;1.4C;;Bornier WAGO HE10;Bleu foncé;Orange;1300;SYT;XE1;61;;;;;;;;;;;;;;;;;;;;;;;;;;
+137;MN_;DC1;E;HQ;_M6;TDI007;DIS121__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS121__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF121 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1505.1;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.2;0.1C;;Bornier WAGO HE10;Marron;Ciel;1310;SYT;XE1;66;;;;;;;;;;;;;;;;;;;;;;;;;;
+138;MN_;DC1;E;HQ;_M6;TDI007;DIS122__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS122__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF122 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1505.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.2;0.2C;;Bornier WAGO HE10;Noir;Ciel;1312;SYT;XE1;67;;;;;;;;;;;;;;;;;;;;;;;;;;
+139;MN_;DC1;E;HQ;_M6;TDI007;DIS123__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS123__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF123 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1505.3;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.2;0.3C;;Bornier WAGO HE10;Rouge;Ciel;1314;SYT;XE1;68;;;;;;;;;;;;;;;;;;;;;;;;;;
+140;MN_;DC1;E;HQ;_M6;TDI007;DIS120__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS120__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF120 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1505.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.2;0.0C;;Bornier WAGO HE10;Jaune;Ciel;1308;SYT;XE1;65;;;;;;;;;;;;;;;;;;;;;;;;;;
+141;MN_;DC1;E;HQ;_M6;TDI007;DIS125__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS125__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF125 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1505.5;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.2;0.5C;;Bornier WAGO HE10;Blanc;Gris;1318;SYT;XE1;70;;;;;;;;;;;;;;;;;;;;;;;;;;
+142;MN_;DC1;E;HQ;_M6;TDI007;DIS126__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS126__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF126 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1505.6;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.2;0.6C;;Bornier WAGO HE10;Bleu foncé;Gris;1320;SYT;XE1;71;;;;;;;;;;;;;;;;;;;;;;;;;;
+143;MN_;DC1;E;HQ;_M6;TDI007;DIS127__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS127__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF127 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1505.7;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.2;0.7C;;Bornier WAGO HE10;Jaune;Gris;1322;SYT;XE1;72;;;;;;;;;;;;;;;;;;;;;;;;;;
+144;MN_;DC1;E;HQ;_M6;TDI007;DIS124__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS124__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF124 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1505.4;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.2;0.4C;;Bornier WAGO HE10;Vert;Ciel;1316;SYT;XE1;69;;;;;;;;;;;;;;;;;;;;;;;;;;
+145;MN_;DC1;E;HQ;_M6;TDI007;DIS129__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS129__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF129 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1505.9;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.2;1.1C;;Bornier WAGO HE10;Noir;Gris;1402;SYT;XE1;74;;;;;;;;;;;;;;;;;;;;;;;;;;
+146;MN_;DC1;E;HQ;_M6;TDI007;DIS130__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS130__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF130 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1505.10;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.2;1.2C;;Bornier WAGO HE10;Rouge;Gris;1404;SYT;XE1;75;;;;;;;;;;;;;;;;;;;;;;;;;;
+147;MN_;DC1;E;HQ;_M6;TDI007;DIS131__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS131__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF131 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1505.11;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.2;1.3C;;Bornier WAGO HE10;Vert;Gris;1406;SYT;XE1;76;;;;;;;;;;;;;;;;;;;;;;;;;;
+148;MN_;DC1;E;HQ;_M6;TDI007;DIS128__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS128__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF128 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1505.8;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.2;1.0C;;Bornier WAGO HE10;Marron;Gris;1400;SYT;XE1;73;;;;;;;;;;;;;;;;;;;;;;;;;;
+149;MN_;DC1;E;HQ;_M6;TDI007;DIS133__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS133__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF133 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1505.13;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.2;1.5C;;Bornier WAGO HE10;Bleu foncé;Orange;1410;SYT;XE1;78;;;;;;;;;;;;;;;;;;;;;;;;;;
+150;MN_;DC1;E;HQ;_M6;TDI007;DIS134__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS134__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF134 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1505.14;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.2;1.6C;;Bornier WAGO HE10;Jaune;Orange;1412;SYT;XE1;79;;;;;;;;;;;;;;;;;;;;;;;;;;
+151;MN_;DC1;E;HQ;_M6;TDI007;DIS132__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS132__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF132 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1505.12;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.2;1.4C;;Bornier WAGO HE10;Blanc;Orange;1408;SYT;XE1;77;;;;;;;;;;;;;;;;;;;;;;;;;;
+152;MN_;DC1;E;HQ;_M6;TDI008;INT_____;NV0R608B;OF;TS;P01;;MN_.DC1.E.HQ._M6.TDI008.INT_____.NV0R608B.OF.TS.P01;51;TDHQ 8 S6 - POSITION INTERRUPTEUR ARRIVEE IG R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1506.1;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.1;0.1C;;Bornier WAGO HE10;Blanc;Ciel;1418;SYT;XE1;82;;;;;;;;;;;;;;;;;;;;;;;;;;
+153;MN_;DC1;E;HQ;_M6;TDI008;DISQM1__;NV0R608B;OF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DISQM1__.NV0R608B.OF.TA.P01;51;TDHQ 8 S6 QM1 COL1 - DEFAUT POSITION FERMEE DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1506.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.1;0.2C;;Bornier WAGO HE10;Bleu foncé;Ciel;1420;SYT;XE1;83;;;;;;;;;;;;;;;;;;;;;;;;;;
+154;MN_;DC1;E;HQ;_M6;TDI008;DISQM1__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DISQM1__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QM1 COL1 - DEFAUT DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1506.3;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.1;0.3C;;Bornier WAGO HE10;Jaune;Ciel;1422;SYT;XE1;84;;;;;;;;;;;;;;;;;;;;;;;;;;
+155;MN_;DC1;E;HQ;_M6;TDI008;DIS003__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS003__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF003/004 COL1 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1506.5;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.1;0.5C;;Bornier WAGO HE10;Noir;Ciel;1502;SYT;XE1;86;;;;;;;;;;;;;;;;;;;;;;;;;;
+156;MN_;DC1;E;HQ;_M6;TDI008;DIS005__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS005__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF005/006 COL1 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1506.6;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.1;0.6C;;Bornier WAGO HE10;Rouge;Ciel;1504;SYT;XE1;87;;;;;;;;;;;;;;;;;;;;;;;;;;
+157;MN_;DC1;E;HQ;_M6;TDI008;DIS007__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS007__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF007/008 COL1 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1506.7;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.1;0.7C;;Bornier WAGO HE10;Vert;Ciel;1506;SYT;XE1;88;;;;;;;;;;;;;;;;;;;;;;;;;;
+158;MN_;DC1;E;HQ;_M6;TDI008;DIS001__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS001__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF001/002 COL1 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1506.4;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.1;0.4C;;Bornier WAGO HE10;Marron;Ciel;1500;SYT;XE1;85;;;;;;;;;;;;;;;;;;;;;;;;;;
+159;MN_;DC1;E;HQ;_M6;TDI008;DIS011__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS011__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF011/012 COL1 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1506.9;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.1;1.1C;;Bornier WAGO HE10;Bleu foncé;Gris;1510;SYT;XE1;90;;;;;;;;;;;;;;;;;;;;;;;;;;
+160;MN_;DC1;E;HQ;_M6;TDI008;DIS013__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS013__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF013/014 COL1 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1506.10;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.1;1.2C;;Bornier WAGO HE10;Jaune;Gris;1512;SYT;XE1;91;;;;;;;;;;;;;;;;;;;;;;;;;;
+161;MN_;DC1;E;HQ;_M6;TDI008;DISQM2__;NV0R608B;OF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DISQM2__.NV0R608B.OF.TA.P01;51;TDHQ 8 S6 QM2 COL2 - DEFAUT POSITION FERMEE DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1506.11;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.1;1.3C;;Bornier WAGO HE10;Blanc;Ciel;1514;SYT;XE1;92;;;;;;;;;;;;;;;;;;;;;;;;;;
+162;MN_;DC1;E;HQ;_M6;TDI008;DIS009__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS009__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF009/010 COL1 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1506.8;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.1;1.0C;;Bornier WAGO HE10;Blanc;Gris;1508;SYT;XE1;89;;;;;;;;;;;;;;;;;;;;;;;;;;
+163;MN_;DC1;E;HQ;_M6;TDI008;DIS015__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS015__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF015/016 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1506.13;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.1;1.5C;;Bornier WAGO HE10;Jaune;Ciel;1518;SYT;XE1;94;;;;;;;;;;;;;;;;;;;;;;;;;;
+164;MN_;DC1;E;HQ;_M6;TDI008;DIS017__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS017__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF017/018 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1506.14;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.1;1.6C;;Bornier WAGO HE10;Marron;Ciel;1520;SYT;XE1;95;;;;;;;;;;;;;;;;;;;;;;;;;;
+165;MN_;DC1;E;HQ;_M6;TDI008;DIS019__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS019__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF019/020 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1506.15;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.1;1.7C;;Bornier WAGO HE10;Noir;Ciel;1522;SYT;XE1;96;;;;;;;;;;;;;;;;;;;;;;;;;;
+166;MN_;DC1;E;HQ;_M6;TDI008;DISQM2__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DISQM2__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QM2 COL2 - DEFAUT DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1506.12;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.1;1.4C;;Bornier WAGO HE10;Bleu foncé;Ciel;1516;SYT;XE1;93;;;;;;;;;;;;;;;;;;;;;;;;;;
+167;MN_;DC1;E;HQ;_M6;TDI008;DIS023__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS023__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF023/024 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1507.1;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.2;0.1C;;Bornier WAGO HE10;Vert;Ciel;1602;SYT;XE1;98;;;;;;;;;;;;;;;;;;;;;;;;;;
+168;MN_;DC1;E;HQ;_M6;TDI008;DIS025__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS025__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF025/026 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1507.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.2;0.2C;;Bornier WAGO HE10;Blanc;Gris;1604;SYT;XE1;99;;;;;;;;;;;;;;;;;;;;;;;;;;
+169;MN_;DC1;E;HQ;_M6;TDI008;DIS027__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS027__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF027/028 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1507.3;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.2;0.3C;;Bornier WAGO HE10;Bleu foncé;Gris;1606;SYT;XE1;100;;;;;;;;;;;;;;;;;;;;;;;;;;
+170;MN_;DC1;E;HQ;_M6;TDI008;DIS021__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS021__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF021/022 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1507.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.2;0.0C;;Bornier WAGO HE10;Rouge;Ciel;1600;SYT;XE1;97;;;;;;;;;;;;;;;;;;;;;;;;;;
+171;MN_;DC1;E;HQ;_M6;TDI008;DIS031__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS031__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF031/032 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1507.5;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.2;0.5C;;Bornier WAGO HE10;Marron;Gris;1610;SYT;XE1;102;;;;;;;;;;;;;;;;;;;;;;;;;;
+172;MN_;DC1;E;HQ;_M6;TDI008;DIS033__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS033__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF033/034 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1507.6;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.2;0.6C;;Bornier WAGO HE10;Noir;Gris;1612;SYT;XE1;103;;;;;;;;;;;;;;;;;;;;;;;;;;
+173;MN_;DC1;E;HQ;_M6;TDI008;DIS035__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS035__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF035/036 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1507.7;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.2;0.7C;;Bornier WAGO HE10;Rouge;Gris;1614;SYT;XE1;104;;;;;;;;;;;;;;;;;;;;;;;;;;
+174;MN_;DC1;E;HQ;_M6;TDI008;DIS029__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS029__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF029/030 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1507.4;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.2;0.4C;;Bornier WAGO HE10;Jaune;Gris;1608;SYT;XE1;101;;;;;;;;;;;;;;;;;;;;;;;;;;
+175;MN_;DC1;E;HQ;_M6;TDI008;DIS039__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS039__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF039/040 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1507.9;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.2;1.1C;;Bornier WAGO HE10;Blanc;Orange;1618;SYT;XE1;106;;;;;;;;;;;;;;;;;;;;;;;;;;
+176;MN_;DC1;E;HQ;_M6;TDI008;DIS041__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS041__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF041/042 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1507.10;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.2;1.2C;;Bornier WAGO HE10;Bleu foncé;Orange;1620;SYT;XE1;107;;;;;;;;;;;;;;;;;;;;;;;;;;
+177;MN_;DC1;E;HQ;_M6;TDI008;DIS043__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS043__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF043/044 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1507.11;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.2;1.3C;;Bornier WAGO HE10;Jaune;Orange;1622;SYT;XE1;108;;;;;;;;;;;;;;;;;;;;;;;;;;
+178;MN_;DC1;E;HQ;_M6;TDI008;DIS037__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS037__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF037/038 COL2 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1507.8;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.2;1.0C;;Bornier WAGO HE10;Vert;Gris;1616;SYT;XE1;105;;;;;;;;;;;;;;;;;;;;;;;;;;
+179;MN_;DC1;E;HQ;_M6;TDI008;DISQM3__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DISQM3__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QM3 COL3 - DEFAUT DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1507.13;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.2;1.5C;;Bornier WAGO HE10;Bleu foncé;Ciel;1702;SYT;XE1;110;;;;;;;;;;;;;;;;;;;;;;;;;;
+180;MN_;DC1;E;HQ;_M6;TDI008;DIS045__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS045__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF045/046 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1507.14;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.2;1.6C;;Bornier WAGO HE10;Jaune;Ciel;1704;SYT;XE1;111;;;;;;;;;;;;;;;;;;;;;;;;;;
+181;MN_;DC1;E;HQ;_M6;TDI008;DIS047__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS047__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF047/048 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1507.15;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.2;1.7C;;Bornier WAGO HE10;Marron;Ciel;1706;SYT;XE1;112;;;;;;;;;;;;;;;;;;;;;;;;;;
+182;MN_;DC1;E;HQ;_M6;TDI008;DISQM3__;NV0R608B;OF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DISQM3__.NV0R608B.OF.TA.P01;51;TDHQ 8 S6 QM3 COL3 - DEFAUT POSITION FERMEE DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1507.12;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;3.2;1.4C;;Bornier WAGO HE10;Blanc;Ciel;1700;SYT;XE1;109;;;;;;;;;;;;;;;;;;;;;;;;;;
+183;MN_;DC1;E;HQ;_M6;TDI008;DIS051__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS051__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF051/052 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1508.1;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.1;0.1C;;Bornier WAGO HE10;Rouge;Ciel;1710;SYT;XE1;114;;;;;;;;;;;;;;;;;;;;;;;;;;
+184;MN_;DC1;E;HQ;_M6;TDI008;DIS053__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS053__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF053/054 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1508.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.1;0.2C;;Bornier WAGO HE10;Vert;Ciel;1712;SYT;XE1;115;;;;;;;;;;;;;;;;;;;;;;;;;;
+185;MN_;DC1;E;HQ;_M6;TDI008;DIS055__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS055__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF055/056 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1508.3;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.1;0.3C;;Bornier WAGO HE10;Blanc;Gris;1714;SYT;XE1;116;;;;;;;;;;;;;;;;;;;;;;;;;;
+186;MN_;DC1;E;HQ;_M6;TDI008;DIS049__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS049__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF049/050 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1508.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.1;0.0C;;Bornier WAGO HE10;Noir;Ciel;1708;SYT;XE1;113;;;;;;;;;;;;;;;;;;;;;;;;;;
+187;MN_;DC1;E;HQ;_M6;TDI008;DIS059__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS059__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF059/060 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1508.5;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.1;0.5C;;Bornier WAGO HE10;Jaune;Gris;1718;SYT;XE1;118;;;;;;;;;;;;;;;;;;;;;;;;;;
+188;MN_;DC1;E;HQ;_M6;TDI008;DIS061__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS061__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF061/062 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1508.6;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.1;0.6C;;Bornier WAGO HE10;Marron;Gris;1720;SYT;XE1;119;;;;;;;;;;;;;;;;;;;;;;;;;;
+189;MN_;DC1;E;HQ;_M6;TDI008;DIS063__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS063__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF063/064 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1508.7;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.1;0.7C;;Bornier WAGO HE10;Noir;Gris;1722;SYT;XE1;120;;;;;;;;;;;;;;;;;;;;;;;;;;
+190;MN_;DC1;E;HQ;_M6;TDI008;DIS057__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS057__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF057/058 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1508.4;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.1;0.4C;;Bornier WAGO HE10;Bleu foncé;Gris;1716;SYT;XE1;117;;;;;;;;;;;;;;;;;;;;;;;;;;
+191;MN_;DC1;E;HQ;_M6;TDI008;DIS067__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS067__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF067/068 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1508.9;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.1;1.1C;;Bornier WAGO HE10;Vert;Gris;1802;SYT;XE1;122;;;;;;;;;;;;;;;;;;;;;;;;;;
+192;MN_;DC1;E;HQ;_M6;TDI008;DIS069__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS069__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF069/070 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1508.10;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.1;1.2C;;Bornier WAGO HE10;Marron;Noir;1804;SYT;XE1;123;;;;;;;;;;;;;;;;;;;;;;;;;;
+193;MN_;DC1;E;HQ;_M6;TDI008;DIS071__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS071__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF071/072 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1508.11;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.1;1.3C;;Bornier WAGO HE10;Bleu foncé;Orange;1806;SYT;XE1;124;;;;;;;;;;;;;;;;;;;;;;;;;;
+194;MN_;DC1;E;HQ;_M6;TDI008;DIS065__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS065__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF065/066 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1508.8;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.1;1.0C;;Bornier WAGO HE10;Rouge;Gris;1800;SYT;XE1;121;;;;;;;;;;;;;;;;;;;;;;;;;;
+195;MN_;DC1;E;HQ;_M6;TDI008;DISQM4__;NV0R608B;OF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DISQM4__.NV0R608B.OF.TA.P01;51;TDHQ 8 S6 QM4 COL4 - DEFAUT POSITION FERMEE DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1508.13;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.1;1.5C;;Bornier WAGO HE10;Blanc;Ciel;1810;SYT;XE1;126;;;;;;;;;;;;;;;;;;;;;;;;;;
+196;MN_;DC1;E;HQ;_M6;TDI008;DISQM4__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DISQM4__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QM4 COL4 - DEFAUT DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1508.14;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.1;1.6C;;Bornier WAGO HE10;Bleu foncé;Ciel;1812;SYT;XE1;127;;;;;;;;;;;;;;;;;;;;;;;;;;
+197;MN_;DC1;E;HQ;_M6;TDI008;DIS075__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS075__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF075/076 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1508.15;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.1;1.7C;;Bornier WAGO HE10;Jaune;Ciel;1814;SYT;XE1;128;;;;;;;;;;;;;;;;;;;;;;;;;;
+198;MN_;DC1;E;HQ;_M6;TDI008;DIS073__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS073__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF073/074 COL3 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1508.12;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.1;1.4C;;Bornier WAGO HE10;Jaune;Orange;1808;SYT;XE1;125;;;;;;;;;;;;;;;;;;;;;;;;;;
+199;MN_;DC1;E;HQ;_M6;TDI008;DIS079__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS079__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF079/080 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1509.1;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.2;0.1C;;Bornier WAGO HE10;Noir;Ciel;1818;SYT;XE1;130;;;;;;;;;;;;;;;;;;;;;;;;;;
+200;MN_;DC1;E;HQ;_M6;TDI008;DIS081__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS081__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF081/082 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1509.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.2;0.2C;;Bornier WAGO HE10;Rouge;Ciel;1820;SYT;XE1;131;;;;;;;;;;;;;;;;;;;;;;;;;;
+201;MN_;DC1;E;HQ;_M6;TDI008;DIS083__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS083__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF083/084 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1509.3;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.2;0.3C;;Bornier WAGO HE10;Vert;Ciel;1822;SYT;XE1;132;;;;;;;;;;;;;;;;;;;;;;;;;;
+202;MN_;DC1;E;HQ;_M6;TDI008;DIS077__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS077__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF077/078 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1509.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.2;0.0C;;Bornier WAGO HE10;Marron;Ciel;1816;SYT;XE1;129;;;;;;;;;;;;;;;;;;;;;;;;;;
+203;MN_;DC1;E;HQ;_M6;TDI008;DIS087__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS087__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF087/088 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1509.5;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.2;0.5C;;Bornier WAGO HE10;Bleu foncé;Gris;1902;SYT;XE1;134;;;;;;;;;;;;;;;;;;;;;;;;;;
+204;MN_;DC1;E;HQ;_M6;TDI008;DIS089__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS089__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF089/090 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1509.6;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.2;0.6C;;Bornier WAGO HE10;Jaune;Gris;1904;SYT;XE1;135;;;;;;;;;;;;;;;;;;;;;;;;;;
+205;MN_;DC1;E;HQ;_M6;TDI008;DIS091__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS091__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF091/092 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1509.7;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.2;0.7C;;Bornier WAGO HE10;Marron;Gris;1906;SYT;XE1;136;;;;;;;;;;;;;;;;;;;;;;;;;;
+206;MN_;DC1;E;HQ;_M6;TDI008;DIS085__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS085__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF085/086 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1509.4;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.2;0.4C;;Bornier WAGO HE10;Blanc;Gris;1900;SYT;XE1;133;;;;;;;;;;;;;;;;;;;;;;;;;;
+207;MN_;DC1;E;HQ;_M6;TDI008;DIS095__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS095__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF095/096 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1509.9;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.2;1.1C;;Bornier WAGO HE10;Rouge;Gris;1910;SYT;XE1;138;;;;;;;;;;;;;;;;;;;;;;;;;;
+208;MN_;DC1;E;HQ;_M6;TDI008;DIS097__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS097__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF097/098 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1509.10;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.2;1.2C;;Bornier WAGO HE10;Vert;Gris;1912;SYT;XE1;139;;;;;;;;;;;;;;;;;;;;;;;;;;
+209;MN_;DC1;E;HQ;_M6;TDI008;DIS099__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS099__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF099/100 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1509.11;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.2;1.3C;;Bornier WAGO HE10;Blanc;Orange;1914;SYT;XE1;140;;;;;;;;;;;;;;;;;;;;;;;;;;
+210;MN_;DC1;E;HQ;_M6;TDI008;DIS093__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS093__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF093/094 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1509.8;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.2;1.0C;;Bornier WAGO HE10;Noir;Gris;1908;SYT;XE1;137;;;;;;;;;;;;;;;;;;;;;;;;;;
+211;MN_;DC1;E;HQ;_M6;TDI008;DIS103__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS103__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF103/104 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1509.13;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.2;1.5C;;Bornier WAGO HE10;Jaune;Orange;1918;SYT;XE1;142;;;;;;;;;;;;;;;;;;;;;;;;;;
+212;MN_;DC1;E;HQ;_M6;TDI008;DISQM6__;NV0R608B;OF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DISQM6__.NV0R608B.OF.TA.P01;51;TDHQ 8 S6 QM6 COL6 - DEFAUT POSITION FERMEE DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1509.14;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.2;1.6C;;Bornier WAGO HE10;Blanc;Ciel;1920;SYT;XE1;143;;;;;;;;;;;;;;;;;;;;;;;;;;
+213;MN_;DC1;E;HQ;_M6;TDI008;DISQM6__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DISQM6__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QM6 COL6 - DEFAUT DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1509.15;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.2;1.7C;;Bornier WAGO HE10;Bleu foncé;Ciel;1922;SYT;XE1;144;;;;;;;;;;;;;;;;;;;;;;;;;;
+214;MN_;DC1;E;HQ;_M6;TDI008;DIS101__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS101__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF101/102 COL4 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1509.12;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;4.2;1.4C;;Bornier WAGO HE10;Bleu foncé;Orange;1916;SYT;XE1;141;;;;;;;;;;;;;;;;;;;;;;;;;;
+215;MN_;DC1;E;HQ;_M6;TDI008;DIS121__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS121__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF121 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1510.1;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.1;0.1C;;Bornier WAGO HE10;Marron;Ciel;2002;SYT;XE1;146;;;;;;;;;;;;;;;;;;;;;;;;;;
+216;MN_;DC1;E;HQ;_M6;TDI008;DIS122__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS122__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF122 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1510.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.1;0.2C;;Bornier WAGO HE10;Noir;Ciel;2004;SYT;XE1;147;;;;;;;;;;;;;;;;;;;;;;;;;;
+217;MN_;DC1;E;HQ;_M6;TDI008;DIS123__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS123__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF123 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1510.3;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.1;0.3C;;Bornier WAGO HE10;Rouge;Ciel;2006;SYT;XE1;148;;;;;;;;;;;;;;;;;;;;;;;;;;
+218;MN_;DC1;E;HQ;_M6;TDI008;DIS120__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS120__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF120 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1510.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.1;0.0C;;Bornier WAGO HE10;Jaune;Ciel;2000;SYT;XE1;140;;;;;;;;;;;;;;;;;;;;;;;;;;
+219;MN_;DC1;E;HQ;_M6;TDI008;DIS125__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS125__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF125 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1510.5;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.1;0.5C;;Bornier WAGO HE10;Blanc;Gris;2010;SYT;XE1;150;;;;;;;;;;;;;;;;;;;;;;;;;;
+220;MN_;DC1;E;HQ;_M6;TDI008;DIS126__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS126__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF126 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1510.6;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.1;0.6C;;Bornier WAGO HE10;Bleu foncé;Gris;2012;SYT;XE1;151;;;;;;;;;;;;;;;;;;;;;;;;;;
+221;MN_;DC1;E;HQ;_M6;TDI008;DIS127__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS127__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF127 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1510.7;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.1;0.7C;;Bornier WAGO HE10;Jaune;Gris;2014;SYT;XE1;152;;;;;;;;;;;;;;;;;;;;;;;;;;
+222;MN_;DC1;E;HQ;_M6;TDI008;DIS124__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS124__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF124 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1510.4;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.1;0.4C;;Bornier WAGO HE10;Vert;Ciel;2008;SYT;XE1;149;;;;;;;;;;;;;;;;;;;;;;;;;;
+223;MN_;DC1;E;HQ;_M6;TDI008;DIS129__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS129__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF129 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1510.9;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.1;1.1C;;Bornier WAGO HE10;Noir;Gris;2018;SYT;XE1;154;;;;;;;;;;;;;;;;;;;;;;;;;;
+224;MN_;DC1;E;HQ;_M6;TDI008;DIS130__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS130__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF130 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1510.10;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.1;1.2C;;Bornier WAGO HE10;Rouge;Gris;2020;SYT;XE1;155;;;;;;;;;;;;;;;;;;;;;;;;;;
+225;MN_;DC1;E;HQ;_M6;TDI008;DIS131__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS131__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF131 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1510.11;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.1;1.3C;;Bornier WAGO HE10;Vert;Gris;2022;SYT;XE1;156;;;;;;;;;;;;;;;;;;;;;;;;;;
+226;MN_;DC1;E;HQ;_M6;TDI008;DIS128__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS128__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF128 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1510.8;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.1;1.0C;;Bornier WAGO HE10;Marron;Gris;2016;SYT;XE1;153;;;;;;;;;;;;;;;;;;;;;;;;;;
+227;MN_;DC1;E;HQ;_M6;TDI008;DIS133__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS133__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF133 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1510.13;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.1;1.5C;;Bornier WAGO HE10;Bleu foncé;Orange;2102;SYT;XE1;158;;;;;;;;;;;;;;;;;;;;;;;;;;
+228;MN_;DC1;E;HQ;_M6;TDI008;DIS134__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS134__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF134 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1510.14;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.1;1.6C;;Bornier WAGO HE10;Orange;Jaune;2104;SYT;XE1;159;;;;;;;;;;;;;;;;;;;;;;;;;;
+229;MN_;DC1;E;HQ;_M6;TDI008;DIS132__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS132__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF132 COL6 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1510.12;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.1;1.4C;;Bornier WAGO HE10;Blanc;Orange;2100;SYT;XE1;157;;;;;;;;;;;;;;;;;;;;;;;;;;
+230;MN_;DC1;E;HQ;_M6;TDI007;DISQM5__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DISQM5__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QM5 COL5 - DEFAUT DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1511.1;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.2;0.1C;;Bornier WAGO HE10;Bleu foncé;Ciel;2110;SYT;XE1;162;;;;;;;;;;;;;;;;;;;;;;;;;;
+231;MN_;DC1;E;HQ;_M6;TDI007;DIS105__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS105__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF105 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1511.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.2;0.2C;;Bornier WAGO HE10;Jaune;Ciel;2112;SYT;XE1;163;;;;;;;;;;;;;;;;;;;;;;;;;;
+232;MN_;DC1;E;HQ;_M6;TDI007;DIS106__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS106__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF106 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1511.3;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.2;0.3C;;Bornier WAGO HE10;Marron;Ciel;2114;SYT;XE1;164;;;;;;;;;;;;;;;;;;;;;;;;;;
+233;MN_;DC1;E;HQ;_M6;TDI007;DISQM5__;NV0R608B;OF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DISQM5__.NV0R608B.OF.TA.P01;51;TDHQ 7 S6 QM5 COL5 - DEFAUT POSITION FERMEE DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1511.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.2;0.0C;;Bornier WAGO HE10;Blanc;Ciel;2108;SYT;XE1;161;;;;;;;;;;;;;;;;;;;;;;;;;;
+234;MN_;DC1;E;HQ;_M6;TDI007;DIS108__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS108__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF108 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1511.5;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.2;0.5C;;Bornier WAGO HE10;Rouge;Ciel;2118;SYT;XE1;166;;;;;;;;;;;;;;;;;;;;;;;;;;
+235;MN_;DC1;E;HQ;_M6;TDI007;DIS109__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS109__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF109 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1511.6;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.2;0.6C;;Bornier WAGO HE10;Vert;Ciel;2120;SYT;XE1;167;;;;;;;;;;;;;;;;;;;;;;;;;;
+236;MN_;DC1;E;HQ;_M6;TDI007;DIS110__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS110__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF110 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1511.7;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.2;0.7C;;Bornier WAGO HE10;Blanc;Gris;2122;SYT;XE1;168;;;;;;;;;;;;;;;;;;;;;;;;;;
+237;MN_;DC1;E;HQ;_M6;TDI007;DIS107__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS107__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF107 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1511.4;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.2;0.4C;;Bornier WAGO HE10;Noir;Ciel;2116;SYT;XE1;165;;;;;;;;;;;;;;;;;;;;;;;;;;
+238;MN_;DC1;E;HQ;_M6;TDI007;DIS112__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS112__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF112 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1511.9;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.2;1.1C;;Bornier WAGO HE10;Jaune;Gris;2202;SYT;XE1;170;;;;;;;;;;;;;;;;;;;;;;;;;;
+239;MN_;DC1;E;HQ;_M6;TDI007;DIS113__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS113__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF113 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1511.10;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.2;1.2C;;Bornier WAGO HE10;Marron;Gris;2204;SYT;XE1;171;;;;;;;;;;;;;;;;;;;;;;;;;;
+240;MN_;DC1;E;HQ;_M6;TDI007;DIS114__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS114__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF114 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1511.11;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.2;1.3C;;Bornier WAGO HE10;Noir;Gris;2206;SYT;XE1;172;;;;;;;;;;;;;;;;;;;;;;;;;;
+241;MN_;DC1;E;HQ;_M6;TDI007;DIS111__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS111__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF111 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1511.8;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.2;1.0C;;Bornier WAGO HE10;Bleu foncé;Gris;2200;SYT;XE1;169;;;;;;;;;;;;;;;;;;;;;;;;;;
+242;MN_;DC1;E;HQ;_M6;TDI007;DIS116__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS116__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF116 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1511.13;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.2;1.5C;;Bornier WAGO HE10;Vert;Gris;2210;SYT;XE1;174;;;;;;;;;;;;;;;;;;;;;;;;;;
+243;MN_;DC1;E;HQ;_M6;TDI007;DIS117__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS117__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF117 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1511.14;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.2;1.6C;;Bornier WAGO HE10;Blanc;Orange;2212;SYT;XE1;175;;;;;;;;;;;;;;;;;;;;;;;;;;
+244;MN_;DC1;E;HQ;_M6;TDI007;DIS118__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS118__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF118 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1511.15;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.2;1.7C;;Bornier WAGO HE10;Bleu foncé;Orange;2214;SYT;XE1;176;;;;;;;;;;;;;;;;;;;;;;;;;;
+245;MN_;DC1;E;HQ;_M6;TDI007;DIS115__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS115__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF115 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1511.12;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.2;1.4C;;Bornier WAGO HE10;Rouge;Gris;2208;SYT;XE1;173;;;;;;;;;;;;;;;;;;;;;;;;;;
+246;MN_;DC1;E;HQ;_M6;TDI008;DISQM5__;NV0R608B;OF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DISQM5__.NV0R608B.OF.TA.P01;51;TDHQ 8 S6 QM5 COL5 - DEFAUT POSITION FERMEE DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1512.1;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.1;0.1C;;Bornier WAGO HE10;Blanc;Ciel;2218;SYT;XE1;178;;;;;;;;;;;;;;;;;;;;;;;;;;
+247;MN_;DC1;E;HQ;_M6;TDI008;DISQM5__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DISQM5__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QM5 COL5 - DEFAUT DISJONCTEUR MAINTENANCE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1512.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.1;0.2C;;Bornier WAGO HE10;Bleu foncé;Ciel;2220;SYT;XE1;179;;;;;;;;;;;;;;;;;;;;;;;;;;
+248;MN_;DC1;E;HQ;_M6;TDI008;DIS105__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS105__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF105 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1512.3;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.1;0.3C;;Bornier WAGO HE10;Jaune;Ciel;2222;SYT;XE1;180;;;;;;;;;;;;;;;;;;;;;;;;;;
+249;MN_;DC1;E;HQ;_M6;TDI007;DIS119__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.DIS119__.NV0R608B.DF.TA.P01;51;TDHQ 7 S6 QF119 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1512.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.1;0.0C;;Bornier WAGO HE10;Jaune;Orange;2216;SYT;XE1;177;;;;;;;;;;;;;;;;;;;;;;;;;;
+250;MN_;DC1;E;HQ;_M6;TDI008;DIS107__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS107__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF107 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1512.5;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.1;0.5C;;Bornier WAGO HE10;Noir;Ciel;2302;SYT;XE1;182;;;;;;;;;;;;;;;;;;;;;;;;;;
+251;MN_;DC1;E;HQ;_M6;TDI008;DIS108__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS108__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF108 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1512.6;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.1;0.6C;;Bornier WAGO HE10;Rouge;Ciel;2304;SYT;XE1;183;;;;;;;;;;;;;;;;;;;;;;;;;;
+252;MN_;DC1;E;HQ;_M6;TDI008;DIS109__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS109__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF109 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1512.7;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.1;0.7C;;Bornier WAGO HE10;Vert;Ciel;2306;SYT;XE1;184;;;;;;;;;;;;;;;;;;;;;;;;;;
+253;MN_;DC1;E;HQ;_M6;TDI008;DIS106__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS106__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF106 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1512.4;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.1;0.4C;;Bornier WAGO HE10;Marron;Ciel;2300;SYT;XE1;181;;;;;;;;;;;;;;;;;;;;;;;;;;
+254;MN_;DC1;E;HQ;_M6;TDI008;DIS111__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS111__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF111 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1512.9;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.1;1.1C;;Bornier WAGO HE10;Bleu foncé;Gris;2310;SYT;XE1;186;;;;;;;;;;;;;;;;;;;;;;;;;;
+255;MN_;DC1;E;HQ;_M6;TDI008;DIS112__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS112__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF112 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1512.10;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.1;1.2C;;Bornier WAGO HE10;Jaune;Gris;2312;SYT;XE1;187;;;;;;;;;;;;;;;;;;;;;;;;;;
+256;MN_;DC1;E;HQ;_M6;TDI008;DIS113__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS113__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF113 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1512.11;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.1;1.3C;;Bornier WAGO HE10;Marron;Gris;2314;SYT;XE1;188;;;;;;;;;;;;;;;;;;;;;;;;;;
+257;MN_;DC1;E;HQ;_M6;TDI008;DIS110__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS110__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF110 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1512.8;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.1;1.0C;;Bornier WAGO HE10;Blanc;Gris;2308;SYT;XE1;185;;;;;;;;;;;;;;;;;;;;;;;;;;
+258;MN_;DC1;E;HQ;_M6;TDI008;DIS115__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS115__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF115 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1512.13;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.1;1.5C;;Bornier WAGO HE10;Rouge;Gris;2318;SYT;XE1;190;;;;;;;;;;;;;;;;;;;;;;;;;;
+259;MN_;DC1;E;HQ;_M6;TDI008;DIS116__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS116__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF116 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1512.14;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.1;1.6C;;Bornier WAGO HE10;Vert;Gris;2320;SYT;XE1;191;;;;;;;;;;;;;;;;;;;;;;;;;;
+260;MN_;DC1;E;HQ;_M6;TDI008;DIS117__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS117__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF117 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1512.15;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.1;1.7C;;Bornier WAGO HE10;Blanc;Orange;2322;SYT;XE1;192;;;;;;;;;;;;;;;;;;;;;;;;;;
+261;MN_;DC1;E;HQ;_M6;TDI008;DIS114__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS114__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF114 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1512.12;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.1;1.4C;;Bornier WAGO HE10;Noir;Gris;2316;SYT;XE1;189;;;;;;;;;;;;;;;;;;;;;;;;;;
+262;MN_;DC1;E;HQ;_M6;TDI008;DIS119__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS119__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF119 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1513.1;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.2;0.1C;;Bornier WAGO HE10;Jaune;Orange;2402;SYT;XE1;194;;;;;;;;;;;;;;;;;;;;;;;;;;
+263;MN_;DC1;E;HQ;_M6;TDI008;DIS118__;NV0R608B;DF;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.DIS118__.NV0R608B.DF.TA.P01;51;TDHQ 8 S6 QF118 COL5 - SYNTHESE DEFAUT DISJONCTEUR  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1513.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;6.2;0.0C;;Bornier WAGO HE10;Bleu foncé;Orange;2400;SYT;XE1;193;;;;;;;;;;;;;;;;;;;;;;;;;;
+264;MN_;DC1;C;DE;_M6;CDE___;_______3;NV0R600_;AL;TA;P01;;MN_.DC1.C.DE._M6.CDE___._______3.NV0R600_.AL.TA.P01;51;DETECTION EAU 3 SALLE INFO R600;NOK;08/06/2026;WMA;Manque animation, vue associée OK;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/HERY;Point supprimé ….repris dans l'API process CVC;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1510.15;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;5.1;1.7C;;Bornier WAGO HE10;Rouge;Blanc;2106;SYT;XE1;160;;;;;;;;;;;;;;;;;;;;;;;;;;
+265;MN_;DC1;G;AP;_M6;API192;____STOP;NV0R608B;DF;TA;P01;;MN_.DC1.G.AP._M6.API192.____STOP.NV0R608B.DF.TA.P01;51;API 19.2 EN STOP R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1500.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;NA;NA;;API;NA;NA;NA;NA;NA;NA;;;;;;;;;;;;;;;;;;;;;;;;;;
+266;MN_;DC1;G;AP;_M6;API192;INC_____;NV0R608B;DF;TA;P01;;MN_.DC1.G.AP._M6.API192.INC_____.NV0R608B.DF.TA.P01;51;API 19.2 DEFAUT MODULES ENTREES/SORTIES R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1500.1;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;NA;NA;;API;NA;NA;NA;SYT;XE1;NA;;;;;;;;;;;;;;;;;;;;;;;;;;
+267;MN_;DC1;G;AP;_M6;API192;____PILE;NV0R608B;DF;TA;P01;;MN_.DC1.G.AP._M6.API192.____PILE.NV0R608B.DF.TA.P01;51;API 19.2 DEFAUT PILE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1500.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;NA;NA;;API;NA;NA;NA;NA;NA;NA;;;;;;;;;;;;;;;;;;;;;;;;;;
+268;MN_;DC1;G;AP;_M6;API192;________;NV0R608B;WD;TA;P01;;MN_.DC1.G.AP._M6.API192.________.NV0R608B.WD.TA.P01;51;API 19.2 DEFAUT COMMUNICATION R608B;NT;08/06/2026;WMA;Non testable avec ModbusDoctor;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1500.5;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;NA;NA;;API;NA;NA;NA;NA;NA;NA;;;;;;;;;;;;;;;;;;;;;;;;;;
+269;MN_;DC1;G;TB;_M6;API192;COF_____;NV0R608B;DF;TA;P01;;MN_.DC1.G.TB._M6.API192.COF_____.NV0R608B.DF.TA.P01;51;OUVERTURE COFFRET RESEAUX OU AUTOMATE API19.2 R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1501.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;0.1;0.0C;;Bornier WAGO HE10;NA;NA;NA;SYT;NA;NA;;;;;;;;;;;;;;;;;;;;;;;;;;
+270;MN_;DC1;G;SW;_M_;SWT192;________;NV0R608B;DF;TA;P01;;MN_.DC1.G.SW._M_.SWT192.________.NV0R608B.DF.TA.P01;51;SYNTHESE DEFAUT SWITCH HIRSCHMANN SWT192 R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;Testé via shunt / ouverture couteau bornier HE10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW1505.15;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;;;;;;;;;;API-R608B-1902;;2.2;1.7C;;Bornier WAGO HE10;NA;NA;NA;SYT;NA;NA;;;;;;;;;;;;;;;;;;;;;;;;;;
+271;MN_;DC1;E;HQ;_M6;TDI007;CPE__JDB;NV0R608B;I1;TM;P01;;MN_.DC1.E.HQ._M6.TDI007.CPE__JDB.NV0R608B.I1.TM.P01;51;TDHQ 7 S6 COMPTEUR DIRIS - INTENSITE I1 JDB R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW45890;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"1
+0 / 32";;;;R608B;DIRIS A40 TDHQ 7 S6;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 1;;;;;;;;;;;;;;;;;;;;;;;;;;;
+272;MN_;DC1;E;HQ;_M6;TDI007;CPE__JDB;NV0R608B;I2;TM;P01;;MN_.DC1.E.HQ._M6.TDI007.CPE__JDB.NV0R608B.I2.TM.P01;51;TDHQ 7 S6 COMPTEUR DIRIS - INTENSITE I2 JDB R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW45892;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"1
+0 / 32";;;;R608B;DIRIS A40 TDHQ 7 S6;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 1;;;;;;;;;;;;;;;;;;;;;;;;;;;
+273;MN_;DC1;E;HQ;_M6;TDI007;CPE__JDB;NV0R608B;PT;TM;P01;;MN_.DC1.E.HQ._M6.TDI007.CPE__JDB.NV0R608B.PT.TM.P01;51;TDHQ 7 S6 COMPTEUR DIRIS - PUISSANCE ACTIVE P JDB R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW45912;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"1
+0 / 32";;;;R608B;DIRIS A40 TDHQ 7 S6;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 1;;;;;;;;;;;;;;;;;;;;;;;;;;;
+274;MN_;DC1;E;HQ;_M6;TDI007;CPE__JDB;NV0R608B;CT;TM;P01;;MN_.DC1.E.HQ._M6.TDI007.CPE__JDB.NV0R608B.CT.TM.P01;51;TDHQ 7 S6 COMPTEUR DIRIS - FACTEUR PUISSANCE FP JDB R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;;;;;;;;;;-1;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW45918;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"1
+0 / 32";;;;R608B;DIRIS A40 TDHQ 7 S6;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 1;;;;;;;;;;;;;;;;;;;;;;;;;;;
+275;MN_;DC1;E;HQ;_M6;TDI007;CPE__JDB;NV0R608B;I3;TM;P01;;MN_.DC1.E.HQ._M6.TDI007.CPE__JDB.NV0R608B.I3.TM.P01;51;TDHQ 7 S6 COMPTEUR DIRIS - INTENSITE I3 JDB R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW45894;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"1
+0 / 32";;;;R608B;DIRIS A40 TDHQ 7 S6;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 1;;;;;;;;;;;;;;;;;;;;;;;;;;;
+276;MN_;DC1;E;HQ;_M6;TDI008;CPE__JDB;NV0R608B;I1;TM;P01;;MN_.DC1.E.HQ._M6.TDI008.CPE__JDB.NV0R608B.I1.TM.P01;51;TDHQ 8 S6 COMPTEUR DIRIS - INTENSITE I1 JDB R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW45920;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"1
+0 / 33";;;;R608B;DIRIS A40 TDHQ 8 S6;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 1;;;;;;;;;;;;;;;;;;;;;;;;;;;
+277;MN_;DC1;E;HQ;_M6;TDI008;CPE__JDB;NV0R608B;I2;TM;P01;;MN_.DC1.E.HQ._M6.TDI008.CPE__JDB.NV0R608B.I2.TM.P01;51;TDHQ 8 S6 COMPTEUR DIRIS - INTENSITE I2 JDB R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW45922;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"1
+0 / 33";;;;R608B;DIRIS A40 TDHQ 8 S6;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 1;;;;;;;;;;;;;;;;;;;;;;;;;;;
+278;MN_;DC1;E;HQ;_M6;TDI008;CPE__JDB;NV0R608B;PT;TM;P01;;MN_.DC1.E.HQ._M6.TDI008.CPE__JDB.NV0R608B.PT.TM.P01;51;TDHQ 8 S6 COMPTEUR DIRIS - PUISSANCE ACTIVE P JDB R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW45942;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"1
+0 / 33";;;;R608B;DIRIS A40 TDHQ 8 S6;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 1;;;;;;;;;;;;;;;;;;;;;;;;;;;
+279;MN_;DC1;E;HQ;_M6;TDI008;CPE__JDB;NV0R608B;CT;TM;P01;;MN_.DC1.E.HQ._M6.TDI008.CPE__JDB.NV0R608B.CT.TM.P01;51;TDHQ 8 S6 COMPTEUR DIRIS - FACTEUR PUISSANCE FP JDB R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;;;;;;;;;;-1;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW45948;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"1
+0 / 33";;;;R608B;DIRIS A40 TDHQ 8 S6;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 1;;;;;;;;;;;;;;;;;;;;;;;;;;;
+280;MN_;DC1;E;HQ;_M6;TDI008;CPE__JDB;NV0R608B;I3;TM;P01;;MN_.DC1.E.HQ._M6.TDI008.CPE__JDB.NV0R608B.I3.TM.P01;51;TDHQ 8 S6 COMPTEUR DIRIS - INTENSITE I3 JDB R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;OK;08/07/2026;WMA/DAL/HERY/JB;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW45924;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"1
+0 / 33";;;;R608B;DIRIS A40 TDHQ 8 S6;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 1;;;;;;;;;;;;;;;;;;;;;;;;;;;
+281;MN_;DC1;E;HQ;_M6;STS007;SRC____1;NV0R608B;MA;TS;P01;;MN_.DC1.E.HQ._M6.STS007.SRC____1.NV0R608B.MA.TS.P01;51;STS 7 S6 - UTILISATION SUR SOURCE 1 R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33210.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 22";;;;R608B;TDC 01 ;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+282;MN_;DC1;E;HQ;_M6;STS007;DTR____1;NV0R608B;MA;TS;P01;;MN_.DC1.E.HQ._M6.STS007.DTR____1.NV0R608B.MA.TS.P01;51;STS 7 S6 - UTILISATION SUR DETOUR 1 R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33210.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 22";;;;R608B;TDC 01 ;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+283;MN_;DC1;E;HQ;_M6;STS007;CMM_____;NV0R608B;OF;TS;P01;;MN_.DC1.E.HQ._M6.STS007.CMM_____.NV0R608B.OF.TS.P01;51;STS 7 S6 - MODE DISTANT / LOCAL  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33217.8;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 22";;;;R608B;TDC 01 ;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+284;MN_;DC1;E;HQ;_M6;STS007;SRC____2;NV0R608B;MA;TS;P01;;MN_.DC1.E.HQ._M6.STS007.SRC____2.NV0R608B.MA.TS.P01;51;STS 7 S6 - UTILISATION SUR SOURCE 2 R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33211.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 22";;;;R608B;TDC 01 ;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+285;MN_;DC1;E;HQ;_M6;STS007;DTR____2;NV0R608B;MA;TS;P01;;MN_.DC1.E.HQ._M6.STS007.DTR____2.NV0R608B.MA.TS.P01;51;STS 7 S6 - UTILISATION SUR DETOUR 2 R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33211.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 22";;;;R608B;TDC 01 ;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+286;MN_;DC1;E;HQ;_M6;STS007;SRCPRIO1;NV0R608B;MA;TS;P01;;MN_.DC1.E.HQ._M6.STS007.SRCPRIO1.NV0R608B.MA.TS.P01;51;STS 7 S6 - SOURCE 1 PRIORITAIRE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33212.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 22";;;;R608B;TDC 01 ;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+287;MN_;DC1;E;HQ;_M6;STS007;DTR_____;NV0R608B;AL;TA;P01;;MN_.DC1.E.HQ._M6.STS007.DTR_____.NV0R608B.AL.TA.P01;51;STS 7 S6 - ALARME DETOUR (Q5X ET Q30 FERMES) R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33214.5;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 22";;;;R608B;TDC 01 ;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+288;MN_;DC1;E;HQ;_M6;STS007;________;NV0R608B;HT;TA;P01;;MN_.DC1.E.HQ._M6.STS007.________.NV0R608B.HT.TA.P01;51;STS 7 S6 - DEFAUT SURCHARGE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33214.6;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 22";;;;R608B;TDC 01 ;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+289;MN_;DC1;E;HQ;_M6;STS007;________;NV0R608B;AL;TA;P01;;MN_.DC1.E.HQ._M6.STS007.________.NV0R608B.AL.TA.P01;51;STS 7 S6 - ALARME GENERALE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33214.15;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 22";;;;R608B;TDC 01 ;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+290;MN_;DC1;E;HQ;_M6;STS008;SRC____1;NV0R608B;MA;TS;P01;;MN_.DC1.E.HQ._M6.STS008.SRC____1.NV0R608B.MA.TS.P01;51;STS 8 S6 - UTILISATION SUR SOURCE 1 R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33220.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 23";;;;R608B;TDC 02;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+291;MN_;DC1;E;HQ;_M6;STS008;DTR____1;NV0R608B;MA;TS;P01;;MN_.DC1.E.HQ._M6.STS008.DTR____1.NV0R608B.MA.TS.P01;51;STS 8 S6 - UTILISATION SUR DETOUR 1 R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33220.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 23";;;;R608B;TDC 02;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+292;MN_;DC1;E;HQ;_M6;STS008;CMM_____;NV0R608B;OF;TS;P01;;MN_.DC1.E.HQ._M6.STS008.CMM_____.NV0R608B.OF.TS.P01;51;STS 8 S6 - MODE DISTANT / LOCAL  R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33227.8;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 23";;;;R608B;TDC 02;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+293;MN_;DC1;E;HQ;_M6;STS008;SRC____2;NV0R608B;MA;TS;P01;;MN_.DC1.E.HQ._M6.STS008.SRC____2.NV0R608B.MA.TS.P01;51;STS 8 S6 - UTILISATION SUR SOURCE 2 R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33221.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 23";;;;R608B;TDC 02;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+294;MN_;DC1;E;HQ;_M6;STS008;DTR____2;NV0R608B;MA;TS;P01;;MN_.DC1.E.HQ._M6.STS008.DTR____2.NV0R608B.MA.TS.P01;51;STS 8 S6 - UTILISATION SUR DETOUR 2 R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33221.2;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 23";;;;R608B;TDC 02;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+295;MN_;DC1;E;HQ;_M6;STS008;SRCPRIO1;NV0R608B;MA;TS;P01;;MN_.DC1.E.HQ._M6.STS008.SRCPRIO1.NV0R608B.MA.TS.P01;51;STS 8 S6 - SOURCE 1 PRIORITAIRE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33222.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 23";;;;R608B;TDC 02;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+296;MN_;DC1;E;HQ;_M6;STS008;DTR_____;NV0R608B;AL;TA;P01;;MN_.DC1.E.HQ._M6.STS008.DTR_____.NV0R608B.AL.TA.P01;51;STS 8 S6 - ALARME DETOUR (Q5X ET Q30 FERMES) R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33224.5;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 23";;;;R608B;TDC 02;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+297;MN_;DC1;E;HQ;_M6;STS008;________;NV0R608B;HT;TA;P01;;MN_.DC1.E.HQ._M6.STS008.________.NV0R608B.HT.TA.P01;51;STS 8 S6 - DEFAUT SURCHARGE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33224.6;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 23";;;;R608B;TDC 02;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+298;MN_;DC1;E;HQ;_M6;STS008;________;NV0R608B;AL;TA;P01;;MN_.DC1.E.HQ._M6.STS008.________.NV0R608B.AL.TA.P01;51;STS 8 S6 - ALARME GENERALE R608B;OK;08/06/2026;WMA;;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1;1;1;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW33224.15;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 23";;;;R608B;TDC 02;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+299;MN_;DC1;E;HQ;_M6;STS007;________;NV0R608B;WD;TA;P01;;MN_.DC1.E.HQ._M6.STS007.________.NV0R608B.WD.TA.P01;51;STS 7 S6 - DEFAUT COMMUNICATION;NT;08/06/2026;WMA;Non testable avec ModbusDoctor;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW755.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 23";;;;R608B;TDC 02;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+300;MN_;DC1;E;HQ;_M6;STS008;________;NV0R608B;WD;TA;P01;;MN_.DC1.E.HQ._M6.STS008.________.NV0R608B.WD.TA.P01;51;STS 8 S6 - DEFAUT COMMUNICATION;NT;08/06/2026;WMA;Non testable avec ModbusDoctor;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW755.1;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"2
+50 / 23";;;;R608B;TDC 02;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+301;MN_;DC1;E;HQ;_M6;TDI007;CPE__JDB;NV0R608B;WD;TA;P01;;MN_.DC1.E.HQ._M6.TDI007.CPE__JDB.NV0R608B.WD.TA.P01;51;TDHQ 7 S6 COMPTEUR DIRIS - DEFAUT COMMUNICATION;NT;08/06/2026;WMA;Non testable avec ModbusDoctor;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW754.0;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"1
+0 / 32";;;;R608B;DIRIS A40 TDHQ 7 S6;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
+302;MN_;DC1;E;HQ;_M6;TDI008;CPE__JDB;NV0R608B;WD;TA;P01;;MN_.DC1.E.HQ._M6.TDI008.CPE__JDB.NV0R608B.WD.TA.P01;51;TDHQ 8 S6 COMPTEUR DIRIS - DEFAUT COMMUNICATION;NT;08/06/2026;WMA;Non testable avec ModbusDoctor;;;OK;08/07/2026;WMA/DAL/KELCH/JRO;;;;NT;08/07/2026;WMA/DAL/HERY/JB;sera testé pendant la maintenance;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"R708
+1109B";"SWI-MN-R708
+SWI-MN-1109B";"API-R708-CFO
+API-1109B-CFO";%MW754.1;;;;;;R608B;SWI-MN-R608B;;;;;;;;;;;;MOX-MN-R608B;"1
+0 / 33";;;;R608B;DIRIS A40 TDHQ 8 S6;;;;;;;;Connecteur DB9;Marron;Blanc;;LIYCY;XBUS 2;;;;;;;;;;;;;;;;;;;;;;;;;;;
