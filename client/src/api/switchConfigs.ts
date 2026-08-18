@@ -118,9 +118,22 @@ export interface RoomOption {
   siteName: string;
 }
 
+export interface UnmatchedSwitchPort {
+  portName: string;
+  suggestedLinkType: string;
+}
+
+export interface AvailableSwitchPort {
+  id: number;
+  label: string;
+}
+
 export interface ApplySwitchConfigResult {
   requiresRoomSelection?: boolean;
   rooms?: RoomOption[];
+  requiresPortMapping?: boolean;
+  unmatchedPorts?: UnmatchedSwitchPort[];
+  availablePorts?: AvailableSwitchPort[];
   equipmentId?: number;
   equipmentName?: string;
   roomId?: number;
@@ -129,10 +142,10 @@ export interface ApplySwitchConfigResult {
   createdPortCount?: number;
 }
 
-export function applySwitchConfigToEquipment(id: number, roomId?: number) {
+export function applySwitchConfigToEquipment(id: number, roomId?: number, portMapping?: Record<string, string>) {
   return apiFetch<ApplySwitchConfigResult>(`/switch-configs/${id}/apply-to-equipment`, {
     method: "POST",
-    body: JSON.stringify({ roomId }),
+    body: JSON.stringify({ roomId, portMapping }),
   });
 }
 

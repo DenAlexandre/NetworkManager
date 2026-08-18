@@ -224,6 +224,20 @@ CREATE TABLE IF NOT EXISTS design_schemas (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_design_schemas_api ON design_schemas(api_id);
 
+-- Memorise, par modele de catalogue, la correspondance choisie par l'admin entre un nom de port
+-- tel que rapporte par une configuration importee (switch_ports.port_name) et un port existant du
+-- modele (hardware_model_ports), quand ce nom ne correspondait a aucun port par simple egalite de
+-- label. Une fois resolue pour un modele, la meme correspondance s'applique automatiquement a
+-- toute future configuration important ce meme nom de port pour ce modele (pas de nouvelle
+-- confirmation demandee a l'admin).
+CREATE TABLE IF NOT EXISTS hardware_model_port_aliases (
+  id SERIAL PRIMARY KEY,
+  hardware_model_id INTEGER NOT NULL REFERENCES hardware_models(id) ON DELETE CASCADE,
+  source_label VARCHAR(100) NOT NULL,
+  hardware_model_port_id INTEGER NOT NULL REFERENCES hardware_model_ports(id) ON DELETE CASCADE,
+  UNIQUE (hardware_model_id, source_label)
+);
+
 -- Gestion des configurations : import de fichiers de configuration MOXA (switchs BRS30 en XML,
 -- passerelles MGate en binaire .cfg MGateManager). Chaque configuration importee est rattachee
 -- au modele materiel du catalogue (Type des donnees > Materiel) via hardware_model_id, mais reste

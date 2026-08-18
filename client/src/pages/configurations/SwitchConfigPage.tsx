@@ -8,11 +8,23 @@ import {
   listSupportedSwitchModels,
   listSwitchConfigs,
 } from "../../api/switchConfigs";
-import type { RoomOption, SupportedSwitchModel, SwitchConfigSummary } from "../../api/switchConfigs";
+import type {
+  AvailableSwitchPort,
+  RoomOption,
+  SupportedSwitchModel,
+  SwitchConfigSummary,
+  UnmatchedSwitchPort,
+} from "../../api/switchConfigs";
 import { ApiError } from "../../api/client";
 import { Modal } from "../../components/Modal";
 import { usePagination } from "../../hooks/usePagination";
 import { Pagination } from "../../components/Pagination";
+
+interface PendingApply {
+  item: SwitchConfigSummary;
+  roomId?: number;
+  portMapping?: Record<string, string>;
+}
 
 export function SwitchConfigPage() {
   const [items, setItems] = useState<SwitchConfigSummary[]>([]);
@@ -28,10 +40,17 @@ export function SwitchConfigPage() {
   const [importError, setImportError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [applyingId, setApplyingId] = useState<number | null>(null);
-  const [roomPicker, setRoomPicker] = useState<{ item: SwitchConfigSummary; rooms: RoomOption[]; isBulk?: boolean } | null>(
+  const [roomPicker, setRoomPicker] = useState<{ pending: PendingApply; rooms: RoomOption[]; isBulk?: boolean } | null>(
     null
   );
   const [pickedRoomId, setPickedRoomId] = useState<number | "">("");
+  const [portPicker, setPortPicker] = useState<{
+    pending: PendingApply;
+    unmatchedPorts: UnmatchedSwitchPort[];
+    availablePorts: AvailableSwitchPort[];
+    isBulk?: boolean;
+  } | null>(null);
+  const [portMappingChoices, setPortMappingChoices] = useState<Record<string, string>>({});
   const [applyError, setApplyError] = useState<string | null>(null);
 
   const [bulkUpdating, setBulkUpdating] = useState(false);
@@ -105,42 +124,6 @@ export function SwitchConfigPage() {
     }
   }
 
-  async function handleApplyToEquipment(item: SwitchConfigSummary, roomId?: number) {
-    setApplyingId(item.id);
-    setApplyError(null);
-    try {
-      const result = await applySwitchConfigToEquipment(item.id, roomId);
-      if (result.requiresRoomSelection) {
-        setRoomPicker({ item, rooms: result.rooms ?? [] });
-        setPickedRoomId("");
-        return;
-      }
-      setRoomPicker(null);
-      await load();
-    } catch (err) {
-      const message = err instanceof ApiError ? err.message : "Erreur lors de la mise à jour du matériel.";
-      if (roomPicker) {
-        setApplyError(message);
-      } else {
-        alert(message);
-      }
-    } finally {
-      setApplyingId(null);
-    }
-  }
-
-  function handleConfirmRoomPicker() {
-    if (!roomPicker || pickedRoomId === "") return;
-    if (roomPicker.isBulk) {
-      const item = roomPicker.item;
-      const roomId = Number(pickedRoomId);
-      setRoomPicker(null);
-      resolveBulkItem(item, roomId);
-      return;
-    }
-    handleApplyToEquipment(roomPicker.item, Number(pickedRoomId));
-  }
-
   function recordBulkOutcome(error?: string) {
     setBulkStats((prev) => {
       if (!prev) return prev;
@@ -148,33 +131,98 @@ export function SwitchConfigPage() {
     });
   }
 
-  async function resolveBulkItem(item: SwitchConfigSummary, roomId: number) {
+  // Drives a single config through apply-to-equipment, pausing on room/port questions and
+  // resuming with whatever the room/port pickers have resolved so far (threaded via `pending`).
+  // Shared by the single-row "Update" button and the bulk "Update complet" queue.
+  async function continueApply(pending: PendingApply, isBulk: boolean): Promise<"paused" | "done"> {
+    if (!isBulk) setApplyingId(pending.item.id);
+    setApplyError(null);
     try {
-      await applySwitchConfigToEquipment(item.id, roomId);
-      recordBulkOutcome();
+      const result = await applySwitchConfigToEquipment(pending.item.id, pending.roomId, pending.portMapping);
+      if (result.requiresPortMapping) {
+        const unmatchedPorts = result.unmatchedPorts ?? [];
+        setPortPicker({ pending, unmatchedPorts, availablePorts: result.availablePorts ?? [], isBulk });
+        setPortMappingChoices(Object.fromEntries(unmatchedPorts.map((p) => [p.portName, "new"])));
+        return "paused";
+      }
+      if (result.requiresRoomSelection) {
+        setRoomPicker({ pending, rooms: result.rooms ?? [], isBulk });
+        setPickedRoomId("");
+        return "paused";
+      }
+      setRoomPicker(null);
+      setPortPicker(null);
+      if (isBulk) {
+        recordBulkOutcome();
+      } else {
+        await load();
+      }
+      return "done";
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "Erreur lors de la mise à jour du matériel.";
-      recordBulkOutcome(`${item.sysName || "?"} : ${message}`);
+      if (isBulk) {
+        recordBulkOutcome(`${pending.item.sysName || "?"} : ${message}`);
+      } else if (roomPicker || portPicker) {
+        setApplyError(message);
+      } else {
+        alert(message);
+      }
+      return "done";
+    } finally {
+      if (!isBulk) setApplyingId(null);
     }
-    await runBulkQueue();
+  }
+
+  function handleApplyToEquipment(item: SwitchConfigSummary) {
+    continueApply({ item }, false);
+  }
+
+  function handleConfirmRoomPicker() {
+    if (!roomPicker || pickedRoomId === "") return;
+    const pending = { ...roomPicker.pending, roomId: Number(pickedRoomId) };
+    const isBulk = !!roomPicker.isBulk;
+    setRoomPicker(null);
+    continueApply(pending, isBulk).then((outcome) => {
+      if (isBulk && outcome === "done") runBulkQueue();
+    });
+  }
+
+  function handleSkipRoomPicker() {
+    if (!roomPicker) return;
+    const { pending, isBulk } = roomPicker;
+    setRoomPicker(null);
+    if (isBulk) {
+      recordBulkOutcome(`${pending.item.sysName || "?"} : Salle non choisie, mise à jour ignorée.`);
+      runBulkQueue();
+    }
+  }
+
+  function handleConfirmPortPicker() {
+    if (!portPicker) return;
+    const pending = { ...portPicker.pending, portMapping: { ...portMappingChoices } };
+    const isBulk = !!portPicker.isBulk;
+    setPortPicker(null);
+    continueApply(pending, isBulk).then((outcome) => {
+      if (isBulk && outcome === "done") runBulkQueue();
+    });
+  }
+
+  function handleSkipPortPicker() {
+    if (!portPicker) return;
+    const { pending, isBulk } = portPicker;
+    setPortPicker(null);
+    if (isBulk) {
+      recordBulkOutcome(`${pending.item.sysName || "?"} : Association de ports annulée, mise à jour ignorée.`);
+      runBulkQueue();
+    }
   }
 
   async function runBulkQueue() {
     while (bulkQueueRef.current.length > 0) {
       const [current, ...rest] = bulkQueueRef.current;
       bulkQueueRef.current = rest;
-      try {
-        const result = await applySwitchConfigToEquipment(current.id);
-        if (result.requiresRoomSelection) {
-          setRoomPicker({ item: current, rooms: result.rooms ?? [], isBulk: true });
-          setPickedRoomId("");
-          return; // paused until the room picker is confirmed or skipped
-        }
-        recordBulkOutcome();
-      } catch (err) {
-        const message = err instanceof ApiError ? err.message : "Erreur lors de la mise à jour du matériel.";
-        recordBulkOutcome(`${current.sysName || "?"} : ${message}`);
-      }
+      const outcome = await continueApply({ item: current }, true);
+      if (outcome === "paused") return; // resumed by the room/port picker confirm handlers
     }
     setBulkUpdating(false);
     await load();
@@ -186,16 +234,6 @@ export function SwitchConfigPage() {
     setBulkStats({ done: 0, total: items.length, errors: [] });
     setBulkUpdating(true);
     runBulkQueue();
-  }
-
-  function handleSkipRoomPicker() {
-    if (!roomPicker) return;
-    const wasBulk = roomPicker.isBulk;
-    setRoomPicker(null);
-    if (wasBulk) {
-      recordBulkOutcome(`${roomPicker.item.sysName || "?"} : Salle non choisie, mise à jour ignorée.`);
-      runBulkQueue();
-    }
   }
 
   if (loading) return <p>Chargement...</p>;
@@ -354,8 +392,8 @@ export function SwitchConfigPage() {
       {roomPicker && (
         <Modal title="Choisir la salle" onClose={handleSkipRoomPicker}>
           <p>
-            Impossible de déterminer automatiquement la salle pour l'équipement "{roomPicker.item.sysName}"
-            (localisation "{roomPicker.item.sysLocation}" introuvable ou ambiguë). Choisissez une salle :
+            Impossible de déterminer automatiquement la salle pour l'équipement "{roomPicker.pending.item.sysName}"
+            (localisation "{roomPicker.pending.item.sysLocation}" introuvable ou ambiguë). Choisissez une salle :
           </p>
           {roomPicker.isBulk && (
             <p className="muted">Mise à jour groupée en cours — les autres configurations suivront ensuite.</p>
@@ -382,9 +420,64 @@ export function SwitchConfigPage() {
               type="button"
               className="btn"
               onClick={handleConfirmRoomPicker}
-              disabled={pickedRoomId === "" || applyingId === roomPicker.item.id}
+              disabled={pickedRoomId === "" || applyingId === roomPicker.pending.item.id}
             >
-              {applyingId === roomPicker.item.id ? "Mise à jour..." : "Valider"}
+              {applyingId === roomPicker.pending.item.id ? "Mise à jour..." : "Valider"}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {portPicker && (
+        <Modal title="Associer les ports" onClose={handleSkipPortPicker}>
+          <p>
+            {portPicker.unmatchedPorts.length} port(s) de la configuration "{portPicker.pending.item.sysName}" ne
+            correspondent à aucun port existant du modèle catalogue. Choisissez un port existant auquel les associer,
+            ou laissez "Créer un nouveau port" pour chacun :
+          </p>
+          {portPicker.isBulk && (
+            <p className="muted">Mise à jour groupée en cours — les autres configurations suivront ensuite.</p>
+          )}
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Port de la configuration</th>
+                <th>Associer à</th>
+              </tr>
+            </thead>
+            <tbody>
+              {portPicker.unmatchedPorts.map((p) => (
+                <tr key={p.portName}>
+                  <td>{p.portName}</td>
+                  <td>
+                    <select
+                      value={portMappingChoices[p.portName] ?? "new"}
+                      onChange={(e) => setPortMappingChoices((prev) => ({ ...prev, [p.portName]: e.target.value }))}
+                    >
+                      <option value="new">Créer un nouveau port ({p.suggestedLinkType})</option>
+                      {portPicker.availablePorts.map((ap) => (
+                        <option key={ap.id} value={ap.id}>
+                          {ap.label}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {applyError && <p className="error">{applyError}</p>}
+          <div className="modal-actions">
+            <button type="button" onClick={handleSkipPortPicker}>
+              {portPicker.isBulk ? "Ignorer celle-ci" : "Annuler"}
+            </button>
+            <button
+              type="button"
+              className="btn"
+              onClick={handleConfirmPortPicker}
+              disabled={applyingId === portPicker.pending.item.id}
+            >
+              {applyingId === portPicker.pending.item.id ? "Mise à jour..." : "Valider"}
             </button>
           </div>
         </Modal>

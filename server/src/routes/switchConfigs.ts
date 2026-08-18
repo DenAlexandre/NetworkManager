@@ -388,6 +388,61 @@ router.post("/:id/apply-to-equipment", async (req, res) => {
     });
   }
 
+  const existingPortsResult = await pool.query(
+    "SELECT id, label FROM hardware_model_ports WHERE hardware_model_id = $1",
+    [config.hardwareModelId]
+  );
+  const portIdByLabel = new Map<string, number>(existingPortsResult.rows.map((r) => [r.label, r.id]));
+  const validExistingPortIds = new Set<number>(existingPortsResult.rows.map((r) => r.id));
+
+  // Correspondances déjà résolues manuellement pour ce modèle par une précédente configuration
+  // (voir POST .../apply-to-equipment ci-dessous) : appliquées automatiquement, sans re-demander.
+  const aliasesResult = await pool.query(
+    "SELECT source_label AS \"sourceLabel\", hardware_model_port_id AS \"hardwareModelPortId\" FROM hardware_model_port_aliases WHERE hardware_model_id = $1",
+    [config.hardwareModelId]
+  );
+  for (const alias of aliasesResult.rows) {
+    if (!portIdByLabel.has(alias.sourceLabel)) {
+      portIdByLabel.set(alias.sourceLabel, alias.hardwareModelPortId);
+    }
+  }
+
+  const unmatchedPorts = portsResult.rows.filter((p) => !portIdByLabel.has(p.portName));
+
+  const rawPortMapping = req.body?.portMapping;
+  const portMapping: Record<string, string> =
+    rawPortMapping && typeof rawPortMapping === "object" ? rawPortMapping : {};
+
+  if (unmatchedPorts.length > 0) {
+    const missing = unmatchedPorts.filter((p) => portMapping[p.portName] === undefined);
+    if (missing.length > 0) {
+      return res.json({
+        requiresPortMapping: true,
+        unmatchedPorts: unmatchedPorts.map((p) => ({
+          portName: p.portName,
+          suggestedLinkType: isFiberPort(p.speedLabel, p.mauTypeOid) ? "Fibre" : "TCP/IP",
+        })),
+        availablePorts: existingPortsResult.rows.map((r) => ({ id: r.id, label: r.label })),
+      });
+    }
+
+    const usedTargetIds = new Set<number>();
+    for (const p of unmatchedPorts) {
+      const mapped = portMapping[p.portName];
+      if (mapped === "new") continue;
+      const targetId = Number(mapped);
+      if (!Number.isInteger(targetId) || !validExistingPortIds.has(targetId)) {
+        return res.status(400).json({ error: `Port sélectionné invalide pour "${p.portName}".` });
+      }
+      if (usedTargetIds.has(targetId)) {
+        return res.status(400).json({
+          error: "Impossible d'associer plusieurs ports de la configuration au même port du catalogue.",
+        });
+      }
+      usedTargetIds.add(targetId);
+    }
+  }
+
   const existingEquipmentResult = await pool.query(
     "SELECT id, room_id AS \"roomId\" FROM equipment WHERE name = $1",
     [config.sysName]
@@ -427,14 +482,22 @@ router.post("/:id/apply-to-equipment", async (req, res) => {
   try {
     await client.query("BEGIN");
 
-    const existingPortsResult = await client.query(
-      "SELECT id, label FROM hardware_model_ports WHERE hardware_model_id = $1",
-      [config.hardwareModelId]
-    );
-    const portIdByLabel = new Map<string, number>(existingPortsResult.rows.map((r) => [r.label, r.id]));
     let createdPortCount = 0;
-    for (const p of portsResult.rows) {
-      if (portIdByLabel.has(p.portName)) continue;
+    for (const p of unmatchedPorts) {
+      const mapped = portMapping[p.portName];
+      if (mapped !== "new") {
+        const targetId = Number(mapped);
+        portIdByLabel.set(p.portName, targetId);
+        // Mémorise ce choix pour ce modèle : les futures configurations avec ce même nom de port
+        // n'auront plus besoin de redemander à l'admin (voir la fusion des alias plus haut).
+        await client.query(
+          `INSERT INTO hardware_model_port_aliases (hardware_model_id, source_label, hardware_model_port_id)
+           VALUES ($1, $2, $3)
+           ON CONFLICT (hardware_model_id, source_label) DO UPDATE SET hardware_model_port_id = $3`,
+          [config.hardwareModelId, p.portName, targetId]
+        );
+        continue;
+      }
       const linkTypeId = isFiberPort(p.speedLabel, p.mauTypeOid) ? fiberLinkTypeId : copperLinkTypeId;
       const inserted = await client.query(
         "INSERT INTO hardware_model_ports (hardware_model_id, link_type_id, label) VALUES ($1, $2, $3) RETURNING id",

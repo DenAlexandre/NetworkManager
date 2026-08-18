@@ -165,8 +165,11 @@ export function DesignPage() {
   }, [links]);
 
   const availableEquipment = useMemo(
-    () => equipmentList.filter((e) => !cards.some((c) => c.equipmentId === e.id)),
-    [equipmentList, cards]
+    () =>
+      selectedApiId === ""
+        ? []
+        : equipmentList.filter((e) => e.apiId === selectedApiId && !cards.some((c) => c.equipmentId === e.id)),
+    [equipmentList, cards, selectedApiId]
   );
 
   function recomputeEndpoints() {
@@ -931,8 +934,9 @@ export function DesignPage() {
             value={addEquipmentId}
             onChange={(e) => setAddEquipmentId(e.target.value ? Number(e.target.value) : "")}
             aria-label="Ajouter un matériel"
+            disabled={selectedApiId === ""}
           >
-            <option value="">Ajouter un matériel...</option>
+            <option value="">{selectedApiId === "" ? "Sélectionnez d'abord une API..." : "Ajouter un matériel..."}</option>
             {availableEquipment.map((e) => (
               <option key={e.id} value={e.id}>
                 {e.name} — {e.brandName} {e.hardwareModel}

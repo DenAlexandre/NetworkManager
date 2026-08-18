@@ -10,6 +10,8 @@ import { ColumnFilterCell } from "../../components/ColumnFilterCell";
 import { Pagination } from "../../components/Pagination";
 import { AddressingConfigModal } from "./AddressingConfigModal";
 
+const NO_API_LABEL = "Sans API";
+
 function roomLabel(item: AddressingEquipment) {
   return `${item.siteName} / ${item.zoneName} / ${item.roomName}`;
 }
@@ -36,6 +38,12 @@ export function AddressingPage() {
     return [...labels].sort((a, b) => a.localeCompare(b));
   }, [items]);
 
+  const apiOptions = useMemo(() => {
+    const names = new Set<string>();
+    for (const item of items) names.add(item.apiName ?? NO_API_LABEL);
+    return [...names].sort((a, b) => a.localeCompare(b));
+  }, [items]);
+
   const columns = useMemo<FilterColumn<AddressingEquipment>[]>(
     () => [
       { key: "equipmentName", getValue: (item) => item.equipmentName },
@@ -52,8 +60,14 @@ export function AddressingPage() {
         type: "select",
         options: roomOptions.map((label) => ({ value: label, label })),
       },
+      {
+        key: "api",
+        getValue: (item) => item.apiName ?? NO_API_LABEL,
+        type: "select",
+        options: apiOptions.map((name) => ({ value: name, label: name })),
+      },
     ],
-    [deviceTypeOptions, roomOptions]
+    [deviceTypeOptions, roomOptions, apiOptions]
   );
 
   const { filters, setFilter, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, columns);
@@ -97,6 +111,7 @@ export function AddressingPage() {
             <SortableHeader label="Type" field="deviceType" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
             <th>Matériel</th>
             <th>Emplacement</th>
+            <th>API</th>
             <th>Ports configurés</th>
             <th></th>
           </tr>
@@ -121,6 +136,7 @@ export function AddressingPage() {
               <td>
                 {item.siteName} / {item.zoneName} / {item.roomName}
               </td>
+              <td>{item.apiName ?? "—"}</td>
               <td>
                 {item.ports.filter(isPortConfigured).length} / {item.ports.length}
               </td>

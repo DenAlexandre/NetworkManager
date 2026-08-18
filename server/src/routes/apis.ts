@@ -24,7 +24,7 @@ function parseId(raw: string) {
 }
 
 router.get("/", async (_req, res) => {
-  const result = await pool.query(`${API_SELECT} ORDER BY id`);
+  const result = await pool.query(`${API_SELECT} ORDER BY name`);
   res.json({ apis: result.rows });
 });
 
