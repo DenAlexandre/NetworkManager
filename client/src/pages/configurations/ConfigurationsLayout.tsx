@@ -8,7 +8,7 @@ export function ConfigurationsLayout() {
     <div>
       <h1>Gestion des configurations</h1>
       <nav className="tabs">
-        <NavLink to="/configurations" className={isSwitchActive ? "tab active" : "tab"}>
+        <NavLink to="/configurations" className={() => (isSwitchActive ? "tab active" : "tab")}>
           Switch
         </NavLink>
         <NavLink to="/configurations/moxa" className="tab">
