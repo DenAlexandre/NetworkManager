@@ -94,6 +94,18 @@ ALTER TABLE link_types ALTER COLUMN color SET NOT NULL;
 -- Indique si ce type de liaison ne peut relier que deux equipements (un seul lien par port).
 ALTER TABLE link_types ADD COLUMN IF NOT EXISTS point_to_point BOOLEAN NOT NULL DEFAULT false;
 
+-- Renomme depuis modbus_link_types : le concept s'est avere plus general qu'un simple sous-type
+-- de liaison ModBus (un "type de configuration" nomme, reutilisable sur n'importe quel port).
+ALTER TABLE IF EXISTS modbus_link_types RENAME TO configuration_types;
+
+-- Catalogue de "types de configuration" : profils nommes de configuration reutilisables sur les
+-- ports (Gestion des ports), independants des link_types generiques (Fibre/TCP-IP/ModBus/...).
+CREATE TABLE IF NOT EXISTS configuration_types (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) UNIQUE NOT NULL,
+  configuration TEXT NOT NULL DEFAULT ''
+);
+
 ALTER TABLE IF EXISTS manufacturer_ports RENAME TO hardware_model_ports;
 
 CREATE TABLE IF NOT EXISTS hardware_model_ports (
@@ -106,6 +118,10 @@ CREATE TABLE IF NOT EXISTS hardware_model_ports (
 -- Mise a niveau des bases existantes creees avant l'extraction de link_types.
 ALTER TABLE hardware_model_ports ADD COLUMN IF NOT EXISTS port_type VARCHAR(50);
 ALTER TABLE hardware_model_ports ADD COLUMN IF NOT EXISTS link_type_id INTEGER REFERENCES link_types(id);
+
+-- Type de configuration optionnel associe au port (Gestion des ports), independant du type de
+-- liaison physique.
+ALTER TABLE hardware_model_ports ADD COLUMN IF NOT EXISTS configuration_type_id INTEGER REFERENCES configuration_types(id);
 
 INSERT INTO link_types (name)
 SELECT DISTINCT port_type FROM hardware_model_ports WHERE port_type IS NOT NULL

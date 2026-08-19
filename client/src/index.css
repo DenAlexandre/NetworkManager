@@ -36,10 +36,11 @@
 body {
   margin: 0;
   min-height: 100vh;
+  /* Light tint with --bg just enough to keep text legible where it sits directly on the photo
+     (sidebar links, navbar) — the image itself stays clearly, prominently visible. */
   background:
-    radial-gradient(circle at top left, rgba(139, 92, 246, 0.12), transparent 45%),
-    radial-gradient(circle at bottom right, rgba(139, 92, 246, 0.08), transparent 40%),
-    var(--bg);
+    linear-gradient(rgba(246, 245, 251, 0.72), rgba(246, 245, 251, 0.72)),
+    url("../images/fond.jpg") center / cover no-repeat fixed;
 }
 
 #root {
@@ -156,16 +157,47 @@ a {
   gap: 4px;
   position: sticky;
   top: 76px;
+  transition: width 0.15s var(--ease);
+}
+
+.sidebar.collapsed {
+  width: 48px;
+}
+
+.sidebar-toggle {
+  align-self: flex-end;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  width: 28px;
+  height: 28px;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s var(--ease), background 0.15s var(--ease);
+}
+
+.sidebar-toggle:hover {
+  background: var(--accent-light);
+  color: var(--accent-dark);
+}
+
+.sidebar.collapsed .sidebar-toggle {
+  align-self: center;
 }
 
 .sidebar-link {
   position: relative;
-  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-h);
   text-decoration: none;
   padding: 9px 14px 9px 18px;
   border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: 14px;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9), 0 1px 8px rgba(255, 255, 255, 0.6);
   transition: background 0.15s var(--ease), color 0.15s var(--ease);
 }
 
@@ -185,6 +217,24 @@ a {
 .sidebar-link:hover {
   background: var(--accent-light);
   color: var(--accent-dark);
+}
+
+.sidebar-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-link {
+  justify-content: center;
+  padding: 9px 0;
+}
+
+.sidebar.collapsed .sidebar-label {
+  display: none;
 }
 
 .sidebar-link.active {
@@ -467,6 +517,10 @@ a {
 .table td {
   padding: 12px;
   border-bottom: 1px solid var(--border-soft);
+}
+
+.cell-pre {
+  white-space: pre-wrap;
 }
 
 .table tr:last-child td {
@@ -1413,8 +1467,8 @@ textarea {
 
 .design-info-panel-body {
   margin-top: 8px;
-  width: 320px;
-  max-height: min(480px, calc(100vh - 340px));
+  width: 480px;
+  max-height: min(760px, calc(100vh - 160px));
   overflow-y: auto;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -1455,20 +1509,8 @@ textarea {
 
 .design-info-tree-row {
   display: flex;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 4px 10px;
-  padding: 4px 2px;
-}
-
-.design-info-tree-left {
-  display: flex;
   align-items: center;
-  gap: 6px;
-  min-width: 0;
-  flex: 1 1 auto;
-  padding-top: 2px;
+  padding: 4px 2px;
 }
 
 .design-info-tree-toggle {
@@ -1501,67 +1543,33 @@ textarea {
   transform: rotate(90deg);
 }
 
-.design-info-tree-via {
-  flex-shrink: 0;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--accent-dark);
-  cursor: pointer;
+.design-info-tree-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 2px 0 0 20px;
 }
 
-.design-info-tree-via:hover,
-.design-info-tree-via.active {
-  text-decoration: underline;
-}
-
-.design-info-tree-connection {
-  flex-shrink: 0;
+.design-info-tree-link {
   font-size: 11px;
   font-weight: 600;
   color: var(--text-muted);
   cursor: pointer;
-  margin-left: 8px;
-}
-
-.design-info-tree-connection:hover,
-.design-info-tree-connection.active {
-  text-decoration: underline;
-  color: var(--accent-dark);
-}
-
-.design-info-tree-connection-external {
-  font-style: italic;
-  color: var(--accent-dark);
-}
-
-.design-info-tree-addr {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  flex: 0 0 auto;
-  margin-left: auto;
-  padding: 4px 8px;
-  background: var(--surface-alt);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-sm);
-}
-
-.design-info-port-chip {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  font-size: 11px;
   white-space: nowrap;
 }
 
-.design-info-port-label {
-  font-weight: 600;
-  color: var(--text-h);
+.design-info-tree-link:hover,
+.design-info-tree-link.active {
+  text-decoration: underline;
+  color: var(--accent-dark);
 }
 
-.design-info-port-detail {
-  color: var(--text-muted);
+.design-info-tree-link-external {
+  font-style: italic;
+}
+
+.design-info-tree-link-addr {
+  font-weight: 400;
 }
 
 .design-info-tree-nested {

@@ -1,13 +1,42 @@
+import { useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { SidebarIcon } from "./SidebarIcon";
+import type { SidebarIconName } from "./SidebarIcon";
+
+const SIDEBAR_COLLAPSED_STORAGE_KEY = "layout.sidebarCollapsed";
+
+// Every link keeps its icon (plus a title tooltip) when the sidebar is collapsed, so navigation
+// stays reachable without expanding it back — only the text label is hidden by CSS in that state.
+const ADMIN_NAV_ITEMS: { to: string; icon: SidebarIconName; label: string }[] = [
+  { to: "/data-types", icon: "layers", label: "Type des données" },
+  { to: "/sites", icon: "pin", label: "Gestion des Sites" },
+  { to: "/apis", icon: "exchange", label: "Gestion des API" },
+  { to: "/equipment", icon: "server", label: "Gestion du matériel" },
+  { to: "/configurations", icon: "sliders", label: "Gestion des configurations" },
+  { to: "/plans", icon: "network", label: "Gestion des plans" },
+  { to: "/reporting", icon: "chart", label: "Reporting" },
+  { to: "/system", icon: "database", label: "Système" },
+];
 
 export function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    () => localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY) === "1"
+  );
 
   async function handleLogout() {
     await logout();
     navigate("/");
+  }
+
+  function toggleSidebar() {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, next ? "1" : "0");
+      return next;
+    });
   }
 
   return (
@@ -34,38 +63,26 @@ export function Layout() {
         </div>
       </header>
       <div className="shell">
-        <aside className="sidebar">
-          <NavLink to="/" end className="sidebar-link">
-            Accueil
+        <aside className={`sidebar${sidebarCollapsed ? " collapsed" : ""}`}>
+          <button
+            type="button"
+            className="sidebar-toggle"
+            onClick={toggleSidebar}
+            title={sidebarCollapsed ? "Afficher le menu" : "Rabattre le menu"}
+          >
+            {sidebarCollapsed ? "▸" : "◂"}
+          </button>
+          <NavLink to="/" end className="sidebar-link" title="Accueil">
+            <span className="sidebar-icon"><SidebarIcon name="home" /></span>
+            <span className="sidebar-label">Accueil</span>
           </NavLink>
-          {user?.role === "admin" && (
-            <>
-              <NavLink to="/data-types" className="sidebar-link">
-                Type des données
+          {user?.role === "admin" &&
+            ADMIN_NAV_ITEMS.map((item) => (
+              <NavLink key={item.to} to={item.to} className="sidebar-link" title={item.label}>
+                <span className="sidebar-icon"><SidebarIcon name={item.icon} /></span>
+                <span className="sidebar-label">{item.label}</span>
               </NavLink>
-              <NavLink to="/sites" className="sidebar-link">
-                Gestion des Sites
-              </NavLink>
-              <NavLink to="/apis" className="sidebar-link">
-                Gestion des API
-              </NavLink>
-              <NavLink to="/equipment" className="sidebar-link">
-                Gestion du matériel
-              </NavLink>
-              <NavLink to="/configurations" className="sidebar-link">
-                Gestion des configurations
-              </NavLink>
-              <NavLink to="/plans" className="sidebar-link">
-                Gestion des plans
-              </NavLink>
-              <NavLink to="/reporting" className="sidebar-link">
-                Reporting
-              </NavLink>
-              <NavLink to="/system" className="sidebar-link">
-                Système
-              </NavLink>
-            </>
-          )}
+            ))}
         </aside>
         <main className="content">
           <Outlet />

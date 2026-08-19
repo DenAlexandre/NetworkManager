@@ -9,12 +9,14 @@ router.use(requireAuth, requireRole("admin"));
 const portSchema = z.object({
   hardwareModelId: z.number().int("Le matériel est requis."),
   linkTypeId: z.number().int("Le type de liaison est requis."),
+  configurationTypeId: z.number().int().nullable().optional(),
   label: z.string().min(1, "Le label du port est requis."),
 });
 
 const bulkPortSchema = z.object({
   hardwareModelId: z.number().int("Le matériel est requis."),
   linkTypeId: z.number().int("Le type de liaison est requis."),
+  configurationTypeId: z.number().int().nullable().optional(),
   quantity: z.number().int().min(1, "La quantité doit être au moins 1.").max(200, "Quantité trop grande (max 200)."),
 });
 
@@ -28,6 +30,7 @@ const regionSchema = z.object({
 const PORT_SELECT = `
   SELECT p.id, p.hardware_model_id AS "hardwareModelId", p.link_type_id AS "linkTypeId",
          lt.name AS "portType", lt.color AS "linkTypeColor", lt.stroke_width AS "linkTypeStrokeWidth",
+         p.configuration_type_id AS "configurationTypeId", ct.name AS "configurationTypeName",
          p.label,
          hm.name AS "hardwareModelName", b.name AS "manufacturerName",
          p.region_x AS "regionX", p.region_y AS "regionY",
@@ -36,6 +39,7 @@ const PORT_SELECT = `
   JOIN hardware_models hm ON hm.id = p.hardware_model_id
   JOIN brands b ON b.id = hm.brand_id
   JOIN link_types lt ON lt.id = p.link_type_id
+  LEFT JOIN configuration_types ct ON ct.id = p.configuration_type_id
 `;
 
 function parseId(raw: string) {
@@ -45,6 +49,9 @@ function parseId(raw: string) {
 
 function fkErrorMessage(err: unknown) {
   const constraint = (err as { constraint?: string }).constraint || "";
+  if (constraint.includes("configuration_type")) {
+    return "Type de configuration introuvable.";
+  }
   if (constraint.includes("link_type")) {
     return "Type de liaison introuvable.";
   }
@@ -74,12 +81,12 @@ router.post("/", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
-  const { hardwareModelId, linkTypeId, label } = parsed.data;
+  const { hardwareModelId, linkTypeId, configurationTypeId, label } = parsed.data;
 
   try {
     const inserted = await pool.query(
-      `INSERT INTO hardware_model_ports (hardware_model_id, link_type_id, label) VALUES ($1, $2, $3) RETURNING id`,
-      [hardwareModelId, linkTypeId, label]
+      `INSERT INTO hardware_model_ports (hardware_model_id, link_type_id, configuration_type_id, label) VALUES ($1, $2, $3, $4) RETURNING id`,
+      [hardwareModelId, linkTypeId, configurationTypeId ?? null, label]
     );
     const result = await pool.query(`${PORT_SELECT} WHERE p.id = $1`, [inserted.rows[0].id]);
     res.status(201).json({ port: result.rows[0] });
@@ -96,7 +103,7 @@ router.post("/bulk", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
-  const { hardwareModelId, linkTypeId, quantity } = parsed.data;
+  const { hardwareModelId, linkTypeId, configurationTypeId, quantity } = parsed.data;
 
   const linkTypeResult = await pool.query("SELECT name FROM link_types WHERE id = $1", [linkTypeId]);
   const linkType = linkTypeResult.rows[0];
@@ -115,8 +122,8 @@ router.post("/bulk", async (req, res) => {
     for (let i = 0; i < quantity; i++) {
       const label = `${linkType.name} ${startIndex + i}`;
       const inserted = await pool.query(
-        `INSERT INTO hardware_model_ports (hardware_model_id, link_type_id, label) VALUES ($1, $2, $3) RETURNING id`,
-        [hardwareModelId, linkTypeId, label]
+        `INSERT INTO hardware_model_ports (hardware_model_id, link_type_id, configuration_type_id, label) VALUES ($1, $2, $3, $4) RETURNING id`,
+        [hardwareModelId, linkTypeId, configurationTypeId ?? null, label]
       );
       insertedIds.push(inserted.rows[0].id);
     }
@@ -124,7 +131,7 @@ router.post("/bulk", async (req, res) => {
     res.status(201).json({ ports: result.rows });
   } catch (err) {
     if ((err as { code?: string }).code === "23503") {
-      return res.status(400).json({ error: "Matériel introuvable." });
+      return res.status(400).json({ error: fkErrorMessage(err) });
     }
     throw err;
   }
@@ -139,12 +146,12 @@ router.put("/:id", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
-  const { hardwareModelId, linkTypeId, label } = parsed.data;
+  const { hardwareModelId, linkTypeId, configurationTypeId, label } = parsed.data;
 
   try {
     const updated = await pool.query(
-      `UPDATE hardware_model_ports SET hardware_model_id = $1, link_type_id = $2, label = $3 WHERE id = $4 RETURNING id`,
-      [hardwareModelId, linkTypeId, label, id]
+      `UPDATE hardware_model_ports SET hardware_model_id = $1, link_type_id = $2, configuration_type_id = $3, label = $4 WHERE id = $5 RETURNING id`,
+      [hardwareModelId, linkTypeId, configurationTypeId ?? null, label, id]
     );
     if (!updated.rowCount) {
       return res.status(404).json({ error: "Entrée/sortie introuvable." });

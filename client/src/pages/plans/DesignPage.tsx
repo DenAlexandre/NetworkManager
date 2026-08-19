@@ -59,6 +59,7 @@ type CardRects = Record<number, Rect>;
 
 interface Connection {
   ownPortLabel: string;
+  ownPortId: number;
   otherEquipmentName: string;
   otherPortLabel: string;
   linkId: number;
@@ -70,7 +71,7 @@ interface Connection {
 
 interface InfoTreeNode {
   equipment: Equipment;
-  via?: { parentPortLabel: string; childPortLabel: string; linkId: number };
+  via?: { parentPortLabel: string; childPortLabel: string; childPortId: number; linkId: number };
   /** Every link touching this equipment (any link type), minus the one already shown via `via` —
       an equipment only ever appears once in the tree, so every OTHER link it's part of (whether
       it lost out on nesting to a link found first, or is a fan-out ModBus link) must still be
@@ -380,6 +381,7 @@ export function DesignPage() {
       const parentList = connectionsByEquipment.get(l.parentEquipmentId) ?? [];
       parentList.push({
         ownPortLabel: l.parentPortLabel,
+        ownPortId: l.parentPortId,
         otherEquipmentName: l.childEquipmentName,
         otherPortLabel: l.childPortLabel,
         linkId: l.id,
@@ -388,6 +390,7 @@ export function DesignPage() {
       const childList = connectionsByEquipment.get(l.childEquipmentId) ?? [];
       childList.push({
         ownPortLabel: l.childPortLabel,
+        ownPortId: l.childPortId,
         otherEquipmentName: l.parentEquipmentName,
         otherPortLabel: l.parentPortLabel,
         linkId: l.id,
@@ -402,12 +405,13 @@ export function DesignPage() {
       const parentInApi = apiEquipmentIds.has(l.parentEquipmentId);
       const childInApi = apiEquipmentIds.has(l.childEquipmentId);
       if (parentInApi === childInApi) continue;
-      const [ownId, ownPortLabel, otherId, otherPortLabel] = parentInApi
-        ? [l.parentEquipmentId, l.parentPortLabel, l.childEquipmentId, l.childPortLabel]
-        : [l.childEquipmentId, l.childPortLabel, l.parentEquipmentId, l.parentPortLabel];
+      const [ownId, ownPortLabel, ownPortId, otherId, otherPortLabel] = parentInApi
+        ? [l.parentEquipmentId, l.parentPortLabel, l.parentPortId, l.childEquipmentId, l.childPortLabel]
+        : [l.childEquipmentId, l.childPortLabel, l.childPortId, l.parentEquipmentId, l.parentPortLabel];
       const list = connectionsByEquipment.get(ownId) ?? [];
       list.push({
         ownPortLabel,
+        ownPortId,
         otherEquipmentName: equipmentById.get(otherId)?.name ?? "?",
         otherPortLabel,
         linkId: l.id,
@@ -475,7 +479,7 @@ export function DesignPage() {
     function buildNode(
       equipmentId: number,
       ancestors: Set<number>,
-      via?: { parentPortLabel: string; childPortLabel: string; linkId: number }
+      via?: { parentPortLabel: string; childPortLabel: string; childPortId: number; linkId: number }
     ): InfoTreeNode | null {
       if (visited.has(equipmentId)) return null;
       const equipment = equipmentById.get(equipmentId);
@@ -487,6 +491,7 @@ export function DesignPage() {
         const childNode = buildNode(l.childEquipmentId, new Set(ancestors).add(l.childEquipmentId), {
           parentPortLabel: l.parentPortLabel,
           childPortLabel: l.childPortLabel,
+          childPortId: l.childPortId,
           linkId: l.id,
         });
         if (childNode) children.push(childNode);
@@ -530,11 +535,14 @@ export function DesignPage() {
     return set;
   }, [links]);
 
-  // Search filters for the "Ajouter un matériel" picker: unlike the info panel (scoped to
-  // selectedApiId's own network), a schema can include equipment from any API/room/type, so the
-  // picker searches the whole fleet rather than being restricted to the schema's API.
+  // Sorted numerically rather than plain alphabetically, so API names like "2-406A-HQ" and
+  // "10-102B-HQ" order as 2 before 10 instead of "10..." sorting first (character-by-character,
+  // "1" < "2"). Used both for the toolbar's own API selector and the "Ajouter un matériel"
+  // picker's API filter below — unlike the info panel (scoped to selectedApiId's own network), a
+  // schema can include equipment from any API/room/type, so that picker searches the whole fleet
+  // rather than being restricted to the schema's API.
   const searchApiOptions = useMemo(
-    () => [...apis].sort((a, b) => a.name.localeCompare(b.name)),
+    () => [...apis].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })),
     [apis]
   );
   const searchRoomOptions = useMemo(() => {
@@ -1614,24 +1622,31 @@ export function DesignPage() {
     const { equipment, via, connections, children } = node;
     const collapsed = collapsedInfoEquipmentIds.has(equipment.id);
     const addr = addressingByEquipmentId.get(equipment.id);
-    const modelPorts = portsByModel.get(equipment.hardwareModelId) ?? [];
-    const addressRows = modelPorts
-      .map((port) => {
-        const addressInfo = addr?.ports.find((p) => p.hardwareModelPortId === port.id);
-        if (!addressInfo?.ipAddress && !addressInfo?.modbusAddress) return null;
-        return { port, addressInfo };
-      })
-      .filter((row): row is NonNullable<typeof row> => row !== null);
 
-    function selectViaLink(e: ReactMouseEvent) {
-      e.stopPropagation();
-      if (!via) return;
-      setSelectedCardIds(new Set());
-      setSelectedTextIds(new Set());
-      setSelectedLinkIds(new Set([via.linkId]));
-    }
+    // One entry per liaison touching this equipment (its own incoming link plus every other link
+    // it's part of) — reduced to just the two port labels and, if configured, the address of this
+    // equipment's own port. Ports with an address but no liaison have no "destination" side to
+    // pair with, so they're no longer shown here at all.
+    const linkedPorts = [
+      ...(via ? [{ ownPortLabel: via.childPortLabel, ownPortId: via.childPortId, otherPortLabel: via.parentPortLabel, linkId: via.linkId, external: false }] : []),
+      ...connections.map((c) => ({
+        ownPortLabel: c.ownPortLabel,
+        ownPortId: c.ownPortId,
+        otherPortLabel: c.otherPortLabel,
+        linkId: c.linkId,
+        external: c.otherApiName !== undefined,
+      })),
+    ].map((lp) => {
+      const addressInfo = addr?.ports.find((p) => p.hardwareModelPortId === lp.ownPortId);
+      const addressText = addressInfo?.ipAddress
+        ? `IP ${addressInfo.ipAddress}`
+        : addressInfo?.modbusAddress
+          ? `Modbus ${addressInfo.modbusAddress}`
+          : null;
+      return { ...lp, addressText };
+    });
 
-    function selectConnectionLink(e: ReactMouseEvent, linkId: number) {
+    function selectLink(e: ReactMouseEvent, linkId: number) {
       e.stopPropagation();
       setSelectedCardIds(new Set());
       setSelectedTextIds(new Set());
@@ -1641,55 +1656,32 @@ export function DesignPage() {
     return (
       <li key={equipment.id} className="design-info-tree-node">
         <div className="design-info-tree-row">
-          <div className="design-info-tree-left">
-            <button
-              type="button"
-              className="design-info-tree-toggle"
-              onClick={() => toggleInfoEquipmentCollapse(equipment.id)}
-              disabled={children.length === 0}
-            >
-              {children.length > 0 && (
-                <span className={`design-info-tree-caret${collapsed ? "" : " open"}`}>▸</span>
-              )}
-              {equipment.name}
-            </button>
-            {via && (
-              <span
-                className={`design-info-tree-via${selectedLinkIds.has(via.linkId) ? " active" : ""}`}
-                onClick={selectViaLink}
-              >
-                via {via.parentPortLabel} → {via.childPortLabel}
-              </span>
+          <button
+            type="button"
+            className="design-info-tree-toggle"
+            onClick={() => toggleInfoEquipmentCollapse(equipment.id)}
+            disabled={children.length === 0}
+          >
+            {children.length > 0 && (
+              <span className={`design-info-tree-caret${collapsed ? "" : " open"}`}>▸</span>
             )}
-            {connections.map((c) => (
+            {equipment.name}
+          </button>
+        </div>
+        {linkedPorts.length > 0 && (
+          <div className="design-info-tree-links">
+            {linkedPorts.map((lp) => (
               <span
-                key={c.linkId}
-                className={`design-info-tree-connection${c.otherApiName !== undefined ? " design-info-tree-connection-external" : ""}${selectedLinkIds.has(c.linkId) ? " active" : ""}`}
-                onClick={(e) => selectConnectionLink(e, c.linkId)}
-                title={c.otherApiName !== undefined ? `Liaison vers l'API ${c.otherApiName ?? "sans API"}` : "Liaison"}
+                key={lp.linkId}
+                className={`design-info-tree-link${lp.external ? " design-info-tree-link-external" : ""}${selectedLinkIds.has(lp.linkId) ? " active" : ""}`}
+                onClick={(e) => selectLink(e, lp.linkId)}
               >
-                {c.otherApiName !== undefined
-                  ? `${c.ownPortLabel} → ${c.otherEquipmentName} (${c.otherApiName ?? "sans API"})`
-                  : `${c.ownPortLabel} ↔ ${c.otherEquipmentName} (${c.otherPortLabel})`}
+                {lp.ownPortLabel} → {lp.otherPortLabel}
+                {lp.addressText && <span className="design-info-tree-link-addr"> · {lp.addressText}</span>}
               </span>
             ))}
           </div>
-          {addressRows.length > 0 && (
-            <div className="design-info-tree-addr">
-              {addressRows.map(({ port, addressInfo }) => (
-                <span key={port.id} className="design-info-port-chip">
-                  <span className="design-info-port-label">{port.label}</span>
-                  {addressInfo?.ipAddress && (
-                    <span className="design-info-port-detail">IP {addressInfo.ipAddress}</span>
-                  )}
-                  {addressInfo?.modbusAddress && (
-                    <span className="design-info-port-detail">Modbus {addressInfo.modbusAddress}</span>
-                  )}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
+        )}
         {!collapsed && children.length > 0 && (
           <ul className="design-info-tree-nested">{children.map((child) => renderInfoNode(child))}</ul>
         )}
@@ -1712,7 +1704,7 @@ export function DesignPage() {
             API
             <select value={selectedApiId} onChange={(e) => handleSelectApi(e.target.value)} disabled={schemaLoading}>
               <option value="">Aucune (non enregistré)</option>
-              {apis.map((a) => (
+              {searchApiOptions.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.name}
                 </option>

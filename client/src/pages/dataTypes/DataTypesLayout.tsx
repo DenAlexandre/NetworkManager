@@ -11,6 +11,9 @@ export function DataTypesLayout() {
         <NavLink to="/data-types/link-types" className="tab">
           Types de liaison
         </NavLink>
+        <NavLink to="/data-types/configuration-types" className="tab">
+          Type de configuration
+        </NavLink>
         <NavLink to="/data-types/brands" className="tab">
           Constructeurs
         </NavLink>

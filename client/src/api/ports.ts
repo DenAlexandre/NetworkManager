@@ -7,6 +7,8 @@ export interface Port {
   portType: string;
   linkTypeColor: string;
   linkTypeStrokeWidth: number;
+  configurationTypeId: number | null;
+  configurationTypeName: string | null;
   label: string;
   hardwareModelName: string;
   manufacturerName: string;
@@ -26,12 +28,14 @@ export interface PortRegionInput {
 export interface PortInput {
   hardwareModelId: number;
   linkTypeId: number;
+  configurationTypeId?: number | null;
   label: string;
 }
 
 export interface BulkPortInput {
   hardwareModelId: number;
   linkTypeId: number;
+  configurationTypeId?: number | null;
   quantity: number;
 }
 

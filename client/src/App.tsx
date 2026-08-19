@@ -8,6 +8,7 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { DataTypesLayout } from "./pages/dataTypes/DataTypesLayout";
 import { DeviceTypesListPage } from "./pages/dataTypes/DeviceTypesListPage";
 import { LinkTypesListPage } from "./pages/dataTypes/LinkTypesListPage";
+import { ConfigurationTypesListPage } from "./pages/dataTypes/ConfigurationTypesListPage";
 import { BrandsListPage } from "./pages/dataTypes/BrandsListPage";
 import { HardwareModelsListPage } from "./pages/dataTypes/HardwareModelsListPage";
 import { PortsDesignerPage } from "./pages/dataTypes/PortsDesignerPage";
@@ -51,6 +52,7 @@ function App() {
           >
             <Route index element={<DeviceTypesListPage />} />
             <Route path="link-types" element={<LinkTypesListPage />} />
+            <Route path="configuration-types" element={<ConfigurationTypesListPage />} />
             <Route path="brands" element={<BrandsListPage />} />
             <Route path="hardware-models" element={<HardwareModelsListPage />} />
             <Route path="ports" element={<PortsDesignerPage />} />

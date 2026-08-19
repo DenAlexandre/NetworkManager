@@ -202,6 +202,7 @@ export function PortsDesignerPage() {
       const { port: updated } = await updatePort(port.id, {
         hardwareModelId: port.hardwareModelId,
         linkTypeId: port.linkTypeId,
+        configurationTypeId: port.configurationTypeId,
         label,
       });
       setPorts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));

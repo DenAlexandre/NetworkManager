@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import * as XLSX from "xlsx";
-import { listApis } from "../../api/apis";
+import { listApis, createApi } from "../../api/apis";
 import { listEquipment, createEquipment, updateEquipment } from "../../api/equipment";
 import { listEquipmentLinks } from "../../api/equipmentLinks";
 import { listAddressing } from "../../api/equipmentPortSettings";
@@ -170,11 +170,34 @@ export function EquipmentImportExport() {
         }
 
         let apiId: number | null = null;
+        let apiCreatedName: string | null = null;
         if (apiValue.trim()) {
-          const api = apis.find((a) => a.name.trim().toLowerCase() === apiValue.trim().toLowerCase());
+          const trimmedApiName = apiValue.trim();
+          let api = apis.find((a) => a.name.trim().toLowerCase() === trimmedApiName.toLowerCase());
           if (!api) {
-            results.push({ line, name: trimmedName, status: "error", message: `API introuvable : "${apiValue}".` });
-            continue;
+            // L'API n'est pas un catalogue figé comme le matériel : une API absente est simplement
+            // créée à la volée (avec ses champs "Terminé"/"DOE à jour" à false par défaut) plutôt
+            // que de faire échouer la ligne.
+            try {
+              const { api: created } = await createApi({
+                name: trimmedApiName,
+                migrationDate: null,
+                completed: false,
+                doeUpToDate: false,
+              });
+              apis.push(created);
+              api = created;
+              apiCreatedName = trimmedApiName;
+            } catch (err) {
+              results.push({
+                line,
+                name: trimmedName,
+                status: "error",
+                message:
+                  err instanceof ApiError ? err.message : `Erreur lors de la création de l'API "${trimmedApiName}".`,
+              });
+              continue;
+            }
           }
           apiId = api.id;
         }
@@ -186,6 +209,8 @@ export function EquipmentImportExport() {
           (e) => e.roomId === room.id && e.name.trim().toLowerCase() === trimmedName.toLowerCase()
         );
 
+        const apiSuffix = apiCreatedName ? ` (API "${apiCreatedName}" créée)` : "";
+
         try {
           if (existing) {
             await updateEquipment(existing.id, {
@@ -196,7 +221,7 @@ export function EquipmentImportExport() {
               name: trimmedName,
               isApiStartPoint: existing.isApiStartPoint,
             });
-            results.push({ line, name: trimmedName, status: "success", message: "Mis à jour." });
+            results.push({ line, name: trimmedName, status: "success", message: `Mis à jour.${apiSuffix}` });
           } else {
             const { equipment: created } = await createEquipment({
               roomId: room.id,
@@ -207,7 +232,7 @@ export function EquipmentImportExport() {
               isApiStartPoint: false,
             });
             existingEquipment.push(created);
-            results.push({ line, name: trimmedName, status: "success", message: "Créé." });
+            results.push({ line, name: trimmedName, status: "success", message: `Créé.${apiSuffix}` });
           }
         } catch (err) {
           results.push({
@@ -228,8 +253,9 @@ export function EquipmentImportExport() {
     }
   }
 
-  const createdCount = importResults?.filter((r) => r.message === "Créé.").length ?? 0;
-  const updatedCount = importResults?.filter((r) => r.message === "Mis à jour.").length ?? 0;
+  const createdCount = importResults?.filter((r) => r.status === "success" && r.message.startsWith("Créé")).length ?? 0;
+  const updatedCount =
+    importResults?.filter((r) => r.status === "success" && r.message.startsWith("Mis à jour")).length ?? 0;
   const errorCount = importResults?.filter((r) => r.status === "error").length ?? 0;
 
   return (
@@ -253,7 +279,8 @@ export function EquipmentImportExport() {
         il est mis à jour plutôt que dupliqué ; sinon il est créé. Seul l'onglet "{MATERIEL_SHEET}" est utilisé ;
         "{LIAISONS_SHEET}" et "{ADRESSAGE_SHEET}" sont ignorés. Chaque ligne doit indiquer :{" "}
         {MATERIEL_COLUMNS.join(", ")} — le constructeur et le modèle doivent correspondre à un matériel du
-        catalogue, la salle au format "Site / Zone / Salle", et l'API est optionnelle.
+        catalogue, la salle au format "Site / Zone / Salle", et l'API est optionnelle ; si elle n'existe pas encore,
+        elle est créée automatiquement.
       </p>
       <div className="inline-form">
         <label>
