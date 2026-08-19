@@ -128,6 +128,18 @@ ALTER TABLE hardware_model_ports ADD COLUMN IF NOT EXISTS region_y REAL;
 ALTER TABLE hardware_model_ports ADD COLUMN IF NOT EXISTS region_width REAL;
 ALTER TABLE hardware_model_ports ADD COLUMN IF NOT EXISTS region_height REAL;
 
+-- Variable de supervision d'un modele materiel (nom, unite, registre a lire), independante des
+-- ports/liaisons.
+CREATE TABLE IF NOT EXISTS hardware_model_variables (
+  id SERIAL PRIMARY KEY,
+  hardware_model_id INTEGER NOT NULL REFERENCES hardware_models(id) ON DELETE CASCADE,
+  name VARCHAR(150) NOT NULL,
+  unit VARCHAR(50) NOT NULL DEFAULT '',
+  register VARCHAR(50) NOT NULL DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS ix_hardware_model_variables_hardware_model ON hardware_model_variables(hardware_model_id);
+
 CREATE TABLE IF NOT EXISTS sites (
   id SERIAL PRIMARY KEY,
   name VARCHAR(150) UNIQUE NOT NULL

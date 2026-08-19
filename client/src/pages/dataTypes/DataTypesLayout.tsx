@@ -20,6 +20,9 @@ export function DataTypesLayout() {
         <NavLink to="/data-types/ports" className="tab">
           Gestion des ports
         </NavLink>
+        <NavLink to="/data-types/variables" className="tab">
+          Variables
+        </NavLink>
       </nav>
       <Outlet />
     </div>

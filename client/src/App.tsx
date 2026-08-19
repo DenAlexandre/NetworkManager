@@ -11,6 +11,7 @@ import { LinkTypesListPage } from "./pages/dataTypes/LinkTypesListPage";
 import { BrandsListPage } from "./pages/dataTypes/BrandsListPage";
 import { HardwareModelsListPage } from "./pages/dataTypes/HardwareModelsListPage";
 import { PortsDesignerPage } from "./pages/dataTypes/PortsDesignerPage";
+import { VariablesPage } from "./pages/dataTypes/VariablesPage";
 import { SitesLayout } from "./pages/sites/SitesLayout";
 import { SitesListPage } from "./pages/sites/SitesListPage";
 import { SiteDetailPage } from "./pages/sites/SiteDetailPage";
@@ -53,6 +54,7 @@ function App() {
             <Route path="brands" element={<BrandsListPage />} />
             <Route path="hardware-models" element={<HardwareModelsListPage />} />
             <Route path="ports" element={<PortsDesignerPage />} />
+            <Route path="variables" element={<VariablesPage />} />
           </Route>
           <Route
             path="sites"
