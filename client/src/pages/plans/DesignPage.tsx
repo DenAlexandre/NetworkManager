@@ -207,6 +207,10 @@ export function DesignPage() {
 
   const [cards, setCards] = useState<Card[]>([]);
   const [addEquipmentId, setAddEquipmentId] = useState<number | "">("");
+  const [searchApiId, setSearchApiId] = useState<number | "">("");
+  const [searchRoomId, setSearchRoomId] = useState<number | "">("");
+  const [searchDeviceTypeId, setSearchDeviceTypeId] = useState<number | "">("");
+  const [searchHardwareModelId, setSearchHardwareModelId] = useState<number | "">("");
   const [linkMode, setLinkMode] = useState(false);
   const [linkDraw, setLinkDraw] = useState<LinkDraw | null>(null);
   const [cardContextMenu, setCardContextMenu] = useState<{ equipmentId: number; x: number; y: number } | null>(null);
@@ -511,12 +515,40 @@ export function DesignPage() {
     return set;
   }, [links]);
 
+  // Search filters for the "Ajouter un matériel" picker: unlike the info panel (scoped to
+  // selectedApiId's own network), a schema can include equipment from any API/room/type, so the
+  // picker searches the whole fleet rather than being restricted to the schema's API.
+  const searchApiOptions = useMemo(
+    () => [...apis].sort((a, b) => a.name.localeCompare(b.name)),
+    [apis]
+  );
+  const searchRoomOptions = useMemo(() => {
+    const map = new Map<number, string>();
+    for (const e of equipmentList) map.set(e.roomId, `${e.zoneName} / ${e.roomName}`);
+    return [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  }, [equipmentList]);
+  const searchDeviceTypeOptions = useMemo(() => {
+    const map = new Map<number, string>();
+    for (const e of equipmentList) map.set(e.deviceTypeId, e.deviceType);
+    return [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  }, [equipmentList]);
+  const searchHardwareModelOptions = useMemo(() => {
+    const map = new Map<number, string>();
+    for (const e of equipmentList) map.set(e.hardwareModelId, `${e.brandName} — ${e.hardwareModel}`);
+    return [...map.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  }, [equipmentList]);
+
   const availableEquipment = useMemo(
     () =>
       selectedApiId === ""
         ? []
-        : equipmentList.filter((e) => e.apiId === selectedApiId && !cards.some((c) => c.equipmentId === e.id)),
-    [equipmentList, cards, selectedApiId]
+        : equipmentList
+            .filter((e) => !cards.some((c) => c.equipmentId === e.id))
+            .filter((e) => searchApiId === "" || e.apiId === searchApiId)
+            .filter((e) => searchRoomId === "" || e.roomId === searchRoomId)
+            .filter((e) => searchDeviceTypeId === "" || e.deviceTypeId === searchDeviceTypeId)
+            .filter((e) => searchHardwareModelId === "" || e.hardwareModelId === searchHardwareModelId),
+    [equipmentList, cards, selectedApiId, searchApiId, searchRoomId, searchDeviceTypeId, searchHardwareModelId]
   );
 
   function recomputeEndpoints() {
@@ -868,6 +900,12 @@ export function DesignPage() {
     }
   }
 
+  // Keeps the "Ajouter un matériel" selection valid as the search filters (or the set of
+  // equipment already on the canvas) narrow the result list out from under it.
+  useEffect(() => {
+    if (addEquipmentId !== "" && !availableEquipment.some((e) => e.id === addEquipmentId)) setAddEquipmentId("");
+  }, [availableEquipment, addEquipmentId]);
+
   function handleAddCard() {
     if (addEquipmentId === "") return;
     const newEquipmentId = Number(addEquipmentId);
@@ -1158,6 +1196,11 @@ export function DesignPage() {
     setLinkDraw(null);
     setLinkPreview(null);
     clearSelection();
+    setAddEquipmentId("");
+    setSearchApiId("");
+    setSearchRoomId("");
+    setSearchDeviceTypeId("");
+    setSearchHardwareModelId("");
     if (apiId === "") {
       localStorage.removeItem(SELECTED_API_STORAGE_KEY);
       setCards([]);
@@ -1650,6 +1693,58 @@ export function DesignPage() {
 
         <div className="design-toolbar-group">
           <select
+            value={searchApiId}
+            onChange={(e) => setSearchApiId(e.target.value ? Number(e.target.value) : "")}
+            aria-label="Rechercher par API"
+            disabled={selectedApiId === ""}
+          >
+            <option value="">Toutes les API</option>
+            {searchApiOptions.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.name}
+              </option>
+            ))}
+          </select>
+          <select
+            value={searchRoomId}
+            onChange={(e) => setSearchRoomId(e.target.value ? Number(e.target.value) : "")}
+            aria-label="Rechercher par salle"
+            disabled={selectedApiId === ""}
+          >
+            <option value="">Toutes les salles</option>
+            {searchRoomOptions.map(([id, label]) => (
+              <option key={id} value={id}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={searchDeviceTypeId}
+            onChange={(e) => setSearchDeviceTypeId(e.target.value ? Number(e.target.value) : "")}
+            aria-label="Rechercher par type"
+            disabled={selectedApiId === ""}
+          >
+            <option value="">Tous les types</option>
+            {searchDeviceTypeOptions.map(([id, label]) => (
+              <option key={id} value={id}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={searchHardwareModelId}
+            onChange={(e) => setSearchHardwareModelId(e.target.value ? Number(e.target.value) : "")}
+            aria-label="Rechercher par matériel"
+            disabled={selectedApiId === ""}
+          >
+            <option value="">Tous les matériels</option>
+            {searchHardwareModelOptions.map(([id, label]) => (
+              <option key={id} value={id}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <select
             value={addEquipmentId}
             onChange={(e) => setAddEquipmentId(e.target.value ? Number(e.target.value) : "")}
             aria-label="Ajouter un matériel"
@@ -1658,7 +1753,7 @@ export function DesignPage() {
             <option value="">{selectedApiId === "" ? "Sélectionnez d'abord une API..." : "Ajouter un matériel..."}</option>
             {availableEquipment.map((e) => (
               <option key={e.id} value={e.id}>
-                {e.name} — {e.brandName} {e.hardwareModel}
+                {e.name} — {e.brandName} {e.hardwareModel} ({e.roomName}, {e.apiName ?? "sans API"})
               </option>
             ))}
           </select>

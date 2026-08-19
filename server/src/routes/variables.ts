@@ -10,7 +10,7 @@ const variableSchema = z.object({
   hardwareModelId: z.number().int("Le matériel est requis."),
   name: z.string().min(1, "Le nom de la variable est requis."),
   unit: z.string().optional().default(""),
-  register: z.string().min(1, "Le registre est requis."),
+  register: z.string().optional().default(""),
 });
 
 const VARIABLE_SELECT = `

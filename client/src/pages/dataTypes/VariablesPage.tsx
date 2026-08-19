@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import type { FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
-import { createVariable, deleteVariable, listVariables, updateVariable } from "../../api/variables";
+import { deleteVariable, listVariables } from "../../api/variables";
 import type { Variable } from "../../api/variables";
 import { listHardwareModels } from "../../api/hardwareModels";
 import type { HardwareModel } from "../../api/hardwareModels";
 import { ApiError } from "../../api/client";
+import { VariableFormModal } from "./VariableFormModal";
 
 export function VariablesPage() {
   const [hardwareModelList, setHardwareModelList] = useState<HardwareModel[]>([]);
@@ -15,17 +15,8 @@ export function VariablesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [newName, setNewName] = useState("");
-  const [newUnit, setNewUnit] = useState("");
-  const [newRegister, setNewRegister] = useState("");
-  const [addError, setAddError] = useState<string | null>(null);
-  const [addSubmitting, setAddSubmitting] = useState(false);
-
+  const [modalOpen, setModalOpen] = useState(false);
   const [editingVariableId, setEditingVariableId] = useState<number | null>(null);
-  const [editingName, setEditingName] = useState("");
-  const [editingUnit, setEditingUnit] = useState("");
-  const [editingRegister, setEditingRegister] = useState("");
-  const [editError, setEditError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -84,11 +75,8 @@ export function VariablesPage() {
   }
 
   useEffect(() => {
+    setModalOpen(false);
     setEditingVariableId(null);
-    setNewName("");
-    setNewUnit("");
-    setNewRegister("");
-    setAddError(null);
     if (!selectedHardwareModel) {
       setVariables([]);
       return;
@@ -97,58 +85,19 @@ export function VariablesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedHardwareModel]);
 
-  async function handleAddVariable(e: FormEvent) {
-    e.preventDefault();
-    if (!selectedHardwareModel) return;
-    setAddError(null);
-    setAddSubmitting(true);
-    try {
-      await createVariable({
-        hardwareModelId: selectedHardwareModel.id,
-        name: newName,
-        unit: newUnit,
-        register: newRegister,
-      });
-      setNewName("");
-      setNewUnit("");
-      setNewRegister("");
-      await loadVariables();
-    } catch (err) {
-      setAddError(err instanceof ApiError ? err.message : "Erreur lors de l'ajout.");
-    } finally {
-      setAddSubmitting(false);
-    }
-  }
-
-  function startEdit(variable: Variable) {
-    setEditingVariableId(variable.id);
-    setEditingName(variable.name);
-    setEditingUnit(variable.unit);
-    setEditingRegister(variable.register);
-    setEditError(null);
-  }
-
-  function cancelEdit() {
+  function openCreateModal() {
     setEditingVariableId(null);
+    setModalOpen(true);
   }
 
-  async function handleSaveEdit(variable: Variable) {
-    const name = editingName.trim();
-    const register = editingRegister.trim();
-    if (!name || !register) return;
-    setEditError(null);
-    try {
-      const { variable: updated } = await updateVariable(variable.id, {
-        hardwareModelId: variable.hardwareModelId,
-        name,
-        unit: editingUnit.trim(),
-        register,
-      });
-      setVariables((prev) => prev.map((v) => (v.id === updated.id ? updated : v)));
-      setEditingVariableId(null);
-    } catch (err) {
-      setEditError(err instanceof ApiError ? err.message : "Erreur lors de la modification.");
-    }
+  function openEditModal(variableId: number) {
+    setEditingVariableId(variableId);
+    setModalOpen(true);
+  }
+
+  function handleSaved() {
+    setModalOpen(false);
+    loadVariables();
   }
 
   async function handleDeleteVariable(variableId: number) {
@@ -199,26 +148,12 @@ export function VariablesPage() {
 
       {selectedHardwareModel && (
         <div className="ports-designer-list">
-          <h3>Variables du modèle</h3>
-          <form className="inline-form" onSubmit={handleAddVariable}>
-            <label>
-              Nom
-              <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)} required />
-            </label>
-            <label>
-              Unité
-              <input type="text" value={newUnit} onChange={(e) => setNewUnit(e.target.value)} />
-            </label>
-            <label>
-              Registre
-              <input type="text" value={newRegister} onChange={(e) => setNewRegister(e.target.value)} required />
-            </label>
-            <button type="submit" disabled={addSubmitting}>
+          <div className="page-header">
+            <h3>Variables du modèle</h3>
+            <button type="button" className="btn" onClick={openCreateModal}>
               Ajouter
             </button>
-          </form>
-          {addError && <p className="error">{addError}</p>}
-          {editError && <p className="error">{editError}</p>}
+          </div>
           <table className="table">
             <thead>
               <tr>
@@ -231,47 +166,31 @@ export function VariablesPage() {
             <tbody>
               {variables.map((v) => (
                 <tr key={v.id}>
-                  {editingVariableId === v.id ? (
-                    <>
-                      <td>
-                        <input type="text" value={editingName} onChange={(e) => setEditingName(e.target.value)} autoFocus />
-                      </td>
-                      <td>
-                        <input type="text" value={editingUnit} onChange={(e) => setEditingUnit(e.target.value)} />
-                      </td>
-                      <td>
-                        <input type="text" value={editingRegister} onChange={(e) => setEditingRegister(e.target.value)} />
-                      </td>
-                      <td className="table-actions">
-                        <button type="button" className="link" onClick={() => handleSaveEdit(v)}>
-                          Enregistrer
-                        </button>
-                        <button type="button" className="link" onClick={cancelEdit}>
-                          Annuler
-                        </button>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td>{v.name}</td>
-                      <td>{v.unit || "—"}</td>
-                      <td>{v.register}</td>
-                      <td className="table-actions">
-                        <button type="button" className="link" onClick={() => startEdit(v)}>
-                          Modifier
-                        </button>
-                        <button className="danger" onClick={() => handleDeleteVariable(v.id)}>
-                          Supprimer
-                        </button>
-                      </td>
-                    </>
-                  )}
+                  <td>{v.name}</td>
+                  <td>{v.unit || "—"}</td>
+                  <td>{v.register || "—"}</td>
+                  <td className="table-actions">
+                    <button type="button" className="link" onClick={() => openEditModal(v.id)}>
+                      Modifier
+                    </button>
+                    <button className="danger" onClick={() => handleDeleteVariable(v.id)}>
+                      Supprimer
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
           {variables.length === 0 && <p className="muted">Aucune variable définie pour ce modèle.</p>}
         </div>
+      )}
+      {modalOpen && selectedHardwareModel && (
+        <VariableFormModal
+          variableId={editingVariableId}
+          hardwareModelId={selectedHardwareModel.id}
+          onClose={() => setModalOpen(false)}
+          onSaved={handleSaved}
+        />
       )}
     </div>
   );

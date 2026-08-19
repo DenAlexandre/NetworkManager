@@ -14,7 +14,7 @@ import { AddressingConfigModal } from "./AddressingConfigModal";
 const NO_API_LABEL = "Sans API";
 
 function roomLabel(item: AddressingEquipment) {
-  return `${item.siteName} / ${item.zoneName} / ${item.roomName}`;
+  return `${item.zoneName} / ${item.roomName}`;
 }
 
 function isPortConfigured(port: AddressingPort) {
@@ -155,7 +155,7 @@ export function AddressingPage() {
                 {item.brandName} — {item.hardwareModel}
               </td>
               <td>
-                {item.siteName} / {item.zoneName} / {item.roomName}
+                {item.zoneName} / {item.roomName}
               </td>
               <td>{item.apiName ?? "—"}</td>
               <td>

@@ -14,7 +14,7 @@ import { EquipmentFormModal } from "./EquipmentFormModal";
 const NO_API_LABEL = "Sans API";
 
 function roomLabel(item: Equipment) {
-  return `${item.siteName} / ${item.zoneName} / ${item.roomName}`;
+  return `${item.zoneName} / ${item.roomName}`;
 }
 
 export function EquipmentListPage() {
