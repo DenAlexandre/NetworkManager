@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent, MouseEvent as ReactMouseEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { bulkCreatePorts, clearPortRegion, deletePort, listPorts, updatePort, updatePortRegion } from "../../api/ports";
 import type { Port } from "../../api/ports";
 import { hardwareModelImageUrl, listHardwareModels } from "../../api/hardwareModels";
@@ -54,6 +54,7 @@ export function PortsDesignerPage() {
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLDivElement>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     Promise.all([listHardwareModels(), listLinkTypes()])
@@ -65,6 +66,18 @@ export function PortsDesignerPage() {
       .catch((err) => setError(err instanceof ApiError ? err.message : "Erreur de chargement."))
       .finally(() => setLoading(false));
   }, []);
+
+  // Supports deep-linking here (e.g. from Type des données > Matériel's "Ports" column) via
+  // /data-types/ports?hardwareModelId=<id>, preselecting that model once the list has loaded,
+  // then stripping the query param so it doesn't reopen on refresh.
+  useEffect(() => {
+    const id = Number(searchParams.get("hardwareModelId"));
+    if (!id || !hardwareModelList.some((m) => m.id === id)) return;
+    setDeviceTypeFilter("");
+    setSelectedHardwareModelId(id);
+    setSearchParams({}, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hardwareModelList, searchParams, setSearchParams]);
 
   const selectedHardwareModel = useMemo(
     () => hardwareModelList.find((m) => m.id === selectedHardwareModelId) ?? null,

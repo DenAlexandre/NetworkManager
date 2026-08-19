@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
+import { useSearchParams } from "react-router-dom";
 import { createVariable, deleteVariable, listVariables, updateVariable } from "../../api/variables";
 import type { Variable } from "../../api/variables";
 import { listHardwareModels } from "../../api/hardwareModels";
@@ -25,6 +26,7 @@ export function VariablesPage() {
   const [editingUnit, setEditingUnit] = useState("");
   const [editingRegister, setEditingRegister] = useState("");
   const [editError, setEditError] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     listHardwareModels()
@@ -32,6 +34,18 @@ export function VariablesPage() {
       .catch((err) => setError(err instanceof ApiError ? err.message : "Erreur de chargement."))
       .finally(() => setLoading(false));
   }, []);
+
+  // Supports deep-linking here (e.g. from Type des données > Matériel's "Variables" column) via
+  // /data-types/variables?hardwareModelId=<id>, preselecting that model once the list has
+  // loaded, then stripping the query param so it doesn't reopen on refresh.
+  useEffect(() => {
+    const id = Number(searchParams.get("hardwareModelId"));
+    if (!id || !hardwareModelList.some((m) => m.id === id)) return;
+    setDeviceTypeFilter("");
+    setSelectedHardwareModelId(id);
+    setSearchParams({}, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hardwareModelList, searchParams, setSearchParams]);
 
   const selectedHardwareModel = useMemo(
     () => hardwareModelList.find((m) => m.id === selectedHardwareModelId) ?? null,

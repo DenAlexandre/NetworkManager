@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   deleteHardwareModel,
   hardwareModelDatasheetUrl,
@@ -7,6 +8,7 @@ import {
 } from "../../api/hardwareModels";
 import type { HardwareModel } from "../../api/hardwareModels";
 import { listPorts } from "../../api/ports";
+import { listVariables } from "../../api/variables";
 import { ApiError } from "../../api/client";
 import { useTableQuery } from "../../hooks/useTableQuery";
 import type { FilterColumn } from "../../hooks/useTableQuery";
@@ -24,9 +26,15 @@ function formatPortCounts(counts: Record<string, number> | undefined) {
   return entries.map(([name, count]) => `${name} : ${count}`).join(" · ");
 }
 
+function formatVariableCount(count: number | undefined) {
+  if (!count) return "—";
+  return `${count} variable${count > 1 ? "s" : ""}`;
+}
+
 export function HardwareModelsListPage() {
   const [items, setItems] = useState<HardwareModel[]>([]);
   const [portCounts, setPortCounts] = useState<Record<number, Record<string, number>>>({});
+  const [variableCounts, setVariableCounts] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,8 +55,9 @@ export function HardwareModelsListPage() {
         options: deviceTypeOptions.map((name) => ({ value: name, label: name })),
       },
       { key: "ports", getValue: (item) => formatPortCounts(portCounts[item.id]) },
+      { key: "variables", getValue: (item) => formatVariableCount(variableCounts[item.id]) },
     ],
-    [deviceTypeOptions, portCounts]
+    [deviceTypeOptions, portCounts, variableCounts]
   );
 
   const { filters, setFilter, sortKey, sortDir, toggleSort, rows } = useTableQuery(items, columns);
@@ -64,7 +73,11 @@ export function HardwareModelsListPage() {
   async function load() {
     setLoading(true);
     try {
-      const [{ hardwareModels }, { ports }] = await Promise.all([listHardwareModels(), listPorts()]);
+      const [{ hardwareModels }, { ports }, { variables }] = await Promise.all([
+        listHardwareModels(),
+        listPorts(),
+        listVariables(),
+      ]);
       setItems(hardwareModels);
       const counts: Record<number, Record<string, number>> = {};
       for (const port of ports) {
@@ -72,6 +85,11 @@ export function HardwareModelsListPage() {
         byType[port.portType] = (byType[port.portType] || 0) + 1;
       }
       setPortCounts(counts);
+      const varCounts: Record<number, number> = {};
+      for (const variable of variables) {
+        varCounts[variable.hardwareModelId] = (varCounts[variable.hardwareModelId] || 0) + 1;
+      }
+      setVariableCounts(varCounts);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Erreur de chargement.");
     } finally {
@@ -135,6 +153,7 @@ export function HardwareModelsListPage() {
               onSort={toggleSort}
             />
             <th>Ports</th>
+            <th>Variables</th>
             <th></th>
           </tr>
           <tr className="filter-row">
@@ -162,7 +181,14 @@ export function HardwareModelsListPage() {
               <td>{item.name}</td>
               <td>{item.brandName}</td>
               <td>{item.deviceType}</td>
-              <td>{formatPortCounts(portCounts[item.id])}</td>
+              <td>
+                <Link to={`/data-types/ports?hardwareModelId=${item.id}`}>{formatPortCounts(portCounts[item.id])}</Link>
+              </td>
+              <td>
+                <Link to={`/data-types/variables?hardwareModelId=${item.id}`}>
+                  {formatVariableCount(variableCounts[item.id])}
+                </Link>
+              </td>
               <td className="table-actions">
                 {item.datasheetPath && (
                   <a
