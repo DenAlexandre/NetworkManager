@@ -182,6 +182,14 @@ const DEFAULT_FONT_SIZE = 16;
 const MIN_FONT_SIZE = 10;
 const MAX_FONT_SIZE = 72;
 
+// How many past card/text-block moves Ctrl+Z can step back through.
+const MAX_MOVE_UNDO_HISTORY = 50;
+
+interface MoveSnapshot {
+  cards: Card[];
+  textBlocks: TextBlock[];
+}
+
 function escapeXml(value: string) {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
@@ -268,6 +276,13 @@ export function DesignPage() {
   const cardRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const hasRestoredSavedApi = useRef(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Ctrl+Z undo history for card/text-block drags only (not resize, add/remove, or link edits).
+  // Refs, not state: pushed on every drag start and read from a window keydown handler, neither of
+  // which should trigger a render or ever see a stale closure over `cards`/`textBlocks`.
+  const moveUndoStackRef = useRef<MoveSnapshot[]>([]);
+  const pendingMoveSnapshotRef = useRef<MoveSnapshot | null>(null);
+  const hasMovedDuringDragRef = useRef(false);
 
   async function fetchAllData() {
     const [eqRes, portsRes, linksRes, apisRes, addressingRes] = await Promise.all([
@@ -596,6 +611,28 @@ export function DesignPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cards, portsByModel, equipmentById, zoom]);
 
+  function handleUndoMove() {
+    const previous = moveUndoStackRef.current.pop();
+    if (!previous) return;
+    setCards(previous.cards);
+    setTextBlocks(previous.textBlocks);
+  }
+
+  // Ctrl+Z (Cmd+Z on Mac) undoes the last card/text-block drag. Ignored while typing in a text
+  // field (e.g. a text-block's own textarea) so the browser's native undo-within-that-field still
+  // works instead of being hijacked.
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.key.toLowerCase() !== "z") return;
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+      e.preventDefault();
+      handleUndoMove();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   useEffect(() => {
     if (!linkDraw) return;
     function onKeyDown(e: KeyboardEvent) {
@@ -659,6 +696,7 @@ export function DesignPage() {
       const y = (e.clientY - canvasRect.top) / zoom;
       const dx = x - groupDrag.startX;
       const dy = y - groupDrag.startY;
+      if (dx !== 0 || dy !== 0) hasMovedDuringDragRef.current = true;
       setCards((prev) =>
         prev.map((c) => {
           const start = groupDrag.cards[c.equipmentId];
@@ -673,6 +711,12 @@ export function DesignPage() {
       );
     }
     function onUp() {
+      if (hasMovedDuringDragRef.current && pendingMoveSnapshotRef.current) {
+        moveUndoStackRef.current.push(pendingMoveSnapshotRef.current);
+        if (moveUndoStackRef.current.length > MAX_MOVE_UNDO_HISTORY) moveUndoStackRef.current.shift();
+      }
+      pendingMoveSnapshotRef.current = null;
+      hasMovedDuringDragRef.current = false;
       setGroupDrag(null);
     }
     window.addEventListener("mousemove", onMove);
@@ -787,6 +831,8 @@ export function DesignPage() {
     const startX = (e.clientX - canvasRect.left) / zoom;
     const startY = (e.clientY - canvasRect.top) / zoom;
     const { cardsSnapshot, textsSnapshot } = snapshotSelection(cardIds, textIds);
+    pendingMoveSnapshotRef.current = { cards, textBlocks };
+    hasMovedDuringDragRef.current = false;
     setGroupDrag({ startX, startY, cards: cardsSnapshot, texts: textsSnapshot });
   }
 
@@ -1201,6 +1247,10 @@ export function DesignPage() {
     setSearchRoomId("");
     setSearchDeviceTypeId("");
     setSearchHardwareModelId("");
+    // A different schema means a different set of cards — old undo entries no longer apply.
+    moveUndoStackRef.current = [];
+    pendingMoveSnapshotRef.current = null;
+    hasMovedDuringDragRef.current = false;
     if (apiId === "") {
       localStorage.removeItem(SELECTED_API_STORAGE_KEY);
       setCards([]);
