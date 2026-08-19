@@ -29,8 +29,10 @@ const PORT = process.env.PORT || 4000;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 
 app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }));
-// Higher limit than the default 100kb: a full database backup/restore payload can exceed it.
-app.use(express.json({ limit: "25mb" }));
+// Higher limit than the default 100kb: a full database backup/restore payload can exceed it, and
+// keeps growing as more equipment/switch/moxa data is added — 25mb was already too tight (a real
+// backup hit ~27mb) so this leaves generous headroom rather than needing another bump soon.
+app.use(express.json({ limit: "200mb" }));
 app.use(cookieParser());
 app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
