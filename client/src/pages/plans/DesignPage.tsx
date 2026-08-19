@@ -1197,7 +1197,7 @@ export function DesignPage() {
     setLinkPreview(null);
     clearSelection();
     setAddEquipmentId("");
-    setSearchApiId("");
+    setSearchApiId(apiId);
     setSearchRoomId("");
     setSearchDeviceTypeId("");
     setSearchHardwareModelId("");

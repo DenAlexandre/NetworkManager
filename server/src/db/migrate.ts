@@ -423,6 +423,8 @@ CREATE TABLE IF NOT EXISTS report_configs (
   sort_dir VARCHAR(4) NOT NULL DEFAULT 'asc',
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+ALTER TABLE report_configs DROP COLUMN IF EXISTS filter_mode;
 `;
 
 async function migrate() {
