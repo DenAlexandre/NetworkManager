@@ -1387,6 +1387,7 @@ export function DesignPage() {
       color: string;
       strokeWidth: number;
       label: string;
+      otherApiId: number | null;
     }[] = [];
     for (const l of links) {
       const parentOn = onCanvas.has(l.parentEquipmentId);
@@ -1423,6 +1424,7 @@ export function DesignPage() {
         color: port?.linkTypeColor ?? "#8b5cf6",
         strokeWidth: port?.linkTypeStrokeWidth ?? 3,
         label: `${ownPortLabel} → ${otherLabel} (${otherPortLabel})`,
+        otherApiId: otherEquipment?.apiId ?? null,
       });
     }
     return result;
@@ -2108,8 +2110,13 @@ export function DesignPage() {
             const backY = e.tip.y - dirY * arrowSize;
             const p1 = { x: backX + perpX * arrowSize * 0.55, y: backY + perpY * arrowSize * 0.55 };
             const p2 = { x: backX - perpX * arrowSize * 0.55, y: backY - perpY * arrowSize * 0.55 };
-            function selectExternalLink(e2: ReactMouseEvent) {
+            const linksToOtherApi = e.otherApiId !== null && e.otherApiId !== selectedApiId;
+            function handleExternalLinkClick(e2: ReactMouseEvent) {
               e2.stopPropagation();
+              if (linksToOtherApi) {
+                handleSelectApi(String(e.otherApiId));
+                return;
+              }
               setSelectedCardIds(new Set());
               setSelectedTextIds(new Set());
               setSelectedLinkIds(new Set([e.linkId]));
@@ -2133,9 +2140,9 @@ export function DesignPage() {
                   x2={e.tip.x}
                   y2={e.tip.y}
                   className="design-link-hit"
-                  onClick={selectExternalLink}
+                  onClick={handleExternalLinkClick}
                 >
-                  <title>{e.label}</title>
+                  <title>{linksToOtherApi ? `${e.label} — cliquer pour ouvrir ce schéma` : e.label}</title>
                 </line>
               </g>
             );
