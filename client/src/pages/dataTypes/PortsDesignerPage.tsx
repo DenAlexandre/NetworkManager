@@ -54,6 +54,7 @@ export function PortsDesignerPage() {
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -141,6 +142,20 @@ export function PortsDesignerPage() {
     }
     loadPorts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedHardwareModel]);
+
+  // The hardware model's photo is often already in the browser cache by the time this page opens
+  // (e.g. its thumbnail was just shown on the Matériel list page the user linked from). When that
+  // happens the <img> can already be "complete" once mounted, and the browser doesn't reliably
+  // fire a fresh load event for it — leaving naturalWidth/Height stuck at the null the effect
+  // above just reset them to, which makes the zoom slider look inert (nothing to size against).
+  // This reads the already-loaded dimensions directly as a fallback for that case.
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img && img.complete && img.naturalWidth > 0) {
+      setNaturalWidth(img.naturalWidth);
+      setNaturalHeight(img.naturalHeight);
+    }
   }, [selectedHardwareModel]);
 
   useEffect(() => {
@@ -385,6 +400,7 @@ export function PortsDesignerPage() {
                 <div className="ports-designer-stage-scroll" ref={stageRef} onMouseDown={handleStageMouseDown}>
                   <div className="ports-designer-stage">
                     <img
+                      ref={imgRef}
                       src={hardwareModelImageUrl(selectedHardwareModel.imagePath)}
                       alt={selectedHardwareModel.name}
                       draggable={false}
