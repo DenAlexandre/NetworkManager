@@ -17,6 +17,8 @@ const TABLES = [
   "link_types",
   "hardware_models",
   "hardware_model_ports",
+  "hardware_model_variables",
+  "hardware_model_port_aliases",
   "sites",
   "zones",
   "rooms",
@@ -32,17 +34,29 @@ const TABLES = [
   "mgate_configurations",
   "mgate_serial_ports",
   "mgate_slave_ids",
+  "report_configs",
 ];
 
 // Le catalogue "Type des données" (Type des données > Marques/Types de matériel/Matériel/Liaisons) :
 // conservé tel quel par la réinitialisation, seules les autres tables sont vidées.
-const CATALOG_TABLES = ["device_types", "brands", "link_types", "hardware_models", "hardware_model_ports"];
+// hardware_model_variables et hardware_model_port_aliases sont des attributs du modèle matériel
+// au même titre que hardware_model_ports, donc traités comme faisant partie de ce catalogue.
+const CATALOG_TABLES = [
+  "device_types",
+  "brands",
+  "link_types",
+  "hardware_models",
+  "hardware_model_ports",
+  "hardware_model_variables",
+  "hardware_model_port_aliases",
+];
 const RESET_TABLES = TABLES.filter((t) => t !== "users" && !CATALOG_TABLES.includes(t));
 
 // Columns that hold JSONB data and must be re-stringified before being sent back as an
 // INSERT parameter (node-postgres returns them already parsed as JS objects from SELECT).
 const JSON_COLUMNS: Record<string, string[]> = {
   design_schemas: ["layout"],
+  report_configs: ["column_ids", "filters"],
 };
 
 const restoreSchema = z.object({

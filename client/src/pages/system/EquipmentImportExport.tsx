@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import * as XLSX from "xlsx";
 import { listApis } from "../../api/apis";
-import { listEquipment, createEquipment } from "../../api/equipment";
+import { listEquipment, createEquipment, updateEquipment } from "../../api/equipment";
 import { listEquipmentLinks } from "../../api/equipmentLinks";
 import { listAddressing } from "../../api/equipmentPortSettings";
 import { listHardwareModels } from "../../api/hardwareModels";
@@ -128,10 +128,11 @@ export function EquipmentImportExport() {
       }
       const [, ...dataRows] = rows;
 
-      const [{ hardwareModels }, { rooms }, { apis }] = await Promise.all([
+      const [{ hardwareModels }, { rooms }, { apis }, { equipment: existingEquipment }] = await Promise.all([
         listHardwareModels(),
         listRooms(),
         listApis(),
+        listEquipment(),
       ]);
 
       const results: ImportRowResult[] = [];
@@ -178,22 +179,42 @@ export function EquipmentImportExport() {
           apiId = api.id;
         }
 
+        // Le nom n'est pas une clé unique en base ; on considère qu'il s'agit du même matériel
+        // si un équipement de même nom (insensible à la casse) existe déjà dans la même salle,
+        // et on le met à jour plutôt que d'en créer un doublon à chaque réimport.
+        const existing = existingEquipment.find(
+          (e) => e.roomId === room.id && e.name.trim().toLowerCase() === trimmedName.toLowerCase()
+        );
+
         try {
-          await createEquipment({
-            roomId: room.id,
-            deviceTypeId: hardwareModel.deviceTypeId,
-            hardwareModelId: hardwareModel.id,
-            apiId,
-            name: trimmedName,
-            isApiStartPoint: false,
-          });
-          results.push({ line, name: trimmedName, status: "success", message: "Créé." });
+          if (existing) {
+            await updateEquipment(existing.id, {
+              roomId: room.id,
+              deviceTypeId: hardwareModel.deviceTypeId,
+              hardwareModelId: hardwareModel.id,
+              apiId,
+              name: trimmedName,
+              isApiStartPoint: existing.isApiStartPoint,
+            });
+            results.push({ line, name: trimmedName, status: "success", message: "Mis à jour." });
+          } else {
+            const { equipment: created } = await createEquipment({
+              roomId: room.id,
+              deviceTypeId: hardwareModel.deviceTypeId,
+              hardwareModelId: hardwareModel.id,
+              apiId,
+              name: trimmedName,
+              isApiStartPoint: false,
+            });
+            existingEquipment.push(created);
+            results.push({ line, name: trimmedName, status: "success", message: "Créé." });
+          }
         } catch (err) {
           results.push({
             line,
             name: trimmedName,
             status: "error",
-            message: err instanceof ApiError ? err.message : "Erreur lors de la création.",
+            message: err instanceof ApiError ? err.message : "Erreur lors de l'enregistrement.",
           });
         }
       }
@@ -207,7 +228,8 @@ export function EquipmentImportExport() {
     }
   }
 
-  const successCount = importResults?.filter((r) => r.status === "success").length ?? 0;
+  const createdCount = importResults?.filter((r) => r.message === "Créé.").length ?? 0;
+  const updatedCount = importResults?.filter((r) => r.message === "Mis à jour.").length ?? 0;
   const errorCount = importResults?.filter((r) => r.status === "error").length ?? 0;
 
   return (
@@ -226,10 +248,12 @@ export function EquipmentImportExport() {
 
       <h3>Import</h3>
       <p className="muted">
-        Réimportez le fichier Excel téléchargé ci-dessus (ou un .csv équivalent) pour créer du matériel en masse.
-        Seul l'onglet "{MATERIEL_SHEET}" est utilisé ; "{LIAISONS_SHEET}" et "{ADRESSAGE_SHEET}" sont ignorés. Chaque
-        ligne doit indiquer : {MATERIEL_COLUMNS.join(", ")} — le constructeur et le modèle doivent correspondre à un
-        matériel du catalogue, la salle au format "Site / Zone / Salle", et l'API est optionnelle.
+        Réimportez le fichier Excel téléchargé ci-dessus (ou un .csv équivalent) pour créer ou mettre à jour du
+        matériel en masse. Si un équipement du même nom (insensible à la casse) existe déjà dans la salle indiquée,
+        il est mis à jour plutôt que dupliqué ; sinon il est créé. Seul l'onglet "{MATERIEL_SHEET}" est utilisé ;
+        "{LIAISONS_SHEET}" et "{ADRESSAGE_SHEET}" sont ignorés. Chaque ligne doit indiquer :{" "}
+        {MATERIEL_COLUMNS.join(", ")} — le constructeur et le modèle doivent correspondre à un matériel du
+        catalogue, la salle au format "Site / Zone / Salle", et l'API est optionnelle.
       </p>
       <div className="inline-form">
         <label>
@@ -251,7 +275,7 @@ export function EquipmentImportExport() {
       {importResults && (
         <>
           <p className="muted">
-            {successCount} matériel(s) créé(s), {errorCount} erreur(s).
+            {createdCount} matériel(s) créé(s), {updatedCount} mis à jour, {errorCount} erreur(s).
           </p>
           <table className="table">
             <thead>
