@@ -398,6 +398,19 @@ CREATE TABLE IF NOT EXISTS mgate_slave_ids (
   modbus_id_end INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS ix_mgate_slave_ids_port ON mgate_slave_ids(mgate_serial_port_id);
+
+-- Configurations de reporting enregistrees par un admin : colonnes affichees, tri et filtres par
+-- colonne (au format "valeur affichee -> incluse"), pour retrouver d'un clic une vue du tableau
+-- de reporting sans reconfigurer les cases a cocher et les filtres a chaque visite.
+CREATE TABLE IF NOT EXISTS report_configs (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(150) NOT NULL UNIQUE,
+  column_ids JSONB NOT NULL,
+  filters JSONB NOT NULL DEFAULT '{}',
+  sort_column_id VARCHAR(100),
+  sort_dir VARCHAR(4) NOT NULL DEFAULT 'asc',
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 `;
 
 async function migrate() {

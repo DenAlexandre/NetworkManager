@@ -27,6 +27,7 @@ import { SwitchConfigPage } from "./pages/configurations/SwitchConfigPage";
 import { SwitchConfigDetailPage } from "./pages/configurations/SwitchConfigDetailPage";
 import { MoxaConfigPage } from "./pages/configurations/MoxaConfigPage";
 import { MoxaConfigDetailPage } from "./pages/configurations/MoxaConfigDetailPage";
+import { ReportingPage } from "./pages/reporting/ReportingPage";
 import { SystemLayout } from "./pages/system/SystemLayout";
 import { DatabasePage } from "./pages/system/DatabasePage";
 import { ImportExportPage } from "./pages/system/ImportExportPage";
@@ -107,6 +108,14 @@ function App() {
             <Route path="moxa/:id" element={<MoxaConfigDetailPage />} />
             <Route path=":id" element={<SwitchConfigDetailPage />} />
           </Route>
+          <Route
+            path="reporting"
+            element={
+              <AdminRoute>
+                <ReportingPage />
+              </AdminRoute>
+            }
+          />
           <Route
             path="system"
             element={

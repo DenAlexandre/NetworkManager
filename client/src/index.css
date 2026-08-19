@@ -358,6 +358,105 @@ a {
   text-transform: none;
 }
 
+.th-filterable {
+  position: relative;
+  white-space: nowrap;
+}
+
+.filter-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-left: 5px;
+  border-radius: 50%;
+  background: var(--accent-dark);
+  vertical-align: middle;
+}
+
+.th-sort {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.12s ease;
+}
+
+.th-sort:hover {
+  color: var(--accent-dark);
+}
+
+.th-filter-btn {
+  background: none;
+  border: none;
+  padding: 0 0 0 6px;
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.th-filter-btn:hover,
+.th-filter-btn.active {
+  color: var(--accent-dark);
+}
+
+.th-filter-popover {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  margin-top: 4px;
+  width: 220px;
+  max-height: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  text-transform: none;
+  font-weight: 400;
+  cursor: default;
+}
+
+.th-filter-search {
+  width: 100%;
+  font-size: 13px;
+  padding: 5px 8px;
+}
+
+.th-filter-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.th-filter-actions button {
+  flex: 1;
+  font-size: 11px;
+  padding: 4px 6px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.th-filter-actions button:hover {
+  color: var(--accent-dark);
+}
+
+.th-filter-options {
+  overflow-y: auto;
+  max-height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.th-filter-option {
+  font-size: 13px;
+  font-weight: 400;
+}
+
 .column-filter {
   width: 100%;
   max-width: 100%;
@@ -718,6 +817,63 @@ label {
 .checkbox-field input[type="checkbox"] {
   width: 16px;
   height: 16px;
+}
+
+/* reporting */
+
+.report-config-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.report-config-bar label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  min-width: 220px;
+}
+
+.report-config-bar select {
+  font-size: 14px;
+  font-weight: 400;
+  text-transform: none;
+  padding: 6px 8px;
+}
+
+.report-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.report-column-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px 16px;
+}
+
+.report-column-group legend {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 4px;
+}
+
+.report-column-group .checkbox-field {
+  font-size: 14px;
+  font-weight: 400;
 }
 
 input,

@@ -21,6 +21,7 @@ import designSchemaRoutes from "./routes/designSchemas";
 import switchConfigRoutes from "./routes/switchConfigs";
 import mgateConfigRoutes from "./routes/mgateConfigs";
 import systemRoutes from "./routes/system";
+import reportConfigRoutes from "./routes/reportConfigs";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -49,6 +50,7 @@ app.use("/api/design-schemas", designSchemaRoutes);
 app.use("/api/switch-configs", switchConfigRoutes);
 app.use("/api/mgate-configs", mgateConfigRoutes);
 app.use("/api/system", systemRoutes);
+app.use("/api/report-configs", reportConfigRoutes);
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err);
