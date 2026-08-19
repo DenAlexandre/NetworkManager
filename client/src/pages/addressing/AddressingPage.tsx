@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { listAddressing } from "../../api/equipmentPortSettings";
 import type { AddressingEquipment, AddressingPort } from "../../api/equipmentPortSettings";
 import { ApiError } from "../../api/client";
@@ -26,7 +26,9 @@ export function AddressingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [returnTo, setReturnTo] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const deviceTypeOptions = useMemo(() => {
     const names = new Set<string>();
@@ -80,11 +82,14 @@ export function AddressingPage() {
   }, []);
 
   // Supports deep-linking here (e.g. from Design's equipment context menu) via
-  // /equipment/addressing?open=<equipmentId>, opening that equipment's config modal directly
-  // once the list has loaded, then stripping the query param so it doesn't reopen on refresh.
+  // /equipment/addressing?open=<equipmentId>&returnTo=<path>, opening that equipment's config
+  // modal directly once the list has loaded, then stripping the query params so they don't
+  // reopen on refresh. returnTo is remembered so closing the modal sends the user back where
+  // they came from instead of leaving them stranded on this list.
   useEffect(() => {
     const openId = Number(searchParams.get("open"));
     if (!openId || !items.some((item) => item.equipmentId === openId)) return;
+    setReturnTo(searchParams.get("returnTo"));
     setSelectedId(openId);
     setSearchParams({}, { replace: true });
   }, [items, searchParams, setSearchParams]);
@@ -102,6 +107,10 @@ export function AddressingPage() {
   }
 
   function handleCloseModal() {
+    if (returnTo) {
+      navigate(returnTo);
+      return;
+    }
     setSelectedId(null);
     load();
   }

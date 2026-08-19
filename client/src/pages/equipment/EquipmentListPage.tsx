@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { deleteEquipment, listEquipment } from "../../api/equipment";
 import type { Equipment } from "../../api/equipment";
 import { ApiError } from "../../api/client";
@@ -71,18 +71,23 @@ export function EquipmentListPage() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [returnTo, setReturnTo] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     load();
   }, []);
 
   // Supports deep-linking here (e.g. from Design's equipment context menu) via
-  // /equipment?open=<equipmentId>, opening that equipment's edit modal directly once the list
-  // has loaded, then stripping the query param so it doesn't reopen on refresh.
+  // /equipment?open=<equipmentId>&returnTo=<path>, opening that equipment's edit modal directly
+  // once the list has loaded, then stripping the query params so they don't reopen on refresh.
+  // returnTo is remembered so closing/saving the modal sends the user back where they came from
+  // instead of leaving them stranded on this list.
   useEffect(() => {
     const openId = Number(searchParams.get("open"));
     if (!openId || !items.some((item) => item.id === openId)) return;
+    setReturnTo(searchParams.get("returnTo"));
     openEditModal(openId);
     setSearchParams({}, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -120,7 +125,19 @@ export function EquipmentListPage() {
     setModalOpen(true);
   }
 
+  function closeModal() {
+    if (returnTo) {
+      navigate(returnTo);
+      return;
+    }
+    setModalOpen(false);
+  }
+
   function handleSaved() {
+    if (returnTo) {
+      navigate(returnTo);
+      return;
+    }
     setModalOpen(false);
     load();
   }
@@ -182,7 +199,7 @@ export function EquipmentListPage() {
       {rows.length === 0 && <p className="muted">Aucun matériel enregistré.</p>}
       <Pagination page={page} pageCount={pageCount} onChange={setPage} />
       {modalOpen && (
-        <EquipmentFormModal equipmentId={editingId} onClose={() => setModalOpen(false)} onSaved={handleSaved} />
+        <EquipmentFormModal equipmentId={editingId} onClose={closeModal} onSaved={handleSaved} />
       )}
     </div>
   );

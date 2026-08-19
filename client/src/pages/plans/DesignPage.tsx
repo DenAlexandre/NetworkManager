@@ -910,13 +910,13 @@ export function DesignPage() {
 
   function handleContextMenuEdit() {
     if (!cardContextMenu) return;
-    navigate(`/equipment?open=${cardContextMenu.equipmentId}`);
+    navigate(`/equipment?open=${cardContextMenu.equipmentId}&returnTo=/plans`);
     setCardContextMenu(null);
   }
 
   function handleContextMenuAddress() {
     if (!cardContextMenu) return;
-    navigate(`/equipment/addressing?open=${cardContextMenu.equipmentId}`);
+    navigate(`/equipment/addressing?open=${cardContextMenu.equipmentId}&returnTo=/plans`);
     setCardContextMenu(null);
   }
 
