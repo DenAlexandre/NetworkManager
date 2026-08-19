@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { deleteEquipment, listEquipment } from "../../api/equipment";
 import type { Equipment } from "../../api/equipment";
 import { ApiError } from "../../api/client";
@@ -70,10 +71,22 @@ export function EquipmentListPage() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     load();
   }, []);
+
+  // Supports deep-linking here (e.g. from Design's equipment context menu) via
+  // /equipment?open=<equipmentId>, opening that equipment's edit modal directly once the list
+  // has loaded, then stripping the query param so it doesn't reopen on refresh.
+  useEffect(() => {
+    const openId = Number(searchParams.get("open"));
+    if (!openId || !items.some((item) => item.id === openId)) return;
+    openEditModal(openId);
+    setSearchParams({}, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, searchParams, setSearchParams]);
 
   async function load() {
     setLoading(true);

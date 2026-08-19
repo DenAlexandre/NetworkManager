@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { listEquipment } from "../../api/equipment";
 import type { Equipment } from "../../api/equipment";
@@ -14,16 +14,27 @@ interface EquipmentLinkFormModalProps {
   onSaved: () => void;
 }
 
+function portKey(equipmentId: number, portId: number) {
+  return `${equipmentId}:${portId}`;
+}
+
 export function EquipmentLinkFormModal({ linkId, onClose, onSaved }: EquipmentLinkFormModalProps) {
   const isEdit = linkId !== null;
 
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [ports, setPorts] = useState<Port[]>([]);
-  const [usedPortIds, setUsedPortIds] = useState<Set<number>>(new Set());
+  // Keyed by "equipmentId:portId", not just portId — a hardware_model_ports row is a catalog
+  // definition shared by every equipment instance of that model, so two different pieces of
+  // equipment using the same model reuse the same port ids. Tracking "used" by port id alone
+  // would mark a port unavailable for an instance that has never actually used it, just because
+  // some other instance of the same model happens to have.
+  const [usedPortKeys, setUsedPortKeys] = useState<Set<string>>(new Set());
   const [parentEquipmentId, setParentEquipmentId] = useState<number | "">("");
   const [parentPortId, setParentPortId] = useState<number | "">("");
   const [childEquipmentId, setChildEquipmentId] = useState<number | "">("");
   const [childPortId, setChildPortId] = useState<number | "">("");
+  const [parentSearch, setParentSearch] = useState("");
+  const [childSearch, setChildSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -37,12 +48,12 @@ export function EquipmentLinkFormModal({ linkId, onClose, onSaved }: EquipmentLi
       ]);
       setEquipment(eq);
       setPorts(allPorts);
-      const used = new Set<number>();
+      const used = new Set<string>();
       for (const link of allLinks) {
-        used.add(link.parentPortId);
-        used.add(link.childPortId);
+        used.add(portKey(link.parentEquipmentId, link.parentPortId));
+        used.add(portKey(link.childEquipmentId, link.childPortId));
       }
-      setUsedPortIds(used);
+      setUsedPortKeys(used);
       if (isEdit) {
         const { link } = await getEquipmentLink(Number(linkId));
         setParentEquipmentId(link.parentEquipmentId);
@@ -59,19 +70,49 @@ export function EquipmentLinkFormModal({ linkId, onClose, onSaved }: EquipmentLi
   }, [linkId, isEdit]);
 
   // currentPortId re-allows this dropdown's own already-assigned port (the one this specific
-  // side of the link is currently using) even though it's marked "used" globally, without
-  // leaking the *other* side's port into this dropdown when both sides share a hardware model.
+  // side of the link is currently using) even though it's marked "used", without leaking the
+  // *other* side's port into this dropdown when both sides share a hardware model.
   function availablePortsFor(equipmentId: number | "", currentPortId: number | "") {
     if (equipmentId === "") return [];
     const item = equipment.find((e) => e.id === equipmentId);
     if (!item) return [];
     return ports.filter(
-      (p) => p.hardwareModelId === item.hardwareModelId && (p.id === currentPortId || !usedPortIds.has(p.id))
+      (p) =>
+        p.hardwareModelId === item.hardwareModelId &&
+        (p.id === currentPortId || !usedPortKeys.has(portKey(equipmentId, p.id)))
     );
   }
 
   const parentPortOptions = availablePortsFor(parentEquipmentId, parentPortId);
   const childPortOptions = availablePortsFor(childEquipmentId, childPortId);
+
+  // Narrows the (potentially long) equipment list down to matches on name/site/zone/room, but
+  // always keeps the currently selected equipment in the list even if it no longer matches the
+  // search text, so typing after picking a value never silently clears the visible selection.
+  function filterEquipmentOptions(search: string, selectedId: number | "") {
+    const query = search.trim().toLowerCase();
+    const filtered = query
+      ? equipment.filter((eq) =>
+          `${eq.name} ${eq.siteName} ${eq.zoneName} ${eq.roomName}`.toLowerCase().includes(query)
+        )
+      : equipment;
+    if (selectedId !== "" && !filtered.some((eq) => eq.id === selectedId)) {
+      const selected = equipment.find((eq) => eq.id === selectedId);
+      if (selected) return [selected, ...filtered];
+    }
+    return filtered;
+  }
+
+  const parentEquipmentOptions = useMemo(
+    () => filterEquipmentOptions(parentSearch, parentEquipmentId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [equipment, parentSearch, parentEquipmentId]
+  );
+  const childEquipmentOptions = useMemo(
+    () => filterEquipmentOptions(childSearch, childEquipmentId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [equipment, childSearch, childEquipmentId]
+  );
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -106,6 +147,12 @@ export function EquipmentLinkFormModal({ linkId, onClose, onSaved }: EquipmentLi
         <form onSubmit={handleSubmit}>
           <label>
             Matériel parent
+            <input
+              type="text"
+              placeholder="Rechercher..."
+              value={parentSearch}
+              onChange={(e) => setParentSearch(e.target.value)}
+            />
             <select
               value={parentEquipmentId}
               onChange={(e) => {
@@ -115,7 +162,7 @@ export function EquipmentLinkFormModal({ linkId, onClose, onSaved }: EquipmentLi
               required
             >
               <option value="">—</option>
-              {equipment.map((eq) => (
+              {parentEquipmentOptions.map((eq) => (
                 <option key={eq.id} value={eq.id}>
                   {eq.name} ({eq.zoneName} / {eq.roomName})
                 </option>
@@ -139,6 +186,12 @@ export function EquipmentLinkFormModal({ linkId, onClose, onSaved }: EquipmentLi
           </label>
           <label>
             Matériel enfant
+            <input
+              type="text"
+              placeholder="Rechercher..."
+              value={childSearch}
+              onChange={(e) => setChildSearch(e.target.value)}
+            />
             <select
               value={childEquipmentId}
               onChange={(e) => {
@@ -148,7 +201,7 @@ export function EquipmentLinkFormModal({ linkId, onClose, onSaved }: EquipmentLi
               required
             >
               <option value="">—</option>
-              {equipment.map((eq) => (
+              {childEquipmentOptions.map((eq) => (
                 <option key={eq.id} value={eq.id}>
                   {eq.name} ({eq.zoneName} / {eq.roomName})
                 </option>

@@ -1373,6 +1373,11 @@ textarea {
   color: var(--accent-dark);
 }
 
+.design-info-tree-connection-external {
+  font-style: italic;
+  color: var(--accent-dark);
+}
+
 .design-info-tree-addr {
   display: flex;
   flex-direction: column;

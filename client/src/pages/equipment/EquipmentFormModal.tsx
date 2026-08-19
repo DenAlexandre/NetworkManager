@@ -18,6 +18,12 @@ interface EquipmentFormModalProps {
   onSaved: () => void;
 }
 
+function sortRooms(rooms: Room[]) {
+  return [...rooms].sort(
+    (a, b) => a.siteName.localeCompare(b.siteName) || a.zoneName.localeCompare(b.zoneName) || a.name.localeCompare(b.name)
+  );
+}
+
 export function EquipmentFormModal({ equipmentId, onClose, onSaved }: EquipmentFormModalProps) {
   const isEdit = equipmentId !== null;
 
@@ -30,18 +36,20 @@ export function EquipmentFormModal({ equipmentId, onClose, onSaved }: EquipmentF
   const [hardwareModelId, setHardwareModelId] = useState<number | "">("");
   const [apiId, setApiId] = useState<number | "">("");
   const [name, setName] = useState("");
+  const [isApiStartPoint, setIsApiStartPoint] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     async function load() {
-      const [{ rooms: r }, { deviceTypes: dt }, { hardwareModels: hm }, { apis: apiList }] = await Promise.all([
+      const [{ rooms: roomsRes }, { deviceTypes: dt }, { hardwareModels: hm }, { apis: apiList }] = await Promise.all([
         listRooms(),
         listDeviceTypes(),
         listHardwareModels(),
         listApis(),
       ]);
+      const r = sortRooms(roomsRes);
       setRooms(r);
       setDeviceTypes(dt);
       setHardwareModels(hm);
@@ -53,6 +61,7 @@ export function EquipmentFormModal({ equipmentId, onClose, onSaved }: EquipmentF
         setHardwareModelId(equipment.hardwareModelId);
         setApiId(equipment.apiId ?? "");
         setName(equipment.name);
+        setIsApiStartPoint(equipment.isApiStartPoint);
       } else {
         if (r.length > 0) setRoomId(r[0].id);
       }
@@ -90,6 +99,7 @@ export function EquipmentFormModal({ equipmentId, onClose, onSaved }: EquipmentF
         hardwareModelId: Number(hardwareModelId),
         apiId: apiId === "" ? null : Number(apiId),
         name,
+        isApiStartPoint,
       };
       if (isEdit) {
         await updateEquipment(Number(equipmentId), input);
@@ -164,6 +174,10 @@ export function EquipmentFormModal({ equipmentId, onClose, onSaved }: EquipmentF
                 </option>
               ))}
             </select>
+          </label>
+          <label className="checkbox-field">
+            <input type="checkbox" checked={isApiStartPoint} onChange={(e) => setIsApiStartPoint(e.target.checked)} />
+            Point de départ API
           </label>
           {error && <p className="error">{error}</p>}
           <div className="form-actions">

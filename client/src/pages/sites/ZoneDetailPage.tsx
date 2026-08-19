@@ -6,9 +6,15 @@ import { deleteRoom, listRooms } from "../../api/rooms";
 import type { Room } from "../../api/rooms";
 import { ApiError } from "../../api/client";
 import { useSitesTree } from "../../context/SitesTreeContext";
+import { useTableQuery } from "../../hooks/useTableQuery";
+import type { FilterColumn } from "../../hooks/useTableQuery";
 import { usePagination } from "../../hooks/usePagination";
+import { SortableHeader } from "../../components/SortableHeader";
+import { ColumnFilterCell } from "../../components/ColumnFilterCell";
 import { Pagination } from "../../components/Pagination";
 import { RoomFormModal } from "./RoomFormModal";
+
+const COLUMNS: FilterColumn<Room>[] = [{ key: "name", getValue: (item) => item.name }];
 
 export function ZoneDetailPage() {
   const { siteId, zoneId } = useParams();
@@ -17,7 +23,8 @@ export function ZoneDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { refresh } = useSitesTree();
-  const { page, setPage, pageCount, pagedItems } = usePagination(rooms);
+  const { filters, setFilter, sortKey, sortDir, toggleSort, rows } = useTableQuery(rooms, COLUMNS);
+  const { page, setPage, pageCount, pagedItems } = usePagination(rows);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -84,7 +91,13 @@ export function ZoneDetailPage() {
       <table className="table">
         <thead>
           <tr>
-            <th>Salle</th>
+            <SortableHeader label="Salle" field="name" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+            <th></th>
+          </tr>
+          <tr className="filter-row">
+            <th>
+              <ColumnFilterCell column={COLUMNS[0]} value={filters[COLUMNS[0].key] ?? ""} onChange={(v) => setFilter(COLUMNS[0].key, v)} />
+            </th>
             <th></th>
           </tr>
         </thead>
@@ -106,7 +119,7 @@ export function ZoneDetailPage() {
           ))}
         </tbody>
       </table>
-      {rooms.length === 0 && <p className="muted">Aucune salle pour cette zone.</p>}
+      {rows.length === 0 && <p className="muted">Aucune salle pour cette zone.</p>}
       <Pagination page={page} pageCount={pageCount} onChange={setPage} />
       {modalOpen && (
         <RoomFormModal

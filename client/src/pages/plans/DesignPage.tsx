@@ -55,12 +55,17 @@ type LinkPaths = Record<number, { dx: number; dy: number }[]>;
 type Endpoints = Record<string, { x: number; y: number }>;
 type Rect = { x: number; y: number; width: number; height: number };
 type PortRects = Record<string, Rect>;
+type CardRects = Record<number, Rect>;
 
 interface Connection {
   ownPortLabel: string;
   otherEquipmentName: string;
   otherPortLabel: string;
   linkId: number;
+  /** Set when the other side of this link belongs to a different API (or none at all) — the
+      link crosses out of the tree being displayed, so it's rendered as a one-way pointer to that
+      equipment instead of nested/bidirectional like an in-tree connection. */
+  otherApiName?: string | null;
 }
 
 interface InfoTreeNode {
@@ -168,6 +173,11 @@ const DEFAULT_CARD_WIDTH = 190;
 const MIN_CARD_WIDTH = 120;
 const MAX_CARD_WIDTH = 480;
 
+// Length (in zoom-independent units, like a hand-drawn link's waypoints) of the stub arrow drawn
+// for a link whose other end isn't on the current canvas — long enough to read clearly as a
+// distinct arrow rather than a stray mark next to the port.
+const EXTERNAL_ARROW_LENGTH = 56;
+
 const DEFAULT_FONT_SIZE = 16;
 const MIN_FONT_SIZE = 10;
 const MAX_FONT_SIZE = 72;
@@ -208,6 +218,7 @@ export function DesignPage() {
   const [resizingText, setResizingText] = useState<{ id: number; startX: number; startFontSize: number } | null>(null);
   const [endpoints, setEndpoints] = useState<Endpoints>({});
   const [portRects, setPortRects] = useState<PortRects>({});
+  const [cardRects, setCardRects] = useState<CardRects>({});
   const [naturalSizes, setNaturalSizes] = useState<Record<number, { width: number; height: number }>>({});
   // Legacy single-bend data from schemas saved before free-form tracing: read-only, used as a
   // rendering fallback for links that have no entry in linkPaths (never written to anymore).
@@ -252,19 +263,44 @@ export function DesignPage() {
   const imgRefs = useRef<Record<number, HTMLImageElement | null>>({});
   const cardRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const hasRestoredSavedApi = useRef(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function fetchAllData() {
+    const [eqRes, portsRes, linksRes, apisRes, addressingRes] = await Promise.all([
+      listEquipment(),
+      listPorts(),
+      listEquipmentLinks(),
+      listApis(),
+      listAddressing(),
+    ]);
+    setEquipmentList(eqRes.equipment);
+    setAllPorts(portsRes.ports);
+    setLinks(linksRes.links);
+    setApis(apisRes.apis);
+    setAddressing(addressingRes.equipment);
+  }
 
   useEffect(() => {
-    Promise.all([listEquipment(), listPorts(), listEquipmentLinks(), listApis(), listAddressing()])
-      .then(([eqRes, portsRes, linksRes, apisRes, addressingRes]) => {
-        setEquipmentList(eqRes.equipment);
-        setAllPorts(portsRes.ports);
-        setLinks(linksRes.links);
-        setApis(apisRes.apis);
-        setAddressing(addressingRes.equipment);
-      })
+    fetchAllData()
       .catch((err) => setError(err instanceof ApiError ? err.message : "Erreur de chargement."))
       .finally(() => setLoading(false));
   }, []);
+
+  // Re-fetches equipment/ports/links/APIs/addressing without touching the canvas layout, so the
+  // arrows/connections (in particular the cross-API "→ equipment (API)" pointers in the info
+  // panel, which reflect other equipment's apiId) pick up changes made elsewhere in the app since
+  // this page loaded, without losing unsaved card positions or hand-drawn link paths.
+  async function handleRefreshData() {
+    setRefreshing(true);
+    setError(null);
+    try {
+      await fetchAllData();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Erreur lors de l'actualisation.");
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   // Runs once the initial data load has landed (so `apis` is populated and `handleSelectApi`'s
   // closure over `equipmentList` isn't stale), restoring whichever API was last worked on.
@@ -296,8 +332,9 @@ export function DesignPage() {
   );
 
   // Hierarchy for the info panel: only equipment belonging to the selected API, rooted at
-  // whichever piece is named "FO-R406A" (the actual gateway in this network), with every other
-  // equipment nested under its parent link — mirroring the real topology instead of a flat list.
+  // whichever piece is flagged "Point de départ API" (the actual gateway in this network), with
+  // every other equipment nested under its parent link — mirroring the real topology instead of a
+  // flat list.
   // Falls back to alphabetical, then to raising anything a cycle would otherwise hide, so nothing
   // silently disappears. ModBus links don't drive that same chain-of-custody nesting (a bus port
   // can fan out to many others, so there's no real one-hop parent/child to reflect the way a
@@ -337,6 +374,27 @@ export function DesignPage() {
         linkId: l.id,
       });
       connectionsByEquipment.set(l.childEquipmentId, childList);
+    }
+
+    // Links where only one side belongs to this API still need to show up on that side — as a
+    // one-way pointer to the other equipment (and its API), not nested into this tree, since the
+    // other equipment's own subtree lives under a different API's schema entirely.
+    for (const l of links) {
+      const parentInApi = apiEquipmentIds.has(l.parentEquipmentId);
+      const childInApi = apiEquipmentIds.has(l.childEquipmentId);
+      if (parentInApi === childInApi) continue;
+      const [ownId, ownPortLabel, otherId, otherPortLabel] = parentInApi
+        ? [l.parentEquipmentId, l.parentPortLabel, l.childEquipmentId, l.childPortLabel]
+        : [l.childEquipmentId, l.childPortLabel, l.parentEquipmentId, l.parentPortLabel];
+      const list = connectionsByEquipment.get(ownId) ?? [];
+      list.push({
+        ownPortLabel,
+        otherEquipmentName: equipmentById.get(otherId)?.name ?? "?",
+        otherPortLabel,
+        linkId: l.id,
+        otherApiName: equipmentById.get(otherId)?.apiName ?? null,
+      });
+      connectionsByEquipment.set(ownId, list);
     }
 
     // Union-find over the ModBus subgraph only, to group every equipment on the same bus/chain
@@ -426,8 +484,7 @@ export function DesignPage() {
     const roots = apiEquipment
       .filter((e) => !childEquipmentIds.has(e.id) && !nonRootModbusMemberIds.has(e.id))
       .sort((a, b) => {
-        if (a.name === "FO-R406A") return -1;
-        if (b.name === "FO-R406A") return 1;
+        if (a.isApiStartPoint !== b.isApiStartPoint) return a.isApiStartPoint ? -1 : 1;
         return a.name.localeCompare(b.name);
       });
 
@@ -467,7 +524,18 @@ export function DesignPage() {
     if (!canvasRect) return;
     const next: Endpoints = {};
     const nextRects: PortRects = {};
+    const nextCardRects: CardRects = {};
     for (const card of cards) {
+      const cardEl = cardRefs.current[card.equipmentId];
+      if (cardEl) {
+        const cardElRect = cardEl.getBoundingClientRect();
+        nextCardRects[card.equipmentId] = {
+          x: cardElRect.left - canvasRect.left,
+          y: cardElRect.top - canvasRect.top,
+          width: cardElRect.width,
+          height: cardElRect.height,
+        };
+      }
       const img = imgRefs.current[card.equipmentId];
       if (!img) continue;
       const imgRect = img.getBoundingClientRect();
@@ -487,6 +555,7 @@ export function DesignPage() {
       }
     }
     setPortRects(nextRects);
+    setCardRects(nextCardRects);
     setEndpoints(next);
   }
 
@@ -839,6 +908,12 @@ export function DesignPage() {
     setCardContextMenu(null);
   }
 
+  function handleContextMenuEdit() {
+    if (!cardContextMenu) return;
+    navigate(`/equipment?open=${cardContextMenu.equipmentId}`);
+    setCardContextMenu(null);
+  }
+
   function handleContextMenuAddress() {
     if (!cardContextMenu) return;
     navigate(`/equipment/addressing?open=${cardContextMenu.equipmentId}`);
@@ -860,6 +935,7 @@ export function DesignPage() {
       hardwareModelId: duplicateSource.hardwareModelId,
       apiId: duplicateSource.apiId,
       name,
+      isApiStartPoint: false,
     });
     setEquipmentList((prev) => [...prev, equipment]);
     // Places the duplicate right next to the original's card, if it's on this canvas.
@@ -1205,6 +1281,60 @@ export function DesignPage() {
       );
   }, [cards, links, endpoints, portRects, portsById, linkPaths, bendOverrides, bendYOverrides, zoom]);
 
+  // Links where exactly one side is on the current canvas (the other equipment lives on a
+  // different API's schema, or just hasn't been added here) are drawn as a short arrow pointing
+  // away from the card through the port, in the same color/thickness as an in-schema link — a
+  // visual cue on the canvas itself, complementing the cross-API pointer text in the info panel.
+  const externalLinks = useMemo(() => {
+    const onCanvas = new Set(cards.map((c) => c.equipmentId));
+    const result: {
+      linkId: number;
+      from: { x: number; y: number };
+      tip: { x: number; y: number };
+      color: string;
+      strokeWidth: number;
+      label: string;
+    }[] = [];
+    for (const l of links) {
+      const parentOn = onCanvas.has(l.parentEquipmentId);
+      const childOn = onCanvas.has(l.childEquipmentId);
+      if (parentOn === childOn) continue;
+      const equipmentId = parentOn ? l.parentEquipmentId : l.childEquipmentId;
+      const portId = parentOn ? l.parentPortId : l.childPortId;
+      const ownPortLabel = parentOn ? l.parentPortLabel : l.childPortLabel;
+      const otherEquipmentId = parentOn ? l.childEquipmentId : l.parentEquipmentId;
+      const otherPortLabel = parentOn ? l.childPortLabel : l.parentPortLabel;
+      const from = endpoints[endpointKey(equipmentId, portId)];
+      const cardRect = cardRects[equipmentId];
+      if (!from || !cardRect) continue;
+      const centerX = cardRect.x + cardRect.width / 2;
+      const centerY = cardRect.y + cardRect.height / 2;
+      const rawDx = from.x - centerX;
+      const rawDy = from.y - centerY;
+      const dist = Math.hypot(rawDx, rawDy) || 1;
+      const dx = rawDx / dist;
+      const dy = rawDy / dist;
+      const reach = EXTERNAL_ARROW_LENGTH * zoom;
+      const tip = { x: from.x + dx * reach, y: from.y + dy * reach };
+      const port = portsById.get(portId);
+      const otherEquipment = equipmentById.get(otherEquipmentId);
+      const otherLabel = otherEquipment
+        ? otherEquipment.apiName
+          ? `${otherEquipment.name} (${otherEquipment.apiName})`
+          : `${otherEquipment.name} (sans API)`
+        : "?";
+      result.push({
+        linkId: l.id,
+        from,
+        tip,
+        color: port?.linkTypeColor ?? "#8b5cf6",
+        strokeWidth: port?.linkTypeStrokeWidth ?? 3,
+        label: `${ownPortLabel} → ${otherLabel} (${otherPortLabel})`,
+      });
+    }
+    return result;
+  }, [cards, links, endpoints, cardRects, portsById, equipmentById, zoom]);
+
   async function handleExportSvg() {
     const canvasEl = canvasRef.current;
     if (!canvasEl || (cards.length === 0 && textBlocks.length === 0)) return;
@@ -1439,11 +1569,13 @@ export function DesignPage() {
             {connections.map((c) => (
               <span
                 key={c.linkId}
-                className={`design-info-tree-connection${selectedLinkIds.has(c.linkId) ? " active" : ""}`}
+                className={`design-info-tree-connection${c.otherApiName !== undefined ? " design-info-tree-connection-external" : ""}${selectedLinkIds.has(c.linkId) ? " active" : ""}`}
                 onClick={(e) => selectConnectionLink(e, c.linkId)}
-                title="Liaison"
+                title={c.otherApiName !== undefined ? `Liaison vers l'API ${c.otherApiName ?? "sans API"}` : "Liaison"}
               >
-                {c.ownPortLabel} ↔ {c.otherEquipmentName} ({c.otherPortLabel})
+                {c.otherApiName !== undefined
+                  ? `${c.ownPortLabel} → ${c.otherEquipmentName} (${c.otherApiName ?? "sans API"})`
+                  : `${c.ownPortLabel} ↔ ${c.otherEquipmentName} (${c.otherPortLabel})`}
               </span>
             ))}
           </div>
@@ -1494,6 +1626,15 @@ export function DesignPage() {
           </label>
           <button type="button" className="btn btn-sm" onClick={handleSaveSchema} disabled={selectedApiId === "" || schemaSaving}>
             {schemaSaving ? "Enregistrement..." : "Enregistrer"}
+          </button>
+          <button
+            type="button"
+            className="btn-outline btn-sm"
+            onClick={handleRefreshData}
+            disabled={refreshing}
+            title="Recharger le matériel, les ports et les liaisons pour mettre à jour le schéma et les flèches vers d'autres API"
+          >
+            {refreshing ? "Actualisation..." : "Actualiser"}
           </button>
           <button
             type="button"
@@ -1808,6 +1949,52 @@ export function DesignPage() {
               </g>
             );
           })}
+          {externalLinks.map((e) => {
+            const selected = selectedLinkIds.has(e.linkId);
+            const arrowSize = Math.max(10, e.strokeWidth * 3);
+            const dx = e.tip.x - e.from.x;
+            const dy = e.tip.y - e.from.y;
+            const len = Math.hypot(dx, dy) || 1;
+            const dirX = dx / len;
+            const dirY = dy / len;
+            const perpX = -dirY;
+            const perpY = dirX;
+            const backX = e.tip.x - dirX * arrowSize;
+            const backY = e.tip.y - dirY * arrowSize;
+            const p1 = { x: backX + perpX * arrowSize * 0.55, y: backY + perpY * arrowSize * 0.55 };
+            const p2 = { x: backX - perpX * arrowSize * 0.55, y: backY - perpY * arrowSize * 0.55 };
+            function selectExternalLink(e2: ReactMouseEvent) {
+              e2.stopPropagation();
+              setSelectedCardIds(new Set());
+              setSelectedTextIds(new Set());
+              setSelectedLinkIds(new Set([e.linkId]));
+            }
+            return (
+              <g key={`ext-${e.linkId}`}>
+                <line
+                  x1={e.from.x}
+                  y1={e.from.y}
+                  x2={backX}
+                  y2={backY}
+                  className={selected ? "design-link-selected" : undefined}
+                  stroke={e.color}
+                  strokeWidth={e.strokeWidth}
+                  pointerEvents="none"
+                />
+                <polygon points={`${e.tip.x},${e.tip.y} ${p1.x},${p1.y} ${p2.x},${p2.y}`} fill={e.color} pointerEvents="none" />
+                <line
+                  x1={e.from.x}
+                  y1={e.from.y}
+                  x2={e.tip.x}
+                  y2={e.tip.y}
+                  className="design-link-hit"
+                  onClick={selectExternalLink}
+                >
+                  <title>{e.label}</title>
+                </line>
+              </g>
+            );
+          })}
         </svg>
       </div>
 
@@ -1843,6 +2030,9 @@ export function DesignPage() {
           style={{ left: cardContextMenu.x, top: cardContextMenu.y }}
           onMouseDown={(e) => e.stopPropagation()}
         >
+          <button type="button" onClick={handleContextMenuEdit}>
+            Modifier le matériel
+          </button>
           <button type="button" onClick={handleContextMenuAddress}>
             Adresser le matériel
           </button>

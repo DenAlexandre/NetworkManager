@@ -222,6 +222,10 @@ CREATE TABLE IF NOT EXISTS apis (
 ALTER TABLE equipment ADD COLUMN IF NOT EXISTS api_id INTEGER REFERENCES apis(id);
 CREATE INDEX IF NOT EXISTS ix_equipment_api ON equipment(api_id);
 
+-- Marque le materiel racine de l'arborescence Design pour son API (remplace l'ancien
+-- rattachement en dur au nom "FO-R406A").
+ALTER TABLE equipment ADD COLUMN IF NOT EXISTS is_api_start_point BOOLEAN NOT NULL DEFAULT false;
+
 -- Schema de cablage (plan Design) enregistre pour une API : disposition des cartes
 -- materiel sur le canevas et courbure des liaisons, un seul schema par API.
 CREATE TABLE IF NOT EXISTS design_schemas (

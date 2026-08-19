@@ -2,9 +2,19 @@ import { useEffect, useState } from "react";
 import { deleteEquipmentLink, listEquipmentLinks } from "../../api/equipmentLinks";
 import type { EquipmentLink } from "../../api/equipmentLinks";
 import { ApiError } from "../../api/client";
+import { useTableQuery } from "../../hooks/useTableQuery";
+import type { FilterColumn } from "../../hooks/useTableQuery";
 import { usePagination } from "../../hooks/usePagination";
+import { SortableHeader } from "../../components/SortableHeader";
+import { ColumnFilterCell } from "../../components/ColumnFilterCell";
 import { Pagination } from "../../components/Pagination";
 import { EquipmentLinkFormModal } from "./EquipmentLinkFormModal";
+
+// Un seul filtre texte, qui cherche à la fois côté parent et côté enfant — les ports n'ont pas
+// besoin d'être filtrables séparément.
+const COLUMNS: FilterColumn<EquipmentLink>[] = [
+  { key: "equipment", getValue: (item) => `${item.parentEquipmentName} ${item.childEquipmentName}` },
+];
 
 export function EquipmentLinksPage() {
   const [links, setLinks] = useState<EquipmentLink[]>([]);
@@ -14,7 +24,8 @@ export function EquipmentLinksPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  const { page, setPage, pageCount, pagedItems } = usePagination(links);
+  const { filters, setFilter, sortKey, sortDir, toggleSort, rows } = useTableQuery(links, COLUMNS);
+  const { page, setPage, pageCount, pagedItems } = usePagination(rows);
 
   useEffect(() => {
     load();
@@ -72,10 +83,19 @@ export function EquipmentLinksPage() {
       <table className="table">
         <thead>
           <tr>
-            <th>Parent</th>
-            <th>Port parent</th>
-            <th>Enfant</th>
-            <th>Port enfant</th>
+            <SortableHeader label="Parent" field="parentEquipmentName" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+            <SortableHeader label="Port parent" field="parentPortLabel" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+            <SortableHeader label="Enfant" field="childEquipmentName" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+            <SortableHeader label="Port enfant" field="childPortLabel" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+            <th></th>
+          </tr>
+          <tr className="filter-row">
+            <th>
+              <ColumnFilterCell column={COLUMNS[0]} value={filters[COLUMNS[0].key] ?? ""} onChange={(v) => setFilter(COLUMNS[0].key, v)} />
+            </th>
+            <th></th>
+            <th></th>
+            <th></th>
             <th></th>
           </tr>
         </thead>
@@ -98,7 +118,7 @@ export function EquipmentLinksPage() {
           ))}
         </tbody>
       </table>
-      {links.length === 0 && <p className="muted">Aucune liaison enregistrée.</p>}
+      {rows.length === 0 && <p className="muted">Aucune liaison enregistrée.</p>}
       <Pagination page={page} pageCount={pageCount} onChange={setPage} />
       {modalOpen && (
         <EquipmentLinkFormModal linkId={editingId} onClose={() => setModalOpen(false)} onSaved={handleSaved} />

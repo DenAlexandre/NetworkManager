@@ -17,6 +17,7 @@ export interface Equipment {
   hardwareModelImagePath: string | null;
   apiId: number | null;
   apiName: string | null;
+  isApiStartPoint: boolean;
 }
 
 export interface EquipmentInput {
@@ -25,6 +26,7 @@ export interface EquipmentInput {
   hardwareModelId: number;
   apiId: number | null;
   name: string;
+  isApiStartPoint: boolean;
 }
 
 export function listEquipment(roomId?: number) {

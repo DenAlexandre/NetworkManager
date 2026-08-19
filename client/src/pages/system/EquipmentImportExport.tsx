@@ -185,6 +185,7 @@ export function EquipmentImportExport() {
             hardwareModelId: hardwareModel.id,
             apiId,
             name: trimmedName,
+            isApiStartPoint: false,
           });
           results.push({ line, name: trimmedName, status: "success", message: "Créé." });
         } catch (err) {
