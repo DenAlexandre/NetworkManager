@@ -425,6 +425,10 @@ CREATE TABLE IF NOT EXISTS report_configs (
 );
 
 ALTER TABLE report_configs DROP COLUMN IF EXISTS filter_mode;
+
+-- Remembers the "N'afficher que les ports / équipements ayant une liaison" checkbox alongside
+-- the rest of a saved reporting view.
+ALTER TABLE report_configs ADD COLUMN IF NOT EXISTS only_linked BOOLEAN NOT NULL DEFAULT false;
 `;
 
 async function migrate() {

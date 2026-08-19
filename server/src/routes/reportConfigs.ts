@@ -12,11 +12,13 @@ const reportConfigSchema = z.object({
   filters: z.record(z.string(), z.array(z.string())),
   sortColumnId: z.string().nullable().optional(),
   sortDir: z.enum(["asc", "desc"]).optional(),
+  onlyLinked: z.boolean().optional(),
 });
 
 const REPORT_CONFIG_SELECT = `
   SELECT id, name, column_ids AS "columnIds", filters,
-         sort_column_id AS "sortColumnId", sort_dir AS "sortDir", updated_at AS "updatedAt"
+         sort_column_id AS "sortColumnId", sort_dir AS "sortDir", only_linked AS "onlyLinked",
+         updated_at AS "updatedAt"
   FROM report_configs
 `;
 
@@ -39,13 +41,13 @@ router.post("/", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
-  const { name, columnIds, filters, sortColumnId, sortDir } = parsed.data;
+  const { name, columnIds, filters, sortColumnId, sortDir, onlyLinked } = parsed.data;
   try {
     const inserted = await pool.query(
-      `INSERT INTO report_configs (name, column_ids, filters, sort_column_id, sort_dir)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO report_configs (name, column_ids, filters, sort_column_id, sort_dir, only_linked)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id`,
-      [name, JSON.stringify(columnIds), JSON.stringify(filters), sortColumnId ?? null, sortDir ?? "asc"]
+      [name, JSON.stringify(columnIds), JSON.stringify(filters), sortColumnId ?? null, sortDir ?? "asc", onlyLinked ?? false]
     );
     const result = await pool.query(`${REPORT_CONFIG_SELECT} WHERE id = $1`, [inserted.rows[0].id]);
     res.status(201).json({ config: result.rows[0] });
@@ -66,14 +68,14 @@ router.put("/:id", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
-  const { name, columnIds, filters, sortColumnId, sortDir } = parsed.data;
+  const { name, columnIds, filters, sortColumnId, sortDir, onlyLinked } = parsed.data;
   try {
     const updated = await pool.query(
       `UPDATE report_configs
-       SET name = $1, column_ids = $2, filters = $3, sort_column_id = $4, sort_dir = $5, updated_at = now()
-       WHERE id = $6
+       SET name = $1, column_ids = $2, filters = $3, sort_column_id = $4, sort_dir = $5, only_linked = $6, updated_at = now()
+       WHERE id = $7
        RETURNING id`,
-      [name, JSON.stringify(columnIds), JSON.stringify(filters), sortColumnId ?? null, sortDir ?? "asc", id]
+      [name, JSON.stringify(columnIds), JSON.stringify(filters), sortColumnId ?? null, sortDir ?? "asc", onlyLinked ?? false, id]
     );
     if (!updated.rowCount) {
       return res.status(404).json({ error: "Configuration introuvable." });

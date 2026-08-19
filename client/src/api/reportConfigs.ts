@@ -7,6 +7,7 @@ export interface ReportConfig {
   filters: Record<string, string[]>;
   sortColumnId: string | null;
   sortDir: "asc" | "desc";
+  onlyLinked: boolean;
   updatedAt: string;
 }
 
@@ -16,6 +17,7 @@ export interface ReportConfigInput {
   filters: Record<string, string[]>;
   sortColumnId: string | null;
   sortDir: "asc" | "desc";
+  onlyLinked: boolean;
 }
 
 export function listReportConfigs() {

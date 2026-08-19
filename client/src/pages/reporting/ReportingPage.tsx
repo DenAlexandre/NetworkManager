@@ -10,6 +10,8 @@ import { listSwitchConfigs } from "../../api/switchConfigs";
 import type { SwitchConfigSummary } from "../../api/switchConfigs";
 import { listMgateConfigs } from "../../api/mgateConfigs";
 import type { MgateConfigSummary } from "../../api/mgateConfigs";
+import { listEquipmentLinks } from "../../api/equipmentLinks";
+import type { EquipmentLink } from "../../api/equipmentLinks";
 import {
   listReportConfigs,
   createReportConfig,
@@ -146,8 +148,13 @@ export function ReportingPage() {
   const [mgateConfigByHardwareModelId, setMgateConfigByHardwareModelId] = useState<Map<number, MgateConfigSummary>>(
     new Map()
   );
+  const [links, setLinks] = useState<EquipmentLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // "N'afficher que les ports / équipements ayant une liaison" checkbox: hides equipment (or, once
+  // the Adressage columns are shown, individual ports) that aren't on either end of any link.
+  const [onlyLinked, setOnlyLinked] = useState(false);
 
   const [selectedColumnIds, setSelectedColumnIds] = useState<Set<string>>(new Set(DEFAULT_COLUMN_IDS));
   const [sortColumnId, setSortColumnId] = useState<string | null>(null);
@@ -175,7 +182,7 @@ export function ReportingPage() {
     async function load() {
       setLoading(true);
       try {
-        const [{ equipment: eq }, { equipment: addressing }, { apis }, { switchConfigs }, { mgateConfigs }, { configs }] =
+        const [{ equipment: eq }, { equipment: addressing }, { apis }, { switchConfigs }, { mgateConfigs }, { configs }, { links: eqLinks }] =
           await Promise.all([
             listEquipment(),
             listAddressing(),
@@ -183,6 +190,7 @@ export function ReportingPage() {
             listSwitchConfigs(),
             listMgateConfigs(),
             listReportConfigs(),
+            listEquipmentLinks(),
           ]);
         setEquipment(eq);
         setPortsByEquipmentId(new Map(addressing.map((a) => [a.equipmentId, a.ports])));
@@ -190,6 +198,7 @@ export function ReportingPage() {
         setSwitchConfigByHardwareModelId(latestByHardwareModel(switchConfigs));
         setMgateConfigByHardwareModelId(latestByHardwareModel(mgateConfigs));
         setReportConfigs(configs);
+        setLinks(eqLinks);
       } catch (err) {
         setError(err instanceof ApiError ? err.message : "Erreur de chargement.");
       } finally {
@@ -207,6 +216,31 @@ export function ReportingPage() {
 
   function displayValue(column: ReportColumn, row: ReportRow) {
     return (column.format ?? formatDefault)(column.value(row));
+  }
+
+  const linkedEquipmentIds = useMemo(() => {
+    const set = new Set<number>();
+    for (const l of links) {
+      set.add(l.parentEquipmentId);
+      set.add(l.childEquipmentId);
+    }
+    return set;
+  }, [links]);
+
+  const linkedPortKeys = useMemo(() => {
+    const set = new Set<string>();
+    for (const l of links) {
+      set.add(`${l.parentEquipmentId}:${l.parentPortId}`);
+      set.add(`${l.childEquipmentId}:${l.childPortId}`);
+    }
+    return set;
+  }, [links]);
+
+  // Once Adressage columns are shown, "a link" means the specific port has one; otherwise it's
+  // about the equipment as a whole (any of its ports linked to anything).
+  function rowHasLink(row: ReportRow) {
+    if (row.port) return linkedPortKeys.has(`${row.equipment.id}:${row.port.hardwareModelPortId}`);
+    return linkedEquipmentIds.has(row.equipment.id);
   }
 
   // Only filters on currently displayed columns apply — hiding a filtered column clears its
@@ -240,9 +274,9 @@ export function ReportingPage() {
   }, [equipment, hasAddressingColumn, portsByEquipmentId, apiById, switchConfigByHardwareModelId, mgateConfigByHardwareModelId]);
 
   const filteredRows = useMemo(
-    () => reportRows.filter((row) => rowMatchesFilters(row)),
+    () => reportRows.filter((row) => (!onlyLinked || rowHasLink(row)) && rowMatchesFilters(row)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [reportRows, columnFilters, displayedColumns]
+    [reportRows, columnFilters, displayedColumns, onlyLinked, linkedEquipmentIds, linkedPortKeys]
   );
 
   const sortedRows = useMemo(() => {
@@ -264,6 +298,7 @@ export function ReportingPage() {
     if (!column) return [];
     const counts = new Map<string, number>();
     for (const row of reportRows) {
+      if (onlyLinked && !rowHasLink(row)) continue;
       if (!rowMatchesFilters(row, openFilterId)) continue;
       const value = displayValue(column, row);
       counts.set(value, (counts.get(value) ?? 0) + 1);
@@ -272,7 +307,7 @@ export function ReportingPage() {
       .map(([value, count]) => ({ value, count }))
       .sort((a, b) => a.value.localeCompare(b.value));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [openFilterId, reportRows, columnFilters]);
+  }, [openFilterId, reportRows, columnFilters, onlyLinked, linkedEquipmentIds, linkedPortKeys]);
 
   const { page, setPage, pageCount, pagedItems } = usePagination(sortedRows);
 
@@ -346,6 +381,7 @@ export function ReportingPage() {
       filters: Object.fromEntries(Object.entries(columnFilters).map(([id, values]) => [id, [...values]])),
       sortColumnId,
       sortDir,
+      onlyLinked,
     };
   }
 
@@ -356,6 +392,7 @@ export function ReportingPage() {
     );
     setSortColumnId(config.sortColumnId);
     setSortDir(config.sortDir);
+    setOnlyLinked(config.onlyLinked ?? false);
   }
 
   function handleSelectConfig(value: string) {
@@ -478,6 +515,10 @@ export function ReportingPage() {
           </fieldset>
         ))}
       </div>
+      <label className="checkbox-field">
+        <input type="checkbox" checked={onlyLinked} onChange={(e) => setOnlyLinked(e.target.checked)} />
+        N'afficher que les ports / équipements ayant une liaison
+      </label>
       {displayedColumns.length === 0 ? (
         <p className="muted">Sélectionnez au moins une colonne à afficher.</p>
       ) : (
