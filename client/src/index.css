@@ -485,6 +485,7 @@ a {
   font-size: 11px;
   padding: 4px 6px;
   background: var(--surface-alt);
+  color: var(--text);
   border: 1px solid var(--border);
   border-radius: 6px;
   cursor: pointer;
