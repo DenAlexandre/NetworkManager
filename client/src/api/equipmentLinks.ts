@@ -10,6 +10,8 @@ export interface EquipmentLink {
   childEquipmentName: string;
   childPortId: number;
   childPortLabel: string;
+  configurationTypeId: number | null;
+  configurationTypeName: string | null;
 }
 
 export interface EquipmentLinkInput {
@@ -17,6 +19,7 @@ export interface EquipmentLinkInput {
   parentPortId: number;
   childEquipmentId: number;
   childPortId: number;
+  configurationTypeId: number | null;
 }
 
 export function listEquipmentLinks(equipmentId?: number) {

@@ -31,6 +31,7 @@ interface ReportRow {
   port?: AddressingPort;
   switchConfig?: SwitchConfigSummary;
   mgateConfig?: MgateConfigSummary;
+  link?: EquipmentLink;
 }
 
 type CellValue = string | number | boolean | null;
@@ -110,6 +111,12 @@ const COLUMNS: ReportColumn[] = [
     label: "Nb ports série",
     category: "Config Moxa",
     value: (r) => r.mgateConfig?.serialPortCount ?? null,
+  },
+  {
+    id: "link_configType",
+    label: "Type de configuration (liaison)",
+    category: "Liaison",
+    value: (r) => r.link?.configurationTypeName ?? null,
   },
 ];
 
@@ -213,6 +220,7 @@ export function ReportingPage() {
     [selectedColumnIds]
   );
   const hasAddressingColumn = displayedColumns.some((c) => c.category === "Adressage");
+  const hasLinkColumn = displayedColumns.some((c) => c.category === "Liaison");
 
   function displayValue(column: ReportColumn, row: ReportRow) {
     return (column.format ?? formatDefault)(column.value(row));
@@ -234,6 +242,32 @@ export function ReportingPage() {
       set.add(`${l.childEquipmentId}:${l.childPortId}`);
     }
     return set;
+  }, [links]);
+
+  // For the "Liaison" column: per port (once Adressage is shown) the link touching that exact
+  // port; per equipment otherwise, one row per link it takes part in (mirrors the Adressage
+  // per-port breakdown below).
+  const linkByPortKey = useMemo(() => {
+    const map = new Map<string, EquipmentLink>();
+    for (const l of links) {
+      map.set(`${l.parentEquipmentId}:${l.parentPortId}`, l);
+      map.set(`${l.childEquipmentId}:${l.childPortId}`, l);
+    }
+    return map;
+  }, [links]);
+
+  const linksByEquipmentId = useMemo(() => {
+    const map = new Map<number, EquipmentLink[]>();
+    function add(equipmentId: number, link: EquipmentLink) {
+      const arr = map.get(equipmentId);
+      if (arr) arr.push(link);
+      else map.set(equipmentId, [link]);
+    }
+    for (const l of links) {
+      add(l.parentEquipmentId, l);
+      add(l.childEquipmentId, l);
+    }
+    return map;
   }, [links]);
 
   // Once Adressage columns are shown, "a link" means the specific port has one; otherwise it's
@@ -264,14 +298,30 @@ export function ReportingPage() {
       if (hasAddressingColumn) {
         const ports = portsByEquipmentId.get(eq.id) ?? [];
         for (const port of ports) {
-          out.push({ key: `${eq.id}:${port.hardwareModelPortId}`, equipment: eq, api, port, switchConfig, mgateConfig });
+          const link = linkByPortKey.get(`${eq.id}:${port.hardwareModelPortId}`);
+          out.push({ key: `${eq.id}:${port.hardwareModelPortId}`, equipment: eq, api, port, switchConfig, mgateConfig, link });
+        }
+      } else if (hasLinkColumn) {
+        const eqLinks = linksByEquipmentId.get(eq.id) ?? [];
+        for (const link of eqLinks) {
+          out.push({ key: `${eq.id}:link:${link.id}`, equipment: eq, api, switchConfig, mgateConfig, link });
         }
       } else {
         out.push({ key: String(eq.id), equipment: eq, api, switchConfig, mgateConfig });
       }
     }
     return out;
-  }, [equipment, hasAddressingColumn, portsByEquipmentId, apiById, switchConfigByHardwareModelId, mgateConfigByHardwareModelId]);
+  }, [
+    equipment,
+    hasAddressingColumn,
+    hasLinkColumn,
+    portsByEquipmentId,
+    linkByPortKey,
+    linksByEquipmentId,
+    apiById,
+    switchConfigByHardwareModelId,
+    mgateConfigByHardwareModelId,
+  ]);
 
   const filteredRows = useMemo(
     () => reportRows.filter((row) => (!onlyLinked || rowHasLink(row)) && rowMatchesFilters(row)),

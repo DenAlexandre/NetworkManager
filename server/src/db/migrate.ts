@@ -225,6 +225,24 @@ CREATE INDEX IF NOT EXISTS ix_equipment_links_child_port ON equipment_links(chil
 CREATE INDEX IF NOT EXISTS ix_equipment_links_parent ON equipment_links(parent_equipment_id);
 CREATE INDEX IF NOT EXISTS ix_equipment_links_child ON equipment_links(child_equipment_id);
 
+-- Type de configuration optionnel associe a la liaison elle-meme (distinct de celui des ports).
+ALTER TABLE equipment_links ADD COLUMN IF NOT EXISTS configuration_type_id INTEGER REFERENCES configuration_types(id);
+
+-- Backfill : reprend le type de liaison du port parent (meme convention que le defaut applique aux
+-- nouvelles liaisons dessinees dans Design, cf. DEFAULT_CONFIGURATION_TYPE_NAME_BY_PORT_TYPE cote
+-- client) pour les liaisons existantes qui n'ont pas encore de type de configuration explicite.
+UPDATE equipment_links l
+SET configuration_type_id = ct.id
+FROM hardware_model_ports p
+JOIN link_types lt ON lt.id = p.link_type_id
+JOIN configuration_types ct ON ct.name = CASE lt.name
+  WHEN 'ModBus' THEN 'ModBus RTU-RS485-9600-8-N-1'
+  WHEN 'TCP/IP' THEN 'TCP-IP'
+END
+WHERE l.parent_port_id = p.id
+  AND l.configuration_type_id IS NULL
+  AND lt.name IN ('ModBus', 'TCP/IP');
+
 -- Reglages d'adressage par instance de materiel pour chaque port de son modele : adresse
 -- ModBus pour les ports ModBus, VLAN/IP/passerelle/masque pour les ports TCP/IP.
 CREATE TABLE IF NOT EXISTS equipment_port_settings (

@@ -13,9 +13,9 @@ const ADMIN_NAV_ITEMS: { to: string; icon: SidebarIconName; label: string }[] = 
   { to: "/sites", icon: "pin", label: "Gestion des Sites" },
   { to: "/apis", icon: "exchange", label: "Gestion des API" },
   { to: "/equipment", icon: "server", label: "Gestion du matériel" },
-  { to: "/configurations", icon: "sliders", label: "Gestion des configurations" },
   { to: "/plans", icon: "network", label: "Gestion des plans" },
   { to: "/reporting", icon: "chart", label: "Reporting" },
+  { to: "/configurations", icon: "sliders", label: "Gestion des configurations" },
   { to: "/system", icon: "database", label: "Système" },
 ];
 

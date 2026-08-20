@@ -11,6 +11,7 @@ const linkSchema = z.object({
   parentPortId: z.number().int("Le port parent est requis."),
   childEquipmentId: z.number().int("Le matériel enfant est requis."),
   childPortId: z.number().int("Le port enfant est requis."),
+  configurationTypeId: z.number().int().nullable().optional(),
 });
 
 const LINK_SELECT = `
@@ -18,12 +19,14 @@ const LINK_SELECT = `
          l.parent_equipment_id AS "parentEquipmentId", pe.name AS "parentEquipmentName",
          l.parent_port_id AS "parentPortId", pp.label AS "parentPortLabel",
          l.child_equipment_id AS "childEquipmentId", ce.name AS "childEquipmentName",
-         l.child_port_id AS "childPortId", cp.label AS "childPortLabel"
+         l.child_port_id AS "childPortId", cp.label AS "childPortLabel",
+         l.configuration_type_id AS "configurationTypeId", ct.name AS "configurationTypeName"
   FROM equipment_links l
   JOIN equipment pe ON pe.id = l.parent_equipment_id
   JOIN equipment ce ON ce.id = l.child_equipment_id
   JOIN hardware_model_ports pp ON pp.id = l.parent_port_id
   JOIN hardware_model_ports cp ON cp.id = l.child_port_id
+  LEFT JOIN configuration_types ct ON ct.id = l.configuration_type_id
 `;
 
 function parseId(raw: string) {
@@ -128,7 +131,7 @@ router.post("/", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
-  const { parentEquipmentId, parentPortId, childEquipmentId, childPortId } = parsed.data;
+  const { parentEquipmentId, parentPortId, childEquipmentId, childPortId, configurationTypeId } = parsed.data;
 
   const mismatch = await findPortMismatch(parentEquipmentId, parentPortId, childEquipmentId, childPortId);
   if (mismatch) {
@@ -138,14 +141,21 @@ router.post("/", async (req, res) => {
     return res.status(409).json({ error: "Un des ports sélectionnés est déjà utilisé par une autre liaison." });
   }
 
-  const inserted = await pool.query(
-    `INSERT INTO equipment_links (parent_equipment_id, parent_port_id, child_equipment_id, child_port_id)
-     VALUES ($1, $2, $3, $4)
-     RETURNING id`,
-    [parentEquipmentId, parentPortId, childEquipmentId, childPortId]
-  );
-  const result = await pool.query(`${LINK_SELECT} WHERE l.id = $1`, [inserted.rows[0].id]);
-  res.status(201).json({ link: result.rows[0] });
+  try {
+    const inserted = await pool.query(
+      `INSERT INTO equipment_links (parent_equipment_id, parent_port_id, child_equipment_id, child_port_id, configuration_type_id)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id`,
+      [parentEquipmentId, parentPortId, childEquipmentId, childPortId, configurationTypeId ?? null]
+    );
+    const result = await pool.query(`${LINK_SELECT} WHERE l.id = $1`, [inserted.rows[0].id]);
+    res.status(201).json({ link: result.rows[0] });
+  } catch (err) {
+    if ((err as { code?: string }).code === "23503") {
+      return res.status(400).json({ error: "Type de configuration introuvable." });
+    }
+    throw err;
+  }
 });
 
 router.put("/:id", async (req, res) => {
@@ -157,7 +167,7 @@ router.put("/:id", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
-  const { parentEquipmentId, parentPortId, childEquipmentId, childPortId } = parsed.data;
+  const { parentEquipmentId, parentPortId, childEquipmentId, childPortId, configurationTypeId } = parsed.data;
 
   const mismatch = await findPortMismatch(parentEquipmentId, parentPortId, childEquipmentId, childPortId);
   if (mismatch) {
@@ -167,18 +177,25 @@ router.put("/:id", async (req, res) => {
     return res.status(409).json({ error: "Un des ports sélectionnés est déjà utilisé par une autre liaison." });
   }
 
-  const updated = await pool.query(
-    `UPDATE equipment_links
-     SET parent_equipment_id = $1, parent_port_id = $2, child_equipment_id = $3, child_port_id = $4
-     WHERE id = $5
-     RETURNING id`,
-    [parentEquipmentId, parentPortId, childEquipmentId, childPortId, id]
-  );
-  if (!updated.rowCount) {
-    return res.status(404).json({ error: "Liaison introuvable." });
+  try {
+    const updated = await pool.query(
+      `UPDATE equipment_links
+       SET parent_equipment_id = $1, parent_port_id = $2, child_equipment_id = $3, child_port_id = $4, configuration_type_id = $5
+       WHERE id = $6
+       RETURNING id`,
+      [parentEquipmentId, parentPortId, childEquipmentId, childPortId, configurationTypeId ?? null, id]
+    );
+    if (!updated.rowCount) {
+      return res.status(404).json({ error: "Liaison introuvable." });
+    }
+    const result = await pool.query(`${LINK_SELECT} WHERE l.id = $1`, [id]);
+    res.json({ link: result.rows[0] });
+  } catch (err) {
+    if ((err as { code?: string }).code === "23503") {
+      return res.status(400).json({ error: "Type de configuration introuvable." });
+    }
+    throw err;
   }
-  const result = await pool.query(`${LINK_SELECT} WHERE l.id = $1`, [id]);
-  res.json({ link: result.rows[0] });
 });
 
 router.delete("/:id", async (req, res) => {

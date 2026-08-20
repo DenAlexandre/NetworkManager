@@ -5,6 +5,8 @@ import { createEquipment, listEquipment } from "../../api/equipment";
 import type { Equipment } from "../../api/equipment";
 import { listPorts } from "../../api/ports";
 import type { Port } from "../../api/ports";
+import { listConfigurationTypes } from "../../api/configurationTypes";
+import type { ConfigurationType } from "../../api/configurationTypes";
 import { createEquipmentLink, deleteEquipmentLink, listEquipmentLinks } from "../../api/equipmentLinks";
 import type { EquipmentLink } from "../../api/equipmentLinks";
 import { listApis } from "../../api/apis";
@@ -166,6 +168,13 @@ function orthoConstrain(anchor: { x: number; y: number }, cursor: { x: number; y
 // away and back (the component unmounts, losing all React state, on every route change).
 const SELECTED_API_STORAGE_KEY = "design.selectedApiId";
 
+// Default "type de configuration" applied to a link drawn in Design, based on the parent port's
+// link type — saves the common case (only override it manually for anything non-standard).
+const DEFAULT_CONFIGURATION_TYPE_NAME_BY_PORT_TYPE: Record<string, string> = {
+  ModBus: "ModBus RTU-RS485-9600-8-N-1",
+  "TCP/IP": "TCP-IP",
+};
+
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 1;
 const ZOOM_STEP = 0.05;
@@ -210,6 +219,7 @@ export function DesignPage() {
   const navigate = useNavigate();
   const [equipmentList, setEquipmentList] = useState<Equipment[]>([]);
   const [allPorts, setAllPorts] = useState<Port[]>([]);
+  const [configurationTypes, setConfigurationTypes] = useState<ConfigurationType[]>([]);
   const [links, setLinks] = useState<EquipmentLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -223,6 +233,7 @@ export function DesignPage() {
   const [linkMode, setLinkMode] = useState(false);
   const [linkDraw, setLinkDraw] = useState<LinkDraw | null>(null);
   const [cardContextMenu, setCardContextMenu] = useState<{ equipmentId: number; x: number; y: number } | null>(null);
+  const [linkContextMenu, setLinkContextMenu] = useState<{ linkId: number; x: number; y: number } | null>(null);
   const [duplicateSource, setDuplicateSource] = useState<Equipment | null>(null);
   const [linkPreview, setLinkPreview] = useState<{ x: number; y: number } | null>(null);
   const [resizing, setResizing] = useState<{ equipmentId: number; startX: number; startWidth: number } | null>(null);
@@ -286,18 +297,20 @@ export function DesignPage() {
   const hasMovedDuringDragRef = useRef(false);
 
   async function fetchAllData() {
-    const [eqRes, portsRes, linksRes, apisRes, addressingRes] = await Promise.all([
+    const [eqRes, portsRes, linksRes, apisRes, addressingRes, configTypesRes] = await Promise.all([
       listEquipment(),
       listPorts(),
       listEquipmentLinks(),
       listApis(),
       listAddressing(),
+      listConfigurationTypes(),
     ]);
     setEquipmentList(eqRes.equipment);
     setAllPorts(portsRes.ports);
     setLinks(linksRes.links);
     setApis(apisRes.apis);
     setAddressing(addressingRes.equipment);
+    setConfigurationTypes(configTypesRes.configurationTypes);
   }
 
   useEffect(() => {
@@ -690,6 +703,24 @@ export function DesignPage() {
   }, [cardContextMenu]);
 
   useEffect(() => {
+    if (!linkContextMenu) return;
+    function close() {
+      setLinkContextMenu(null);
+    }
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") close();
+    }
+    window.addEventListener("mousedown", close);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("scroll", close, true);
+    return () => {
+      window.removeEventListener("mousedown", close);
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("scroll", close, true);
+    };
+  }, [linkContextMenu]);
+
+  useEffect(() => {
     window.addEventListener("resize", recomputeEndpoints);
     return () => window.removeEventListener("resize", recomputeEndpoints);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1019,6 +1050,25 @@ export function DesignPage() {
     if (equipment) setDuplicateSource(equipment);
   }
 
+  function handleLinkContextMenu(e: ReactMouseEvent, linkId: number) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (linkMode) return;
+    setLinkContextMenu({ linkId, x: e.clientX, y: e.clientY });
+  }
+
+  function handleLinkContextMenuEdit() {
+    if (!linkContextMenu) return;
+    navigate(`/equipment/links?open=${linkContextMenu.linkId}&returnTo=/plans`);
+    setLinkContextMenu(null);
+  }
+
+  function handleLinkContextMenuDelete() {
+    if (!linkContextMenu) return;
+    handleDeleteLink(linkContextMenu.linkId);
+    setLinkContextMenu(null);
+  }
+
   async function handleSaveDuplicate(name: string) {
     if (!duplicateSource) return;
     const { equipment } = await createEquipment({
@@ -1175,11 +1225,17 @@ export function DesignPage() {
     if (!to) return;
     setError(null);
     try {
+      const fromPortType = portsById.get(from.fromPortId)?.portType;
+      const defaultConfigTypeName = fromPortType ? DEFAULT_CONFIGURATION_TYPE_NAME_BY_PORT_TYPE[fromPortType] : undefined;
+      const defaultConfigType = defaultConfigTypeName
+        ? configurationTypes.find((ct) => ct.name === defaultConfigTypeName)
+        : undefined;
       const { link } = await createEquipmentLink({
         parentEquipmentId: from.fromEquipmentId,
         parentPortId: from.fromPortId,
         childEquipmentId: equipmentId,
         childPortId: portId,
+        configurationTypeId: defaultConfigType?.id ?? null,
       });
       // Every waypoint the user actually clicked is already ortho-constrained relative to the
       // previous one (see handleCanvasMouseDown) — but the very last segment, into the destination
@@ -2063,6 +2119,7 @@ export function DesignPage() {
                       style={{ pointerEvents: linkMode ? "none" : "stroke" }}
                       onClick={selectLink}
                       onDoubleClick={deleteLink}
+                      onContextMenu={(e) => handleLinkContextMenu(e, link.id)}
                     >
                       <title>{tooltip}</title>
                     </line>
@@ -2185,6 +2242,21 @@ export function DesignPage() {
           </button>
           <button type="button" className="danger" onClick={handleContextMenuRemove}>
             Supprimer du schéma
+          </button>
+        </div>
+      )}
+
+      {linkContextMenu && (
+        <div
+          className="design-context-menu"
+          style={{ left: linkContextMenu.x, top: linkContextMenu.y }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <button type="button" onClick={handleLinkContextMenuEdit}>
+            Éditer la liaison
+          </button>
+          <button type="button" className="danger" onClick={handleLinkContextMenuDelete}>
+            Supprimer la liaison
           </button>
         </div>
       )}

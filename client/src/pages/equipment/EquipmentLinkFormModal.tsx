@@ -4,6 +4,8 @@ import { listEquipment } from "../../api/equipment";
 import type { Equipment } from "../../api/equipment";
 import { listPorts } from "../../api/ports";
 import type { Port } from "../../api/ports";
+import { listConfigurationTypes } from "../../api/configurationTypes";
+import type { ConfigurationType } from "../../api/configurationTypes";
 import { createEquipmentLink, getEquipmentLink, listEquipmentLinks, updateEquipmentLink } from "../../api/equipmentLinks";
 import { ApiError } from "../../api/client";
 import { Modal } from "../../components/Modal";
@@ -23,6 +25,7 @@ export function EquipmentLinkFormModal({ linkId, onClose, onSaved }: EquipmentLi
 
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [ports, setPorts] = useState<Port[]>([]);
+  const [configurationTypes, setConfigurationTypes] = useState<ConfigurationType[]>([]);
   // Keyed by "equipmentId:portId", not just portId — a hardware_model_ports row is a catalog
   // definition shared by every equipment instance of that model, so two different pieces of
   // equipment using the same model reuse the same port ids. Tracking "used" by port id alone
@@ -33,6 +36,7 @@ export function EquipmentLinkFormModal({ linkId, onClose, onSaved }: EquipmentLi
   const [parentPortId, setParentPortId] = useState<number | "">("");
   const [childEquipmentId, setChildEquipmentId] = useState<number | "">("");
   const [childPortId, setChildPortId] = useState<number | "">("");
+  const [configurationTypeId, setConfigurationTypeId] = useState<number | "">("");
   const [parentSearch, setParentSearch] = useState("");
   const [childSearch, setChildSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -41,13 +45,15 @@ export function EquipmentLinkFormModal({ linkId, onClose, onSaved }: EquipmentLi
 
   useEffect(() => {
     async function load() {
-      const [{ equipment: eq }, { ports: allPorts }, { links: allLinks }] = await Promise.all([
+      const [{ equipment: eq }, { ports: allPorts }, { links: allLinks }, { configurationTypes: allConfigTypes }] = await Promise.all([
         listEquipment(),
         listPorts(),
         listEquipmentLinks(),
+        listConfigurationTypes(),
       ]);
       setEquipment(eq);
       setPorts(allPorts);
+      setConfigurationTypes(allConfigTypes);
       const used = new Set<string>();
       for (const link of allLinks) {
         used.add(portKey(link.parentEquipmentId, link.parentPortId));
@@ -60,6 +66,7 @@ export function EquipmentLinkFormModal({ linkId, onClose, onSaved }: EquipmentLi
         setParentPortId(link.parentPortId);
         setChildEquipmentId(link.childEquipmentId);
         setChildPortId(link.childPortId);
+        setConfigurationTypeId(link.configurationTypeId ?? "");
       }
       setLoading(false);
     }
@@ -125,6 +132,7 @@ export function EquipmentLinkFormModal({ linkId, onClose, onSaved }: EquipmentLi
         parentPortId: Number(parentPortId),
         childEquipmentId: Number(childEquipmentId),
         childPortId: Number(childPortId),
+        configurationTypeId: configurationTypeId === "" ? null : Number(configurationTypeId),
       };
       if (isEdit) {
         await updateEquipmentLink(Number(linkId), input);
@@ -219,6 +227,20 @@ export function EquipmentLinkFormModal({ linkId, onClose, onSaved }: EquipmentLi
               {childPortOptions.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Type de configuration
+            <select
+              value={configurationTypeId}
+              onChange={(e) => setConfigurationTypeId(e.target.value ? Number(e.target.value) : "")}
+            >
+              <option value="">—</option>
+              {configurationTypes.map((ct) => (
+                <option key={ct.id} value={ct.id}>
+                  {ct.name}
                 </option>
               ))}
             </select>

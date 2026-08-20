@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { deleteEquipmentLink, listEquipmentLinks } from "../../api/equipmentLinks";
 import type { EquipmentLink } from "../../api/equipmentLinks";
 import { ApiError } from "../../api/client";
@@ -23,6 +24,9 @@ export function EquipmentLinksPage() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [returnTo, setReturnTo] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const { filters, setFilter, sortKey, sortDir, toggleSort, rows } = useTableQuery(links, COLUMNS);
   const { page, setPage, pageCount, pagedItems } = usePagination(rows);
@@ -30,6 +34,20 @@ export function EquipmentLinksPage() {
   useEffect(() => {
     load();
   }, []);
+
+  // Supports deep-linking here (e.g. from Design's link context menu) via
+  // /equipment/links?open=<linkId>&returnTo=<path>, opening that link's edit modal directly once
+  // the list has loaded, then stripping the query params so they don't reopen on refresh. returnTo
+  // is remembered so closing/saving the modal sends the user back where they came from instead of
+  // leaving them stranded on this list.
+  useEffect(() => {
+    const openId = Number(searchParams.get("open"));
+    if (!openId || !links.some((link) => link.id === openId)) return;
+    setReturnTo(searchParams.get("returnTo"));
+    openEditModal(openId);
+    setSearchParams({}, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [links, searchParams, setSearchParams]);
 
   async function load() {
     setLoading(true);
@@ -63,7 +81,19 @@ export function EquipmentLinksPage() {
     setModalOpen(true);
   }
 
+  function closeModal() {
+    if (returnTo) {
+      navigate(returnTo);
+      return;
+    }
+    setModalOpen(false);
+  }
+
   function handleSaved() {
+    if (returnTo) {
+      navigate(returnTo);
+      return;
+    }
     setModalOpen(false);
     load();
   }
@@ -87,12 +117,14 @@ export function EquipmentLinksPage() {
             <SortableHeader label="Port parent" field="parentPortLabel" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
             <SortableHeader label="Enfant" field="childEquipmentName" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
             <SortableHeader label="Port enfant" field="childPortLabel" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+            <SortableHeader label="Type de configuration" field="configurationTypeName" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
             <th></th>
           </tr>
           <tr className="filter-row">
             <th>
               <ColumnFilterCell column={COLUMNS[0]} value={filters[COLUMNS[0].key] ?? ""} onChange={(v) => setFilter(COLUMNS[0].key, v)} />
             </th>
+            <th></th>
             <th></th>
             <th></th>
             <th></th>
@@ -106,6 +138,7 @@ export function EquipmentLinksPage() {
               <td>{link.parentPortLabel}</td>
               <td>{link.childEquipmentName}</td>
               <td>{link.childPortLabel}</td>
+              <td>{link.configurationTypeName ?? "—"}</td>
               <td className="table-actions">
                 <button type="button" className="link" onClick={() => openEditModal(link.id)}>
                   Modifier
@@ -121,7 +154,7 @@ export function EquipmentLinksPage() {
       {rows.length === 0 && <p className="muted">Aucune liaison enregistrée.</p>}
       <Pagination page={page} pageCount={pageCount} onChange={setPage} />
       {modalOpen && (
-        <EquipmentLinkFormModal linkId={editingId} onClose={() => setModalOpen(false)} onSaved={handleSaved} />
+        <EquipmentLinkFormModal linkId={editingId} onClose={closeModal} onSaved={handleSaved} />
       )}
     </div>
   );
