@@ -10,6 +10,7 @@ import { SortableHeader } from "../../components/SortableHeader";
 import { ColumnFilterCell } from "../../components/ColumnFilterCell";
 import { Pagination } from "../../components/Pagination";
 import { EquipmentLinkFormModal } from "./EquipmentLinkFormModal";
+import { usePermission } from "../../hooks/usePermission";
 
 // Un seul filtre texte, qui cherche à la fois côté parent et côté enfant — les ports n'ont pas
 // besoin d'être filtrables séparément.
@@ -18,6 +19,7 @@ const COLUMNS: FilterColumn<EquipmentLink>[] = [
 ];
 
 export function EquipmentLinksPage() {
+  const { canWrite } = usePermission("equipment");
   const [links, setLinks] = useState<EquipmentLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -104,9 +106,11 @@ export function EquipmentLinksPage() {
     <div className="card">
       <div className="page-header">
         <h2>Liaisons</h2>
-        <button type="button" className="btn" onClick={openCreateModal}>
-          Ajouter
-        </button>
+        {canWrite && (
+          <button type="button" className="btn" onClick={openCreateModal}>
+            Ajouter
+          </button>
+        )}
       </div>
       <p className="muted">Le matériel peut être relié à du matériel d'autres salles.</p>
       {error && <p className="error">{error}</p>}
@@ -140,12 +144,16 @@ export function EquipmentLinksPage() {
               <td>{link.childPortLabel}</td>
               <td>{link.configurationTypeName ?? "—"}</td>
               <td className="table-actions">
-                <button type="button" className="link" onClick={() => openEditModal(link.id)}>
-                  Modifier
-                </button>
-                <button className="danger" onClick={() => handleDeleteLink(link.id)}>
-                  Supprimer
-                </button>
+                {canWrite && (
+                  <>
+                    <button type="button" className="link" onClick={() => openEditModal(link.id)}>
+                      Modifier
+                    </button>
+                    <button className="danger" onClick={() => handleDeleteLink(link.id)}>
+                      Supprimer
+                    </button>
+                  </>
+                )}
               </td>
             </tr>
           ))}

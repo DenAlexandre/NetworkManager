@@ -18,6 +18,7 @@ import { ColumnFilterCell } from "../../components/ColumnFilterCell";
 import { Pagination } from "../../components/Pagination";
 import { PdfIcon } from "../../components/PdfIcon";
 import { HardwareModelFormModal } from "./HardwareModelFormModal";
+import { usePermission } from "../../hooks/usePermission";
 
 function formatPortCounts(counts: Record<string, number> | undefined) {
   if (!counts) return "—";
@@ -32,6 +33,7 @@ function formatVariableCount(count: number | undefined) {
 }
 
 export function HardwareModelsListPage() {
+  const { canWrite } = usePermission("data-types");
   const [items, setItems] = useState<HardwareModel[]>([]);
   const [portCounts, setPortCounts] = useState<Record<number, Record<string, number>>>({});
   const [variableCounts, setVariableCounts] = useState<Record<number, number>>({});
@@ -128,9 +130,11 @@ export function HardwareModelsListPage() {
     <div className="card">
       <div className="page-header">
         <h2>Matériel</h2>
-        <button type="button" className="btn" onClick={openCreateModal}>
-          Ajouter
-        </button>
+        {canWrite && (
+          <button type="button" className="btn" onClick={openCreateModal}>
+            Ajouter
+          </button>
+        )}
       </div>
       {error && <p className="error">{error}</p>}
       <table className="table">
@@ -201,12 +205,16 @@ export function HardwareModelsListPage() {
                     <PdfIcon />
                   </a>
                 )}
-                <button type="button" className="link" onClick={() => openEditModal(item.id)}>
-                  Modifier
-                </button>
-                <button className="danger" onClick={() => handleDelete(item.id)}>
-                  Supprimer
-                </button>
+                {canWrite && (
+                  <>
+                    <button type="button" className="link" onClick={() => openEditModal(item.id)}>
+                      Modifier
+                    </button>
+                    <button className="danger" onClick={() => handleDelete(item.id)}>
+                      Supprimer
+                    </button>
+                  </>
+                )}
               </td>
             </tr>
           ))}

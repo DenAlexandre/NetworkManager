@@ -1080,6 +1080,17 @@ textarea {
   font-size: 14px;
 }
 
+.badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 /* left tree panel */
 
 .tree-shell {
@@ -1607,6 +1618,15 @@ textarea {
 
 .design-info-tree-link-addr {
   font-weight: 400;
+}
+
+.design-info-tree-address {
+  cursor: default;
+}
+
+.design-info-tree-address:hover {
+  text-decoration: none;
+  color: var(--text-muted);
 }
 
 .design-info-tree-nested {

@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { Layout } from "./components/Layout";
-import { AdminRoute } from "./components/ProtectedRoute";
+import { SectionRoute } from "./components/ProtectedRoute";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
@@ -34,6 +34,10 @@ import { ReportingPage } from "./pages/reporting/ReportingPage";
 import { SystemLayout } from "./pages/system/SystemLayout";
 import { DatabasePage } from "./pages/system/DatabasePage";
 import { ImportExportPage } from "./pages/system/ImportExportPage";
+import { RightsLayout } from "./pages/rights/RightsLayout";
+import { RolesListPage } from "./pages/rights/RolesListPage";
+import { PermissionsPage } from "./pages/rights/PermissionsPage";
+import { UsersListPage } from "./pages/rights/UsersListPage";
 
 function App() {
   return (
@@ -46,9 +50,9 @@ function App() {
           <Route
             path="data-types"
             element={
-              <AdminRoute>
+              <SectionRoute section="data-types">
                 <DataTypesLayout />
-              </AdminRoute>
+              </SectionRoute>
             }
           >
             <Route index element={<DeviceTypesListPage />} />
@@ -62,9 +66,9 @@ function App() {
           <Route
             path="sites"
             element={
-              <AdminRoute>
+              <SectionRoute section="sites">
                 <SitesLayout />
-              </AdminRoute>
+              </SectionRoute>
             }
           >
             <Route index element={<SitesListPage />} />
@@ -75,9 +79,9 @@ function App() {
           <Route
             path="equipment"
             element={
-              <AdminRoute>
+              <SectionRoute section="equipment">
                 <EquipmentLayout />
-              </AdminRoute>
+              </SectionRoute>
             }
           >
             <Route index element={<EquipmentListPage />} />
@@ -87,33 +91,33 @@ function App() {
           <Route
             path="apis"
             element={
-              <AdminRoute>
+              <SectionRoute section="apis">
                 <ApisListPage />
-              </AdminRoute>
+              </SectionRoute>
             }
           />
           <Route
             path="variables"
             element={
-              <AdminRoute>
+              <SectionRoute section="variables">
                 <VariablesManagementPage />
-              </AdminRoute>
+              </SectionRoute>
             }
           />
           <Route
             path="plans"
             element={
-              <AdminRoute>
+              <SectionRoute section="plans">
                 <DesignPage />
-              </AdminRoute>
+              </SectionRoute>
             }
           />
           <Route
             path="configurations"
             element={
-              <AdminRoute>
+              <SectionRoute section="configurations">
                 <ConfigurationsLayout />
-              </AdminRoute>
+              </SectionRoute>
             }
           >
             <Route index element={<SwitchConfigPage />} />
@@ -124,21 +128,33 @@ function App() {
           <Route
             path="reporting"
             element={
-              <AdminRoute>
+              <SectionRoute section="reporting">
                 <ReportingPage />
-              </AdminRoute>
+              </SectionRoute>
             }
           />
           <Route
             path="system"
             element={
-              <AdminRoute>
+              <SectionRoute section="system">
                 <SystemLayout />
-              </AdminRoute>
+              </SectionRoute>
             }
           >
             <Route index element={<DatabasePage />} />
             <Route path="import-export" element={<ImportExportPage />} />
+          </Route>
+          <Route
+            path="rights"
+            element={
+              <SectionRoute section="rights">
+                <RightsLayout />
+              </SectionRoute>
+            }
+          >
+            <Route index element={<RolesListPage />} />
+            <Route path="droits" element={<PermissionsPage />} />
+            <Route path="utilisateurs" element={<UsersListPage />} />
           </Route>
         </Route>
       </Routes>

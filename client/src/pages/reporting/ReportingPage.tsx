@@ -25,6 +25,7 @@ import { ApiError } from "../../api/client";
 import { usePagination } from "../../hooks/usePagination";
 import { Pagination } from "../../components/Pagination";
 import { SimpleNameFormModal } from "../../components/SimpleNameFormModal";
+import { usePermission } from "../../hooks/usePermission";
 
 interface ReportRow {
   key: string;
@@ -154,6 +155,7 @@ function latestByHardwareModel<T extends { hardwareModelId: number; importedAt: 
 }
 
 export function ReportingPage() {
+  const { canWrite } = usePermission("reporting");
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [portsByEquipmentId, setPortsByEquipmentId] = useState<Map<number, AddressingPort[]>>(new Map());
   const [apiById, setApiById] = useState<Map<number, Api>>(new Map());
@@ -202,8 +204,8 @@ export function ReportingPage() {
           { equipment: eq },
           { equipment: addressing },
           { apis },
-          { switchConfigs },
-          { mgateConfigs },
+          switchConfigs,
+          mgateConfigs,
           { configs },
           { links: eqLinks },
           { equipment: variableSettings },
@@ -211,8 +213,14 @@ export function ReportingPage() {
           listEquipment(),
           listAddressing(),
           listApis(),
-          listSwitchConfigs(),
-          listMgateConfigs(),
+          // listSwitchConfigs/listMgateConfigs are requireAdmin server-side and never cascaded to
+          // non-admin Reporting readers by design — a 403 here must not break the rest of the page.
+          listSwitchConfigs()
+            .then((r) => r.switchConfigs)
+            .catch(() => []),
+          listMgateConfigs()
+            .then((r) => r.mgateConfigs)
+            .catch(() => []),
           listReportConfigs(),
           listEquipmentLinks(),
           listEquipmentVariableSettings(),
@@ -555,20 +563,24 @@ export function ReportingPage() {
             ))}
           </select>
         </label>
-        <button type="button" className="btn btn-sm" onClick={handleSaveConfig} disabled={selectedConfigId === "" || savingConfig}>
-          {savingConfig ? "Enregistrement..." : "Enregistrer"}
-        </button>
-        <button type="button" className="btn-outline btn-sm" onClick={() => setSaveAsOpen(true)}>
-          Enregistrer sous...
-        </button>
-        <button
-          type="button"
-          className="btn-outline btn-sm"
-          onClick={handleDeleteConfig}
-          disabled={selectedConfigId === ""}
-        >
-          Supprimer
-        </button>
+        {canWrite && (
+          <>
+            <button type="button" className="btn btn-sm" onClick={handleSaveConfig} disabled={selectedConfigId === "" || savingConfig}>
+              {savingConfig ? "Enregistrement..." : "Enregistrer"}
+            </button>
+            <button type="button" className="btn-outline btn-sm" onClick={() => setSaveAsOpen(true)}>
+              Enregistrer sous...
+            </button>
+            <button
+              type="button"
+              className="btn-outline btn-sm"
+              onClick={handleDeleteConfig}
+              disabled={selectedConfigId === ""}
+            >
+              Supprimer
+            </button>
+          </>
+        )}
       </div>
       {configError && <p className="error">{configError}</p>}
 
@@ -688,7 +700,7 @@ export function ReportingPage() {
         </>
       )}
 
-      {saveAsOpen && (
+      {canWrite && saveAsOpen && (
         <SimpleNameFormModal
           title="Enregistrer la configuration sous..."
           itemId={null}

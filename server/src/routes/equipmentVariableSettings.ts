@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { z } from "zod";
 import { pool } from "../db/pool";
-import { requireAuth, requireRole } from "../middleware/auth";
+import { requireAuth } from "../middleware/auth";
+import { requirePermission } from "../permissions";
 
 const router = Router();
-router.use(requireAuth, requireRole("admin"));
+router.use(requireAuth, requirePermission("variables"));
 
 const settingSchema = z.object({
   equipmentId: z.number().int("Le matériel est requis."),

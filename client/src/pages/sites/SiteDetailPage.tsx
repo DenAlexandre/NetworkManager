@@ -13,10 +13,12 @@ import { SortableHeader } from "../../components/SortableHeader";
 import { ColumnFilterCell } from "../../components/ColumnFilterCell";
 import { Pagination } from "../../components/Pagination";
 import { ZoneFormModal } from "./ZoneFormModal";
+import { usePermission } from "../../hooks/usePermission";
 
 const COLUMNS: FilterColumn<Zone>[] = [{ key: "name", getValue: (item) => item.name }];
 
 export function SiteDetailPage() {
+  const { canWrite } = usePermission("sites");
   const { siteId } = useParams();
   const [site, setSite] = useState<Site | null>(null);
   const [zones, setZones] = useState<Zone[]>([]);
@@ -83,9 +85,11 @@ export function SiteDetailPage() {
     <div className="card">
       <div className="page-header">
         <h1>{site.name}</h1>
-        <button type="button" className="btn" onClick={openCreateModal}>
-          Ajouter une zone
-        </button>
+        {canWrite && (
+          <button type="button" className="btn" onClick={openCreateModal}>
+            Ajouter une zone
+          </button>
+        )}
       </div>
       <table className="table">
         <thead>
@@ -107,12 +111,16 @@ export function SiteDetailPage() {
                 <Link to={`/sites/${site.id}/zones/${zone.id}`}>{zone.name}</Link>
               </td>
               <td className="table-actions">
-                <button type="button" className="link" onClick={() => openEditModal(zone.id)}>
-                  Modifier
-                </button>
-                <button className="danger" onClick={() => handleDelete(zone.id)}>
-                  Supprimer
-                </button>
+                {canWrite && (
+                  <>
+                    <button type="button" className="link" onClick={() => openEditModal(zone.id)}>
+                      Modifier
+                    </button>
+                    <button className="danger" onClick={() => handleDelete(zone.id)}>
+                      Supprimer
+                    </button>
+                  </>
+                )}
               </td>
             </tr>
           ))}

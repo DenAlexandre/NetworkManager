@@ -4,6 +4,7 @@ import { z } from "zod";
 import { pool } from "../db/pool";
 import { signToken } from "../utils/jwt";
 import { requireAuth } from "../middleware/auth";
+import { getUserAccess } from "../permissions";
 
 const router = Router();
 
@@ -24,8 +25,6 @@ const loginSchema = z.object({
   username: z.string().min(1),
   password: z.string().min(1),
 });
-
-const USER_FIELDS = "id, username, first_name AS \"firstName\", last_name AS \"lastName\", email, phone, role";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -49,16 +48,22 @@ router.post("/register", async (req, res) => {
     return res.status(409).json({ error: "Un compte existe déjà avec ce pseudo ou cet email." });
   }
 
-  const passwordHash = await bcrypt.hash(password, 10);
-  const result = await pool.query(
-    `INSERT INTO users (username, first_name, last_name, email, phone, password_hash, role)
-     VALUES ($1, $2, $3, $4, $5, $6, 'user')
-     RETURNING ${USER_FIELDS}`,
-    [username, firstName, lastName, email, phone, passwordHash]
-  );
-  const user = result.rows[0];
+  const defaultRole = await pool.query("SELECT id FROM roles WHERE is_default_registration_role = true LIMIT 1");
+  const defaultRoleId = defaultRole.rows[0]?.id;
+  if (!defaultRoleId) {
+    return res.status(500).json({ error: "Aucun rôle par défaut n'est configuré." });
+  }
 
-  const token = signToken({ id: user.id, role: user.role });
+  const passwordHash = await bcrypt.hash(password, 10);
+  const inserted = await pool.query(
+    `INSERT INTO users (username, first_name, last_name, email, phone, password_hash, role_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     RETURNING id`,
+    [username, firstName, lastName, email, phone, passwordHash, defaultRoleId]
+  );
+
+  const user = await getUserAccess(inserted.rows[0].id);
+  const token = signToken({ id: user!.id });
   res.cookie("token", token, COOKIE_OPTIONS);
   res.status(201).json({ user });
 });
@@ -71,17 +76,17 @@ router.post("/login", async (req, res) => {
   const { username, password } = parsed.data;
 
   const result = await pool.query(
-    `SELECT ${USER_FIELDS}, password_hash FROM users WHERE username = $1`,
+    `SELECT id, password_hash FROM users WHERE username = $1`,
     [username]
   );
-  const user = result.rows[0];
-  if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+  const row = result.rows[0];
+  if (!row || !(await bcrypt.compare(password, row.password_hash))) {
     return res.status(401).json({ error: "Pseudo ou mot de passe invalide." });
   }
 
-  const token = signToken({ id: user.id, role: user.role });
+  const user = await getUserAccess(row.id);
+  const token = signToken({ id: user!.id });
   res.cookie("token", token, COOKIE_OPTIONS);
-  delete user.password_hash;
   res.json({ user });
 });
 
@@ -91,14 +96,7 @@ router.post("/logout", (_req, res) => {
 });
 
 router.get("/me", requireAuth, async (req, res) => {
-  const result = await pool.query(`SELECT ${USER_FIELDS} FROM users WHERE id = $1`, [
-    req.user!.id,
-  ]);
-  const user = result.rows[0];
-  if (!user) {
-    return res.status(404).json({ error: "Utilisateur introuvable." });
-  }
-  res.json({ user });
+  res.json({ user: req.user });
 });
 
 export default router;

@@ -1,24 +1,40 @@
 import { useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { usePermission } from "../hooks/usePermission";
 import { SidebarIcon } from "./SidebarIcon";
 import type { SidebarIconName } from "./SidebarIcon";
+import type { Section } from "../constants/permissions";
 
 const SIDEBAR_COLLAPSED_STORAGE_KEY = "layout.sidebarCollapsed";
 
 // Every link keeps its icon (plus a title tooltip) when the sidebar is collapsed, so navigation
 // stays reachable without expanding it back — only the text label is hidden by CSS in that state.
-const ADMIN_NAV_ITEMS: { to: string; icon: SidebarIconName; label: string }[] = [
-  { to: "/data-types", icon: "layers", label: "Type des données" },
-  { to: "/sites", icon: "pin", label: "Gestion des Sites" },
-  { to: "/apis", icon: "exchange", label: "Gestion des API" },
-  { to: "/equipment", icon: "server", label: "Gestion du matériel" },
-  { to: "/variables", icon: "tag", label: "Gestion des variables" },
-  { to: "/plans", icon: "network", label: "Gestion des plans" },
-  { to: "/reporting", icon: "chart", label: "Reporting" },
-  { to: "/configurations", icon: "sliders", label: "Gestion des configurations" },
-  { to: "/system", icon: "database", label: "Système" },
+// Every section (all 10 menus besides Accueil) is part of the configurable role/permission matrix
+// — an admin decides via Gestion des droits which roles see which of these links.
+const SECTION_NAV_ITEMS: { to: string; icon: SidebarIconName; label: string; section: Section }[] = [
+  { to: "/data-types", icon: "layers", label: "Type des données", section: "data-types" },
+  { to: "/sites", icon: "pin", label: "Gestion des Sites", section: "sites" },
+  { to: "/apis", icon: "exchange", label: "Gestion des API", section: "apis" },
+  { to: "/equipment", icon: "server", label: "Gestion du matériel", section: "equipment" },
+  { to: "/variables", icon: "tag", label: "Gestion des variables", section: "variables" },
+  { to: "/plans", icon: "network", label: "Gestion des plans", section: "plans" },
+  { to: "/reporting", icon: "chart", label: "Reporting", section: "reporting" },
+  { to: "/configurations", icon: "sliders", label: "Gestion des configurations", section: "configurations" },
+  { to: "/system", icon: "database", label: "Système", section: "system" },
+  { to: "/rights", icon: "shield", label: "Gestion des droits", section: "rights" },
 ];
+
+function SectionNavLink({ item }: { item: (typeof SECTION_NAV_ITEMS)[number] }) {
+  const { canRead } = usePermission(item.section);
+  if (!canRead) return null;
+  return (
+    <NavLink key={item.to} to={item.to} className="sidebar-link" title={item.label}>
+      <span className="sidebar-icon"><SidebarIcon name={item.icon} /></span>
+      <span className="sidebar-label">{item.label}</span>
+    </NavLink>
+  );
+}
 
 export function Layout() {
   const { user, logout } = useAuth();
@@ -77,13 +93,8 @@ export function Layout() {
             <span className="sidebar-icon"><SidebarIcon name="home" /></span>
             <span className="sidebar-label">Accueil</span>
           </NavLink>
-          {user?.role === "admin" &&
-            ADMIN_NAV_ITEMS.map((item) => (
-              <NavLink key={item.to} to={item.to} className="sidebar-link" title={item.label}>
-                <span className="sidebar-icon"><SidebarIcon name={item.icon} /></span>
-                <span className="sidebar-label">{item.label}</span>
-              </NavLink>
-            ))}
+          {user &&
+            SECTION_NAV_ITEMS.map((item) => <SectionNavLink key={item.to} item={item} />)}
         </aside>
         <main className="content">
           <Outlet />

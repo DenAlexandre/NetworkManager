@@ -1,11 +1,12 @@
 import { Router } from "express";
 import multer from "multer";
 import { pool } from "../db/pool";
-import { requireAuth, requireRole } from "../middleware/auth";
+import { requireAuth } from "../middleware/auth";
+import { requirePermission } from "../permissions";
 import { parseMoxaMgateCfg } from "../services/moxaCfgParser";
 
 const router = Router();
-router.use(requireAuth, requireRole("admin"));
+router.use(requireAuth, requirePermission("configurations"));
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 

@@ -9,10 +9,12 @@ import { listRooms, updateRoom } from "../../api/rooms";
 import type { Room } from "../../api/rooms";
 import { ApiError } from "../../api/client";
 import { useSitesTree } from "../../context/SitesTreeContext";
+import { usePermission } from "../../hooks/usePermission";
 
 const ROOM_DND_TYPE = "application/x-networkmanager-room-id";
 
 export function SitesTree() {
+  const { canWrite } = usePermission("sites");
   const params = useParams();
   const activeSiteId = Number(params.siteId ?? params.id) || null;
   const activeZoneId = Number(params.zoneId) || null;
@@ -86,12 +88,14 @@ export function SitesTree() {
   }
 
   function handleZoneDragOver(e: DragEvent) {
+    if (!canWrite) return;
     if (!e.dataTransfer.types.includes(ROOM_DND_TYPE)) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
   }
 
   async function handleZoneDrop(e: DragEvent, zone: Zone) {
+    if (!canWrite) return;
     const raw = e.dataTransfer.getData(ROOM_DND_TYPE);
     setDragOverZoneId(null);
     setDraggingRoomId(null);
@@ -169,9 +173,9 @@ export function SitesTree() {
                               <li key={room.id}>
                                 <div
                                   className={`tree-node tree-leaf${room.id === draggingRoomId ? " dragging" : ""}`}
-                                  draggable
-                                  onDragStart={(e) => handleRoomDragStart(e, room)}
-                                  onDragEnd={handleRoomDragEnd}
+                                  draggable={canWrite}
+                                  onDragStart={canWrite ? (e) => handleRoomDragStart(e, room) : undefined}
+                                  onDragEnd={canWrite ? handleRoomDragEnd : undefined}
                                 >
                                   <span className="tree-toggle-spacer" />
                                   <Link

@@ -9,6 +9,7 @@ import { SortableHeader } from "../../components/SortableHeader";
 import { ColumnFilterCell } from "../../components/ColumnFilterCell";
 import { Pagination } from "../../components/Pagination";
 import { ApiFormModal } from "./ApiFormModal";
+import { usePermission } from "../../hooks/usePermission";
 
 function formatDate(value: string | null) {
   if (!value) return "—";
@@ -38,6 +39,7 @@ const COLUMNS: FilterColumn<Api>[] = [
 ];
 
 export function ApisListPage() {
+  const { canWrite } = usePermission("apis");
   const [items, setItems] = useState<Api[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -94,9 +96,11 @@ export function ApisListPage() {
     <div className="card">
       <div className="page-header">
         <h1>Gestion des API</h1>
-        <button type="button" className="btn" onClick={openCreateModal}>
-          Ajouter
-        </button>
+        {canWrite && (
+          <button type="button" className="btn" onClick={openCreateModal}>
+            Ajouter
+          </button>
+        )}
       </div>
       {error && <p className="error">{error}</p>}
       <table className="table">
@@ -143,12 +147,16 @@ export function ApisListPage() {
                 )}
               </td>
               <td className="table-actions">
-                <button type="button" className="link" onClick={() => openEditModal(item.id)}>
-                  Modifier
-                </button>
-                <button className="danger" onClick={() => handleDelete(item.id)}>
-                  Supprimer
-                </button>
+                {canWrite && (
+                  <>
+                    <button type="button" className="link" onClick={() => openEditModal(item.id)}>
+                      Modifier
+                    </button>
+                    <button className="danger" onClick={() => handleDelete(item.id)}>
+                      Supprimer
+                    </button>
+                  </>
+                )}
               </td>
             </tr>
           ))}

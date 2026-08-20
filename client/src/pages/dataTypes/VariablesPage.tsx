@@ -6,8 +6,10 @@ import { listHardwareModels } from "../../api/hardwareModels";
 import type { HardwareModel } from "../../api/hardwareModels";
 import { ApiError } from "../../api/client";
 import { VariableFormModal } from "./VariableFormModal";
+import { usePermission } from "../../hooks/usePermission";
 
 export function VariablesPage() {
+  const { canWrite } = usePermission("data-types");
   const [hardwareModelList, setHardwareModelList] = useState<HardwareModel[]>([]);
   const [deviceTypeFilter, setDeviceTypeFilter] = useState<number | "">("");
   const [selectedHardwareModelId, setSelectedHardwareModelId] = useState<number | "">("");
@@ -150,9 +152,11 @@ export function VariablesPage() {
         <div className="ports-designer-list">
           <div className="page-header">
             <h3>Variables du modèle</h3>
-            <button type="button" className="btn" onClick={openCreateModal}>
-              Ajouter
-            </button>
+            {canWrite && (
+              <button type="button" className="btn" onClick={openCreateModal}>
+                Ajouter
+              </button>
+            )}
           </div>
           <table className="table">
             <thead>
@@ -170,12 +174,16 @@ export function VariablesPage() {
                   <td>{v.unit || "—"}</td>
                   <td>{v.register || "—"}</td>
                   <td className="table-actions">
-                    <button type="button" className="link" onClick={() => openEditModal(v.id)}>
-                      Modifier
-                    </button>
-                    <button className="danger" onClick={() => handleDeleteVariable(v.id)}>
-                      Supprimer
-                    </button>
+                    {canWrite && (
+                      <>
+                        <button type="button" className="link" onClick={() => openEditModal(v.id)}>
+                          Modifier
+                        </button>
+                        <button className="danger" onClick={() => handleDeleteVariable(v.id)}>
+                          Supprimer
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}

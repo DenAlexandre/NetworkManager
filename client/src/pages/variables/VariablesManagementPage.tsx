@@ -10,6 +10,7 @@ import { SortableHeader } from "../../components/SortableHeader";
 import { ColumnFilterCell } from "../../components/ColumnFilterCell";
 import { Pagination } from "../../components/Pagination";
 import { VariableSettingsConfigModal } from "./VariableSettingsConfigModal";
+import { usePermission } from "../../hooks/usePermission";
 
 const NO_API_LABEL = "Sans API";
 
@@ -22,6 +23,7 @@ function isVariableConfigured(v: VariableSetting) {
 }
 
 export function VariablesManagementPage() {
+  const { canWrite } = usePermission("variables");
   const [items, setItems] = useState<EquipmentVariableSettings[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -166,9 +168,11 @@ export function VariablesManagementPage() {
                 {item.variables.filter(isVariableConfigured).length} / {item.variables.length}
               </td>
               <td className="table-actions">
-                <button type="button" className="link" onClick={() => setSelectedId(item.equipmentId)}>
-                  Configurer
-                </button>
+                {canWrite && (
+                  <button type="button" className="link" onClick={() => setSelectedId(item.equipmentId)}>
+                    Configurer
+                  </button>
+                )}
               </td>
             </tr>
           ))}

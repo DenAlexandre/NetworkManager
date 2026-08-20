@@ -10,6 +10,7 @@ import { SortableHeader } from "../../components/SortableHeader";
 import { ColumnFilterCell } from "../../components/ColumnFilterCell";
 import { Pagination } from "../../components/Pagination";
 import { AddressingConfigModal } from "./AddressingConfigModal";
+import { usePermission } from "../../hooks/usePermission";
 
 const NO_API_LABEL = "Sans API";
 
@@ -22,6 +23,7 @@ function isPortConfigured(port: AddressingPort) {
 }
 
 export function AddressingPage() {
+  const { canWrite } = usePermission("equipment");
   const [items, setItems] = useState<AddressingEquipment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -162,9 +164,11 @@ export function AddressingPage() {
                 {item.ports.filter(isPortConfigured).length} / {item.ports.length}
               </td>
               <td className="table-actions">
-                <button type="button" className="link" onClick={() => setSelectedId(item.equipmentId)}>
-                  Adresser
-                </button>
+                {canWrite && (
+                  <button type="button" className="link" onClick={() => setSelectedId(item.equipmentId)}>
+                    Adresser
+                  </button>
+                )}
               </td>
             </tr>
           ))}

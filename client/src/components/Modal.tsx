@@ -10,10 +10,9 @@ interface ModalProps {
 
 export function Modal({ title, onClose, children, wide, xwide }: ModalProps) {
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div
         className={`modal-dialog${xwide ? " modal-dialog-xwide" : wide ? " modal-dialog-wide" : ""}`}
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
           <h2>{title}</h2>

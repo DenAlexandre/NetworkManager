@@ -57,7 +57,7 @@ export function HomePage() {
   const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
-    if (user?.role !== "admin") return;
+    if (!user?.role.isAdmin) return;
     Promise.all([
       listDeviceTypes(),
       listLinkTypes(),

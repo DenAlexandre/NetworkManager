@@ -10,7 +10,8 @@ export type SidebarIconName =
   | "network"
   | "chart"
   | "database"
-  | "tag";
+  | "tag"
+  | "shield";
 
 // Simple flat/line-style icons (single color, drawn from basic primitives), one per sidebar
 // section — self-contained so the sidebar never depends on an external icon set being reachable.
@@ -87,6 +88,12 @@ const ICON_CONTENT: Record<SidebarIconName, ReactNode> = {
     <>
       <path d="M11 4h6a1 1 0 0 1 1 1v6a1 1 0 0 1-.3.7l-8 8a1 1 0 0 1-1.4 0l-6-6a1 1 0 0 1 0-1.4l8-8A1 1 0 0 1 11 4Z" />
       <circle cx="15" cy="8" r="1.5" />
+    </>
+  ),
+  shield: (
+    <>
+      <path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3Z" />
+      <path d="M9 12l2 2 4-4" />
     </>
   ),
 };

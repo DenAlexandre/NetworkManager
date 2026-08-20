@@ -32,6 +32,49 @@ ALTER TABLE users ALTER COLUMN phone SET NOT NULL;
 
 CREATE UNIQUE INDEX IF NOT EXISTS ux_users_username ON users(username);
 
+-- Gestion des droits : roles nommes avec un niveau d'acces (aucun/lecture/lecture-ecriture) par
+-- section, remplacant l'ancien role binaire admin/user. "Admin" et "Utilisateur" sont les deux
+-- roles systeme seedes ci-dessous (proteges de la suppression/renommage), les autres sont crees
+-- librement par un admin depuis Gestion des droits.
+CREATE TABLE IF NOT EXISTS roles (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(50) UNIQUE NOT NULL,
+  is_system BOOLEAN NOT NULL DEFAULT false,
+  is_admin BOOLEAN NOT NULL DEFAULT false,
+  is_default_registration_role BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_roles_default_registration_role
+  ON roles (is_default_registration_role) WHERE is_default_registration_role;
+
+-- Absence de ligne pour une section = acces "aucun" (deny par defaut).
+CREATE TABLE IF NOT EXISTS role_permissions (
+  id SERIAL PRIMARY KEY,
+  role_id INTEGER NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+  section VARCHAR(20) NOT NULL,
+  access_level VARCHAR(10) NOT NULL CHECK (access_level IN ('read', 'write')),
+  UNIQUE (role_id, section)
+);
+
+-- Keyed on the flag, not the name, since roles can be renamed from Gestion des droits (Rôle tab) —
+-- matching by name would re-insert a duplicate system role on the next migrate run after a rename.
+INSERT INTO roles (name, is_system, is_admin, is_default_registration_role)
+SELECT 'Admin', true, true, false
+WHERE NOT EXISTS (SELECT 1 FROM roles WHERE is_admin = true);
+INSERT INTO roles (name, is_system, is_admin, is_default_registration_role)
+SELECT 'Utilisateur', true, false, true
+WHERE NOT EXISTS (SELECT 1 FROM roles WHERE is_default_registration_role = true);
+
+-- Mise a niveau des bases existantes : remplace l'ancienne colonne role (admin/user) par un
+-- rattachement a un role de Gestion des droits.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS role_id INTEGER REFERENCES roles(id);
+UPDATE users SET role_id = (SELECT id FROM roles WHERE is_admin = true)
+  WHERE role_id IS NULL AND role = 'admin';
+UPDATE users SET role_id = (SELECT id FROM roles WHERE is_default_registration_role = true)
+  WHERE role_id IS NULL AND role = 'user';
+ALTER TABLE users ALTER COLUMN role_id SET NOT NULL;
+ALTER TABLE users DROP COLUMN IF EXISTS role;
+
 CREATE TABLE IF NOT EXISTS device_types (
   id SERIAL PRIMARY KEY,
   name VARCHAR(100) UNIQUE NOT NULL

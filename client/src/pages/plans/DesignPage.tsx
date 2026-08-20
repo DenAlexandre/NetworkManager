@@ -17,6 +17,7 @@ import { listAddressing } from "../../api/equipmentPortSettings";
 import type { AddressingEquipment } from "../../api/equipmentPortSettings";
 import { ApiError } from "../../api/client";
 import { SimpleNameFormModal } from "../../components/SimpleNameFormModal";
+import { usePermission } from "../../hooks/usePermission";
 
 interface Card {
   equipmentId: number;
@@ -217,6 +218,7 @@ async function fetchImageAsDataUrl(url: string): Promise<string> {
 
 export function DesignPage() {
   const navigate = useNavigate();
+  const { canWrite } = usePermission("plans");
   const [equipmentList, setEquipmentList] = useState<Equipment[]>([]);
   const [allPorts, setAllPorts] = useState<Port[]>([]);
   const [configurationTypes, setConfigurationTypes] = useState<ConfigurationType[]>([]);
@@ -754,6 +756,26 @@ export function DesignPage() {
         moveUndoStackRef.current.push(pendingMoveSnapshotRef.current);
         if (moveUndoStackRef.current.length > MAX_MOVE_UNDO_HISTORY) moveUndoStackRef.current.shift();
       }
+      // A hand-drawn/legacy path is anchored to its link's endpoints as they were when it was
+      // drawn; once either card it touches moves, that anchoring is stale and the last leg can
+      // end up diagonal. Dropping it here makes the link fall back to the auto elbow router
+      // (always horizontal/vertical) instead of staying visually broken after every move.
+      if (hasMovedDuringDragRef.current && groupDrag) {
+        const movedEquipmentIds = new Set(Object.keys(groupDrag.cards).map(Number));
+        const affectedLinkIds = links
+          .filter((l) => movedEquipmentIds.has(l.parentEquipmentId) || movedEquipmentIds.has(l.childEquipmentId))
+          .map((l) => l.id);
+        if (affectedLinkIds.length > 0) {
+          const dropAffected = <T,>(prev: Record<number, T>) => {
+            const next = { ...prev };
+            for (const id of affectedLinkIds) delete next[id];
+            return next;
+          };
+          setLinkPaths(dropAffected);
+          setBendOverrides(dropAffected);
+          setBendYOverrides(dropAffected);
+        }
+      }
       pendingMoveSnapshotRef.current = null;
       hasMovedDuringDragRef.current = false;
       setGroupDrag(null);
@@ -764,7 +786,7 @@ export function DesignPage() {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
     };
-  }, [groupDrag, zoom]);
+  }, [groupDrag, zoom, links]);
 
   useEffect(() => {
     if (!resizing) return;
@@ -820,6 +842,7 @@ export function DesignPage() {
   function handleResizeMouseDown(e: ReactMouseEvent, card: Card) {
     e.stopPropagation();
     e.preventDefault();
+    if (!canWrite) return;
     setResizing({ equipmentId: card.equipmentId, startX: e.clientX, startWidth: card.width ?? DEFAULT_CARD_WIDTH });
   }
 
@@ -867,6 +890,9 @@ export function DesignPage() {
       setSelectedTextIds(textIds);
       setSelectedLinkIds(new Set());
     }
+    // Selecting a card/text block (above) is a pure view affordance and stays available in
+    // read-only mode; only the drag-to-move that follows is a layout mutation.
+    if (!canWrite) return;
     const startX = (e.clientX - canvasRect.left) / zoom;
     const startY = (e.clientY - canvasRect.top) / zoom;
     const { cardsSnapshot, textsSnapshot } = snapshotSelection(cardIds, textIds);
@@ -901,10 +927,12 @@ export function DesignPage() {
   function handleTextResizeMouseDown(e: ReactMouseEvent, block: TextBlock) {
     e.stopPropagation();
     e.preventDefault();
+    if (!canWrite) return;
     setResizingText({ id: block.id, startX: e.clientX, startFontSize: block.fontSize });
   }
 
   function handleAddTextBlock() {
+    if (!canWrite) return;
     setTextBlocks((prev) => [
       ...prev,
       {
@@ -918,10 +946,12 @@ export function DesignPage() {
   }
 
   function handleRemoveTextBlock(id: number) {
+    if (!canWrite) return;
     setTextBlocks((prev) => prev.filter((t) => t.id !== id));
   }
 
   function handleTextChange(id: number, text: string) {
+    if (!canWrite) return;
     setTextBlocks((prev) => prev.map((t) => (t.id === id ? { ...t, text } : t)));
   }
 
@@ -934,15 +964,73 @@ export function DesignPage() {
       const link = links.find((l) => l.id === waypointDrag.linkId);
       if (!link) return;
       const from = endpoints[endpointKey(link.parentEquipmentId, link.parentPortId)];
-      if (!from) return;
-      const x = clamp(e.clientX - canvasRect.left, 0, canvasEl.scrollWidth);
-      const y = clamp(e.clientY - canvasRect.top, 0, canvasEl.scrollHeight);
-      const dx = (x - from.x) / zoom;
-      const dy = (y - from.y) / zoom;
+      const to = endpoints[endpointKey(link.childEquipmentId, link.childPortId)];
+      if (!from || !to) return;
+      const rawX = clamp(e.clientX - canvasRect.left, 0, canvasEl.scrollWidth);
+      const rawY = clamp(e.clientY - canvasRect.top, 0, canvasEl.scrollHeight);
+
+      // Keeps every segment horizontal/vertical while dragging a corner: each corner shares
+      // exactly one axis with its previous point and one (the other) axis with its next point
+      // (that's what makes it a right angle). If that neighbor is one of the link's fixed ports,
+      // the shared axis can't move at all; if it's another draggable corner, the shared axis is
+      // free to move but the neighbor's matching coordinate is dragged along with it so its own
+      // segment stays square too.
       setLinkPaths((prev) => {
-        const path = [...(prev[waypointDrag.linkId] ?? [])];
-        path[waypointDrag.index] = { dx, dy };
-        return { ...prev, [waypointDrag.linkId]: path };
+        const stored = prev[waypointDrag.linkId] ?? [];
+        const index = waypointDrag.index;
+        if (index < 0 || index >= stored.length) return prev;
+        const points = stored.map((p) => ({ x: from.x + p.dx * zoom, y: from.y + p.dy * zoom }));
+        const prevPoint = index === 0 ? from : points[index - 1];
+        const nextPoint = index === points.length - 1 ? to : points[index + 1];
+        const prevIsFixed = index === 0;
+        const nextIsFixed = index === points.length - 1;
+        const current = points[index];
+        const next = [...stored];
+
+        if (prevIsFixed && nextIsFixed) {
+          // A single corner between the link's two (fixed) ports only has two possible
+          // right-angle shapes — snap to whichever one the cursor is closer to.
+          const optionA = { x: nextPoint.x, y: prevPoint.y };
+          const optionB = { x: prevPoint.x, y: nextPoint.y };
+          const distA = Math.hypot(rawX - optionA.x, rawY - optionA.y);
+          const distB = Math.hypot(rawX - optionB.x, rawY - optionB.y);
+          const chosen = distA <= distB ? optionA : optionB;
+          next[index] = { dx: (chosen.x - from.x) / zoom, dy: (chosen.y - from.y) / zoom };
+          return { ...prev, [waypointDrag.linkId]: next };
+        }
+
+        const axisSharedWith = (p: { x: number; y: number }) =>
+          Math.abs(current.y - p.y) <= Math.abs(current.x - p.x) ? ("y" as const) : ("x" as const);
+        const prevAxis = axisSharedWith(prevPoint);
+        const nextAxis = axisSharedWith(nextPoint);
+
+        let cornerX = rawX;
+        let cornerY = rawY;
+        if (prevIsFixed) {
+          if (prevAxis === "y") cornerY = prevPoint.y;
+          else cornerX = prevPoint.x;
+        }
+        if (nextIsFixed) {
+          if (nextAxis === "y") cornerY = nextPoint.y;
+          else cornerX = nextPoint.x;
+        }
+
+        next[index] = { dx: (cornerX - from.x) / zoom, dy: (cornerY - from.y) / zoom };
+        if (!prevIsFixed) {
+          const p = points[index - 1];
+          next[index - 1] =
+            prevAxis === "y"
+              ? { dx: (p.x - from.x) / zoom, dy: (cornerY - from.y) / zoom }
+              : { dx: (cornerX - from.x) / zoom, dy: (p.y - from.y) / zoom };
+        }
+        if (!nextIsFixed) {
+          const p = points[index + 1];
+          next[index + 1] =
+            nextAxis === "y"
+              ? { dx: (p.x - from.x) / zoom, dy: (cornerY - from.y) / zoom }
+              : { dx: (cornerX - from.x) / zoom, dy: (p.y - from.y) / zoom };
+        }
+        return { ...prev, [waypointDrag.linkId]: next };
       });
     }
     function onUp() {
@@ -967,6 +1055,7 @@ export function DesignPage() {
     from: { x: number; y: number }
   ) {
     e.stopPropagation();
+    if (!canWrite) return;
     if (!(linkId in linkPaths)) {
       setLinkPaths((prev) => ({
         ...prev,
@@ -992,6 +1081,7 @@ export function DesignPage() {
   }, [availableEquipment, addEquipmentId]);
 
   function handleAddCard() {
+    if (!canWrite) return;
     if (addEquipmentId === "") return;
     const newEquipmentId = Number(addEquipmentId);
     setCards((prev) => {
@@ -1005,6 +1095,7 @@ export function DesignPage() {
   }
 
   function handleRemoveCard(equipmentId: number) {
+    if (!canWrite) return;
     setCards((prev) => prev.filter((c) => c.equipmentId !== equipmentId));
     if (linkDraw?.fromEquipmentId === equipmentId) {
       setLinkDraw(null);
@@ -1044,7 +1135,7 @@ export function DesignPage() {
   }
 
   function handleContextMenuDuplicate() {
-    if (!cardContextMenu) return;
+    if (!cardContextMenu || !canWrite) return;
     const equipment = equipmentById.get(cardContextMenu.equipmentId);
     setCardContextMenu(null);
     if (equipment) setDuplicateSource(equipment);
@@ -1070,7 +1161,7 @@ export function DesignPage() {
   }
 
   async function handleSaveDuplicate(name: string) {
-    if (!duplicateSource) return;
+    if (!duplicateSource || !canWrite) return;
     const { equipment } = await createEquipment({
       roomId: duplicateSource.roomId,
       deviceTypeId: duplicateSource.deviceTypeId,
@@ -1105,6 +1196,7 @@ export function DesignPage() {
   }
 
   function handleToggleLinkMode() {
+    if (!canWrite) return;
     setLinkMode((prev) => !prev);
     setLinkDraw(null);
     setLinkPreview(null);
@@ -1197,7 +1289,7 @@ export function DesignPage() {
 
   async function handlePortMouseDown(e: ReactMouseEvent, equipmentId: number, portId: number) {
     e.stopPropagation();
-    if (!linkMode) return;
+    if (!linkMode || !canWrite) return;
     const portPosition = endpoints[endpointKey(equipmentId, portId)];
 
     if (!linkDraw) {
@@ -1255,6 +1347,7 @@ export function DesignPage() {
   }
 
   async function handleDeleteLink(linkId: number) {
+    if (!canWrite) return;
     if (!window.confirm("Supprimer cette liaison ?")) return;
     try {
       await deleteEquipmentLink(linkId);
@@ -1354,7 +1447,7 @@ export function DesignPage() {
   }
 
   async function handleSaveSchema() {
-    if (selectedApiId === "") return;
+    if (!canWrite || selectedApiId === "") return;
     setSchemaSaving(true);
     setError(null);
     try {
@@ -1409,10 +1502,20 @@ export function DesignPage() {
             .filter(([key]) => !ownKeys.has(key))
             .map(([, rect]) => rect);
           const auto = findAutoRoute(from, to, obstacles, zoom);
-          points = [
-            { x: auto.midX, y: from.y },
-            { x: auto.midX, y: auto.midY },
-          ];
+          // Only horizontal/vertical segments: when the obstacle-avoiding elbow needs a Y offset
+          // (auto.midY !== to.y), a third corner is required so the last leg lines up with "to"
+          // instead of cutting across it diagonally.
+          points =
+            auto.midY === to.y
+              ? [
+                  { x: auto.midX, y: from.y },
+                  { x: auto.midX, y: auto.midY },
+                ]
+              : [
+                  { x: auto.midX, y: from.y },
+                  { x: auto.midX, y: auto.midY },
+                  { x: to.x, y: auto.midY },
+                ];
         }
 
         return {
@@ -1675,39 +1778,18 @@ export function DesignPage() {
   }
 
   function renderInfoNode(node: InfoTreeNode) {
-    const { equipment, via, connections, children } = node;
+    const { equipment, children } = node;
     const collapsed = collapsedInfoEquipmentIds.has(equipment.id);
     const addr = addressingByEquipmentId.get(equipment.id);
 
-    // One entry per liaison touching this equipment (its own incoming link plus every other link
-    // it's part of) — reduced to just the two port labels and, if configured, the address of this
-    // equipment's own port. Ports with an address but no liaison have no "destination" side to
-    // pair with, so they're no longer shown here at all.
-    const linkedPorts = [
-      ...(via ? [{ ownPortLabel: via.childPortLabel, ownPortId: via.childPortId, otherPortLabel: via.parentPortLabel, linkId: via.linkId, external: false }] : []),
-      ...connections.map((c) => ({
-        ownPortLabel: c.ownPortLabel,
-        ownPortId: c.ownPortId,
-        otherPortLabel: c.otherPortLabel,
-        linkId: c.linkId,
-        external: c.otherApiName !== undefined,
-      })),
-    ].map((lp) => {
-      const addressInfo = addr?.ports.find((p) => p.hardwareModelPortId === lp.ownPortId);
-      const addressText = addressInfo?.ipAddress
-        ? `IP ${addressInfo.ipAddress}`
-        : addressInfo?.modbusAddress
-          ? `Modbus ${addressInfo.modbusAddress}`
-          : null;
-      return { ...lp, addressText };
-    });
-
-    function selectLink(e: ReactMouseEvent, linkId: number) {
-      e.stopPropagation();
-      setSelectedCardIds(new Set());
-      setSelectedTextIds(new Set());
-      setSelectedLinkIds(new Set([linkId]));
-    }
+    // Just this equipment's own configured addresses (IP and/or Modbus) — no liaison/port-to-port
+    // display here, that's what selecting the link itself on the canvas is for.
+    const configuredAddresses = (addr?.ports ?? [])
+      .filter((p) => p.ipAddress || p.modbusAddress)
+      .map((p) => ({
+        portLabel: p.label,
+        addressText: p.ipAddress ? `IP ${p.ipAddress}` : `Modbus ${p.modbusAddress}`,
+      }));
 
     return (
       <li key={equipment.id} className="design-info-tree-node">
@@ -1724,16 +1806,11 @@ export function DesignPage() {
             {equipment.name}
           </button>
         </div>
-        {linkedPorts.length > 0 && (
+        {configuredAddresses.length > 0 && (
           <div className="design-info-tree-links">
-            {linkedPorts.map((lp) => (
-              <span
-                key={lp.linkId}
-                className={`design-info-tree-link${lp.external ? " design-info-tree-link-external" : ""}${selectedLinkIds.has(lp.linkId) ? " active" : ""}`}
-                onClick={(e) => selectLink(e, lp.linkId)}
-              >
-                {lp.ownPortLabel} → {lp.otherPortLabel}
-                {lp.addressText && <span className="design-info-tree-link-addr"> · {lp.addressText}</span>}
+            {configuredAddresses.map((a) => (
+              <span key={a.portLabel} className="design-info-tree-link design-info-tree-address">
+                {a.portLabel} · {a.addressText}
               </span>
             ))}
           </div>
@@ -1751,6 +1828,19 @@ export function DesignPage() {
     <div className="card">
       <div className="page-header">
         <h2>Design</h2>
+        {!canWrite && (
+          <span
+            className="muted"
+            style={{
+              border: "1px solid var(--border)",
+              borderRadius: 999,
+              padding: "2px 10px",
+              fontSize: 13,
+            }}
+          >
+            Lecture seule
+          </span>
+        )}
       </div>
       {error && <p className="error">{error}</p>}
 
@@ -1767,9 +1857,11 @@ export function DesignPage() {
               ))}
             </select>
           </label>
-          <button type="button" className="btn btn-sm" onClick={handleSaveSchema} disabled={selectedApiId === "" || schemaSaving}>
-            {schemaSaving ? "Enregistrement..." : "Enregistrer"}
-          </button>
+          {canWrite && (
+            <button type="button" className="btn btn-sm" onClick={handleSaveSchema} disabled={selectedApiId === "" || schemaSaving}>
+              {schemaSaving ? "Enregistrement..." : "Enregistrer"}
+            </button>
+          )}
           <button
             type="button"
             className="btn-outline btn-sm"
@@ -1789,8 +1881,9 @@ export function DesignPage() {
           </button>
         </div>
 
-        <span className="design-toolbar-sep" />
+        {canWrite && <span className="design-toolbar-sep" />}
 
+        {canWrite && (
         <div className="design-toolbar-group">
           <select
             value={searchApiId}
@@ -1861,9 +1954,11 @@ export function DesignPage() {
             + Ajouter
           </button>
         </div>
+        )}
 
-        <span className="design-toolbar-sep" />
+        {canWrite && <span className="design-toolbar-sep" />}
 
+        {canWrite && (
         <div className="design-toolbar-group">
           <button
             type="button"
@@ -1873,14 +1968,17 @@ export function DesignPage() {
             {linkMode ? "Mode liaison actif" : "Mode liaison"}
           </button>
         </div>
+        )}
 
-        <span className="design-toolbar-sep" />
+        {canWrite && <span className="design-toolbar-sep" />}
 
+        {canWrite && (
         <div className="design-toolbar-group">
           <button type="button" className="btn-outline btn-sm" onClick={handleAddTextBlock}>
             + Texte
           </button>
         </div>
+        )}
 
         <span className="design-toolbar-sep" />
 
@@ -1951,14 +2049,16 @@ export function DesignPage() {
               >
                 <div className="design-card-header" onMouseDown={(e) => handleHeaderMouseDown(e, card)}>
                   <span>{equipment.name}</span>
-                  <button
-                    type="button"
-                    className="design-card-remove"
-                    onClick={() => handleRemoveCard(card.equipmentId)}
-                    aria-label="Retirer"
-                  >
-                    ×
-                  </button>
+                  {canWrite && (
+                    <button
+                      type="button"
+                      className="design-card-remove"
+                      onClick={() => handleRemoveCard(card.equipmentId)}
+                      aria-label="Retirer"
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
                 {equipment.hardwareModelImagePath ? (
                   <div className="design-card-stage">
@@ -2000,11 +2100,13 @@ export function DesignPage() {
                 ) : (
                   <p className="muted design-card-noimage">Pas d'image pour ce modèle.</p>
                 )}
-                <div
-                  className="design-card-resize"
-                  onMouseDown={(e) => handleResizeMouseDown(e, card)}
-                  title="Glisser pour redimensionner"
-                />
+                {canWrite && (
+                  <div
+                    className="design-card-resize"
+                    onMouseDown={(e) => handleResizeMouseDown(e, card)}
+                    title="Glisser pour redimensionner"
+                  />
+                )}
               </div>
             );
           })}
@@ -2018,27 +2120,32 @@ export function DesignPage() {
                 style={{ left: block.x, top: block.y, width: size.width, height: size.height }}
               >
                 <div className="design-text-block-header" onMouseDown={(e) => handleTextHeaderMouseDown(e, block)}>
-                  <button
-                    type="button"
-                    className="design-card-remove"
-                    onClick={() => handleRemoveTextBlock(block.id)}
-                    aria-label="Retirer"
-                  >
-                    ×
-                  </button>
+                  {canWrite && (
+                    <button
+                      type="button"
+                      className="design-card-remove"
+                      onClick={() => handleRemoveTextBlock(block.id)}
+                      aria-label="Retirer"
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
                 <textarea
                   className="design-text-block-content"
                   style={{ fontSize: block.fontSize }}
                   value={block.text}
+                  readOnly={!canWrite}
                   onChange={(e) => handleTextChange(block.id, e.target.value)}
                   onMouseDown={(e) => e.stopPropagation()}
                 />
-                <div
-                  className="design-card-resize"
-                  onMouseDown={(e) => handleTextResizeMouseDown(e, block)}
-                  title="Glisser pour agrandir/rétrécir le texte"
-                />
+                {canWrite && (
+                  <div
+                    className="design-card-resize"
+                    onMouseDown={(e) => handleTextResizeMouseDown(e, block)}
+                    title="Glisser pour agrandir/rétrécir le texte"
+                  />
+                )}
               </div>
             );
           })}
@@ -2070,7 +2177,7 @@ export function DesignPage() {
             const path = [from, ...points, to];
             const tooltip = `${link.parentEquipmentName} (${link.parentPortLabel}) ↔ ${link.childEquipmentName} (${link.childPortLabel})`;
             const selected = selectedLinkIds.has(link.id);
-            const showHandles = selected && selectedLinkIds.size === 1;
+            const showHandles = canWrite && selected && selectedLinkIds.size === 1;
             function selectLink(e: ReactMouseEvent) {
               e.stopPropagation();
               if (e.shiftKey) {
@@ -2237,12 +2344,16 @@ export function DesignPage() {
           <button type="button" onClick={handleContextMenuAddress}>
             Adresser le matériel
           </button>
-          <button type="button" onClick={handleContextMenuDuplicate}>
-            Dupliquer le matériel
-          </button>
-          <button type="button" className="danger" onClick={handleContextMenuRemove}>
-            Supprimer du schéma
-          </button>
+          {canWrite && (
+            <button type="button" onClick={handleContextMenuDuplicate}>
+              Dupliquer le matériel
+            </button>
+          )}
+          {canWrite && (
+            <button type="button" className="danger" onClick={handleContextMenuRemove}>
+              Supprimer du schéma
+            </button>
+          )}
         </div>
       )}
 
@@ -2255,9 +2366,11 @@ export function DesignPage() {
           <button type="button" onClick={handleLinkContextMenuEdit}>
             Éditer la liaison
           </button>
-          <button type="button" className="danger" onClick={handleLinkContextMenuDelete}>
-            Supprimer la liaison
-          </button>
+          {canWrite && (
+            <button type="button" className="danger" onClick={handleLinkContextMenuDelete}>
+              Supprimer la liaison
+            </button>
+          )}
         </div>
       )}
 

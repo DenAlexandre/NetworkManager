@@ -8,6 +8,7 @@ import type { HardwareModel } from "../../api/hardwareModels";
 import { listLinkTypes } from "../../api/linkTypes";
 import type { LinkType } from "../../api/linkTypes";
 import { ApiError } from "../../api/client";
+import { usePermission } from "../../hooks/usePermission";
 
 interface DraftRegion {
   x: number;
@@ -25,6 +26,7 @@ const MAX_ZOOM = 4;
 const ZOOM_STEP = 0.25;
 
 export function PortsDesignerPage() {
+  const { canWrite } = usePermission("data-types");
   const [hardwareModelList, setHardwareModelList] = useState<HardwareModel[]>([]);
   const [deviceTypeFilter, setDeviceTypeFilter] = useState<number | "">("");
   const [selectedHardwareModelId, setSelectedHardwareModelId] = useState<number | "">("");
@@ -241,7 +243,7 @@ export function PortsDesignerPage() {
   }
 
   function handleStageMouseDown(e: ReactMouseEvent) {
-    if (pendingRegion) return;
+    if (!canWrite || pendingRegion) return;
     const pos = percentPositionFromClient(e.clientX, e.clientY);
     setDragStart(pos);
     setDraft({ x: pos.x, y: pos.y, width: 0, height: 0 });
@@ -481,32 +483,34 @@ export function PortsDesignerPage() {
 
           <div className="ports-designer-list">
             <h3>Ports du modèle</h3>
-            <form className="inline-form" onSubmit={handleGeneratePorts}>
-              <label>
-                Type de liaison
-                <select value={bulkLinkTypeId} onChange={(e) => setBulkLinkTypeId(Number(e.target.value))} required>
-                  {linkTypes.map((lt) => (
-                    <option key={lt.id} value={lt.id}>
-                      {lt.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Quantité
-                <input
-                  type="number"
-                  min={1}
-                  max={200}
-                  value={bulkQuantity}
-                  onChange={(e) => setBulkQuantity(Number(e.target.value))}
-                  required
-                />
-              </label>
-              <button type="submit" disabled={bulkSubmitting}>
-                Générer
-              </button>
-            </form>
+            {canWrite && (
+              <form className="inline-form" onSubmit={handleGeneratePorts}>
+                <label>
+                  Type de liaison
+                  <select value={bulkLinkTypeId} onChange={(e) => setBulkLinkTypeId(Number(e.target.value))} required>
+                    {linkTypes.map((lt) => (
+                      <option key={lt.id} value={lt.id}>
+                        {lt.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Quantité
+                  <input
+                    type="number"
+                    min={1}
+                    max={200}
+                    value={bulkQuantity}
+                    onChange={(e) => setBulkQuantity(Number(e.target.value))}
+                    required
+                  />
+                </label>
+                <button type="submit" disabled={bulkSubmitting}>
+                  Générer
+                </button>
+              </form>
+            )}
             {bulkError && <p className="error">{bulkError}</p>}
             {editLabelError && <p className="error">{editLabelError}</p>}
             <table className="table">
@@ -546,33 +550,36 @@ export function PortsDesignerPage() {
                     </td>
                     <td>
                       {p.regionX !== null ? (
-                        <button type="button" className="link danger" onClick={() => handleRemoveRegion(p.id)}>
-                          Supprimer la zone
-                        </button>
+                        canWrite && (
+                          <button type="button" className="link danger" onClick={() => handleRemoveRegion(p.id)}>
+                            Supprimer la zone
+                          </button>
+                        )
                       ) : (
                         <span className="muted">Non placé</span>
                       )}
                     </td>
                     <td className="table-actions">
-                      {editingPortId === p.id ? (
-                        <>
-                          <button type="button" className="link" onClick={() => handleSaveLabel(p)}>
-                            Enregistrer
-                          </button>
-                          <button type="button" className="link" onClick={cancelEditLabel}>
-                            Annuler
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button type="button" className="link" onClick={() => startEditLabel(p)}>
-                            Modifier
-                          </button>
-                          <button className="danger" onClick={() => handleDeletePort(p.id)}>
-                            Supprimer
-                          </button>
-                        </>
-                      )}
+                      {canWrite &&
+                        (editingPortId === p.id ? (
+                          <>
+                            <button type="button" className="link" onClick={() => handleSaveLabel(p)}>
+                              Enregistrer
+                            </button>
+                            <button type="button" className="link" onClick={cancelEditLabel}>
+                              Annuler
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button type="button" className="link" onClick={() => startEditLabel(p)}>
+                              Modifier
+                            </button>
+                            <button className="danger" onClick={() => handleDeletePort(p.id)}>
+                              Supprimer
+                            </button>
+                          </>
+                        ))}
                     </td>
                   </tr>
                 ))}

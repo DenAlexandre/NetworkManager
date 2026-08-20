@@ -9,10 +9,12 @@ import { SortableHeader } from "../../components/SortableHeader";
 import { ColumnFilterCell } from "../../components/ColumnFilterCell";
 import { Pagination } from "../../components/Pagination";
 import { ConfigurationTypeFormModal } from "./ConfigurationTypeFormModal";
+import { usePermission } from "../../hooks/usePermission";
 
 const COLUMNS: FilterColumn<ConfigurationType>[] = [{ key: "name", getValue: (item) => item.name }];
 
 export function ConfigurationTypesListPage() {
+  const { canWrite } = usePermission("data-types");
   const [items, setItems] = useState<ConfigurationType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,9 +71,11 @@ export function ConfigurationTypesListPage() {
     <div className="card">
       <div className="page-header">
         <h2>Types de configuration</h2>
-        <button type="button" className="btn" onClick={openCreateModal}>
-          Ajouter
-        </button>
+        {canWrite && (
+          <button type="button" className="btn" onClick={openCreateModal}>
+            Ajouter
+          </button>
+        )}
       </div>
       {error && <p className="error">{error}</p>}
       <table className="table">
@@ -95,12 +99,16 @@ export function ConfigurationTypesListPage() {
               <td>{item.name}</td>
               <td className="cell-pre">{item.configuration || "—"}</td>
               <td className="table-actions">
-                <button type="button" className="link" onClick={() => openEditModal(item.id)}>
-                  Modifier
-                </button>
-                <button className="danger" onClick={() => handleDelete(item.id)}>
-                  Supprimer
-                </button>
+                {canWrite && (
+                  <>
+                    <button type="button" className="link" onClick={() => openEditModal(item.id)}>
+                      Modifier
+                    </button>
+                    <button className="danger" onClick={() => handleDelete(item.id)}>
+                      Supprimer
+                    </button>
+                  </>
+                )}
               </td>
             </tr>
           ))}

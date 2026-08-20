@@ -1,6 +1,11 @@
 import { apiFetch } from "./client";
+import type { AccessLevel, Section } from "../constants/permissions";
 
-export type Role = "admin" | "user";
+export interface UserRole {
+  id: number;
+  name: string;
+  isAdmin: boolean;
+}
 
 export interface User {
   id: number;
@@ -9,7 +14,8 @@ export interface User {
   lastName: string;
   email: string;
   phone: string;
-  role: Role;
+  role: UserRole;
+  permissions: Partial<Record<Section, AccessLevel>>;
 }
 
 export interface RegisterInput {

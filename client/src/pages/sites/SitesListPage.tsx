@@ -12,10 +12,12 @@ import { Pagination } from "../../components/Pagination";
 import { PdfIcon } from "../../components/PdfIcon";
 import { useSitesTree } from "../../context/SitesTreeContext";
 import { SiteFormModal } from "./SiteFormModal";
+import { usePermission } from "../../hooks/usePermission";
 
 const COLUMNS: FilterColumn<Site>[] = [{ key: "name", getValue: (item) => item.name }];
 
 export function SitesListPage() {
+  const { canWrite } = usePermission("sites");
   const [items, setItems] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,9 +76,11 @@ export function SitesListPage() {
     <div className="card">
       <div className="page-header">
         <h1>Gestion des Sites</h1>
-        <button type="button" className="btn" onClick={openCreateModal}>
-          Ajouter
-        </button>
+        {canWrite && (
+          <button type="button" className="btn" onClick={openCreateModal}>
+            Ajouter
+          </button>
+        )}
       </div>
       {error && <p className="error">{error}</p>}
       <table className="table">
@@ -110,12 +114,16 @@ export function SitesListPage() {
                     <PdfIcon />
                   </a>
                 )}
-                <button type="button" className="link" onClick={() => openEditModal(item.id)}>
-                  Modifier
-                </button>
-                <button className="danger" onClick={() => handleDelete(item.id)}>
-                  Supprimer
-                </button>
+                {canWrite && (
+                  <>
+                    <button type="button" className="link" onClick={() => openEditModal(item.id)}>
+                      Modifier
+                    </button>
+                    <button className="danger" onClick={() => handleDelete(item.id)}>
+                      Supprimer
+                    </button>
+                  </>
+                )}
               </td>
             </tr>
           ))}

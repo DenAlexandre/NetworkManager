@@ -9,6 +9,7 @@ import { SortableHeader } from "../../components/SortableHeader";
 import { ColumnFilterCell } from "../../components/ColumnFilterCell";
 import { Pagination } from "../../components/Pagination";
 import { LinkTypeFormModal } from "./LinkTypeFormModal";
+import { usePermission } from "../../hooks/usePermission";
 
 const COLUMNS: FilterColumn<LinkType>[] = [
   { key: "name", getValue: (item) => item.name },
@@ -24,6 +25,7 @@ const COLUMNS: FilterColumn<LinkType>[] = [
 ];
 
 export function LinkTypesListPage() {
+  const { canWrite } = usePermission("data-types");
   const [items, setItems] = useState<LinkType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -80,9 +82,11 @@ export function LinkTypesListPage() {
     <div className="card">
       <div className="page-header">
         <h2>Types de liaison</h2>
-        <button type="button" className="btn" onClick={openCreateModal}>
-          Ajouter
-        </button>
+        {canWrite && (
+          <button type="button" className="btn" onClick={openCreateModal}>
+            Ajouter
+          </button>
+        )}
       </div>
       {error && <p className="error">{error}</p>}
       <table className="table">
@@ -123,12 +127,16 @@ export function LinkTypesListPage() {
               </td>
               <td>{item.pointToPoint ? "Oui" : "Non"}</td>
               <td className="table-actions">
-                <button type="button" className="link" onClick={() => openEditModal(item.id)}>
-                  Modifier
-                </button>
-                <button className="danger" onClick={() => handleDelete(item.id)}>
-                  Supprimer
-                </button>
+                {canWrite && (
+                  <>
+                    <button type="button" className="link" onClick={() => openEditModal(item.id)}>
+                      Modifier
+                    </button>
+                    <button className="danger" onClick={() => handleDelete(item.id)}>
+                      Supprimer
+                    </button>
+                  </>
+                )}
               </td>
             </tr>
           ))}

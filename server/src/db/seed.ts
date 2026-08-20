@@ -18,17 +18,23 @@ async function seedAdmin() {
 
   const passwordHash = await bcrypt.hash(password, 10);
 
+  const adminRole = await pool.query(`SELECT id FROM roles WHERE is_admin = true LIMIT 1`);
+  const adminRoleId = adminRole.rows[0]?.id;
+  if (!adminRoleId) {
+    throw new Error("Le rôle Admin n'existe pas (la migration a-t-elle été exécutée ?)");
+  }
+
   await pool.query(
-    `INSERT INTO users (username, first_name, last_name, email, phone, password_hash, role)
-     VALUES ($1, $2, $3, $4, $5, $6, 'admin')
+    `INSERT INTO users (username, first_name, last_name, email, phone, password_hash, role_id)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
      ON CONFLICT (email) DO UPDATE SET
        username = EXCLUDED.username,
        first_name = EXCLUDED.first_name,
        last_name = EXCLUDED.last_name,
        phone = EXCLUDED.phone,
        password_hash = EXCLUDED.password_hash,
-       role = 'admin'`,
-    [username, firstName, lastName, email, phone, passwordHash]
+       role_id = EXCLUDED.role_id`,
+    [username, firstName, lastName, email, phone, passwordHash, adminRoleId]
   );
 
   console.log(`Compte admin prêt : ${username} (${email})`);

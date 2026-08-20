@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 
 export interface TokenPayload {
   id: number;
-  role: "admin" | "user";
 }
 
 function getSecret(): string {

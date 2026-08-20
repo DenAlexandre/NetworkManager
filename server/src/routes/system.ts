@@ -1,16 +1,20 @@
 import { Router } from "express";
 import { z } from "zod";
 import { pool } from "../db/pool";
-import { requireAuth, requireRole } from "../middleware/auth";
+import { requireAuth } from "../middleware/auth";
+import { requirePermission } from "../permissions";
 
 const router = Router();
-router.use(requireAuth, requireRole("admin"));
+router.use(requireAuth, requirePermission("system"));
 
 // Order matters: parents before children, so restore can insert rows without violating
 // foreign-key constraints. Matches the FK relationships in db/migrate.ts (note that although
 // `equipment` is created before `apis` in the schema, `equipment.api_id` references `apis`,
-// so `apis` must be restored first).
+// so `apis` must be restored first). `roles` must precede `users` since `users.role_id`
+// references it.
 const TABLES = [
+  "roles",
+  "role_permissions",
   "users",
   "device_types",
   "brands",
@@ -53,7 +57,11 @@ const CATALOG_TABLES = [
   "hardware_model_variables",
   "hardware_model_port_aliases",
 ];
-const RESET_TABLES = TABLES.filter((t) => t !== "users" && !CATALOG_TABLES.includes(t));
+// roles/role_permissions define access for the accounts the reset keeps, so they must survive
+// it too — truncating `roles` with CASCADE would otherwise also wipe `users` (FK `role_id`).
+const RESET_TABLES = TABLES.filter(
+  (t) => t !== "users" && t !== "roles" && t !== "role_permissions" && !CATALOG_TABLES.includes(t)
+);
 
 // Columns that hold JSONB data and must be re-stringified before being sent back as an
 // INSERT parameter (node-postgres returns them already parsed as JS objects from SELECT).
@@ -123,8 +131,8 @@ router.post("/database/restore", async (req, res) => {
 });
 
 // Réinitialisation (RAZ) : vide toutes les données de l'application à l'exception des comptes
-// utilisateurs et du catalogue "Type des données" (device_types, brands, link_types,
-// hardware_models, hardware_model_ports), qui restent intacts.
+// utilisateurs, des rôles/permissions (Gestion des droits) et du catalogue "Type des données"
+// (device_types, brands, link_types, hardware_models, hardware_model_ports), qui restent intacts.
 router.post("/database/reset", async (_req, res) => {
   const client = await pool.connect();
   try {

@@ -13,10 +13,12 @@ import { SortableHeader } from "../../components/SortableHeader";
 import { ColumnFilterCell } from "../../components/ColumnFilterCell";
 import { Pagination } from "../../components/Pagination";
 import { RoomFormModal } from "./RoomFormModal";
+import { usePermission } from "../../hooks/usePermission";
 
 const COLUMNS: FilterColumn<Room>[] = [{ key: "name", getValue: (item) => item.name }];
 
 export function ZoneDetailPage() {
+  const { canWrite } = usePermission("sites");
   const { siteId, zoneId } = useParams();
   const [zone, setZone] = useState<Zone | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -83,9 +85,11 @@ export function ZoneDetailPage() {
     <div className="card">
       <div className="page-header">
         <h1>{zone.name}</h1>
-        <button type="button" className="btn" onClick={openCreateModal}>
-          Ajouter une salle
-        </button>
+        {canWrite && (
+          <button type="button" className="btn" onClick={openCreateModal}>
+            Ajouter une salle
+          </button>
+        )}
       </div>
       <p className="muted">{zone.siteName}</p>
       <table className="table">
@@ -108,12 +112,16 @@ export function ZoneDetailPage() {
                 <Link to={`/sites/${siteId}/zones/${zone.id}/rooms/${room.id}`}>{room.name}</Link>
               </td>
               <td className="table-actions">
-                <button type="button" className="link" onClick={() => openEditModal(room.id)}>
-                  Modifier
-                </button>
-                <button className="danger" onClick={() => handleDelete(room.id)}>
-                  Supprimer
-                </button>
+                {canWrite && (
+                  <>
+                    <button type="button" className="link" onClick={() => openEditModal(room.id)}>
+                      Modifier
+                    </button>
+                    <button className="danger" onClick={() => handleDelete(room.id)}>
+                      Supprimer
+                    </button>
+                  </>
+                )}
               </td>
             </tr>
           ))}

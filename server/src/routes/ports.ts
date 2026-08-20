@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { z } from "zod";
 import { pool } from "../db/pool";
-import { requireAuth, requireRole } from "../middleware/auth";
+import { requireAuth } from "../middleware/auth";
+import { requirePermission } from "../permissions";
 
 const router = Router();
-router.use(requireAuth, requireRole("admin"));
+router.use(requireAuth, requirePermission("data-types"));
 
 const portSchema = z.object({
   hardwareModelId: z.number().int("Le matériel est requis."),

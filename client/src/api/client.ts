@@ -9,6 +9,15 @@ export class ApiError extends Error {
   }
 }
 
+// A role/permission edit made by an admin takes effect on the server immediately, but the
+// client's cached AuthContext user only refreshes on mount. AuthProvider registers a refresh
+// callback here so the first 403 a stale session hits re-syncs the sidebar/route guards right
+// away instead of only on next login/reload.
+let onForbidden: (() => void) | null = null;
+export function setOnForbidden(fn: (() => void) | null) {
+  onForbidden = fn;
+}
+
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     credentials: "include",
@@ -26,6 +35,9 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
   const body = await res.json().catch(() => ({}));
 
   if (!res.ok) {
+    if (res.status === 403) {
+      onForbidden?.();
+    }
     throw new ApiError(res.status, body.error || "Une erreur est survenue.");
   }
 
@@ -42,6 +54,9 @@ export async function apiUpload<T>(path: string, formData: FormData): Promise<T>
   const body = await res.json().catch(() => ({}));
 
   if (!res.ok) {
+    if (res.status === 403) {
+      onForbidden?.();
+    }
     throw new ApiError(res.status, body.error || "Une erreur est survenue.");
   }
 
@@ -52,6 +67,9 @@ export async function apiDownload(path: string): Promise<{ blob: Blob; filename:
   const res = await fetch(`${API_URL}${path}`, { credentials: "include" });
 
   if (!res.ok) {
+    if (res.status === 403) {
+      onForbidden?.();
+    }
     const body = await res.json().catch(() => ({}));
     throw new ApiError(res.status, body.error || "Une erreur est survenue.");
   }

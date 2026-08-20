@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import * as authApi from "../api/auth";
 import type { RegisterInput, User } from "../api/auth";
+import { setOnForbidden } from "../api/client";
 
 interface AuthContextValue {
   user: User | null;
@@ -9,6 +10,7 @@ interface AuthContextValue {
   login: (username: string, password: string) => Promise<void>;
   register: (input: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -17,12 +19,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  async function refreshUser() {
+    try {
+      const { user } = await authApi.fetchMe();
+      setUser(user);
+    } catch {
+      setUser(null);
+    }
+  }
+
   useEffect(() => {
-    authApi
-      .fetchMe()
-      .then(({ user }) => setUser(user))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
+    refreshUser().finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    setOnForbidden(() => {
+      refreshUser();
+    });
+    return () => setOnForbidden(null);
   }, []);
 
   async function login(username: string, password: string) {
@@ -41,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

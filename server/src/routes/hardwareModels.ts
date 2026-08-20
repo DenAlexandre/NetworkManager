@@ -4,10 +4,11 @@ import { Router } from "express";
 import multer from "multer";
 import { z } from "zod";
 import { pool } from "../db/pool";
-import { requireAuth, requireRole } from "../middleware/auth";
+import { requireAuth } from "../middleware/auth";
+import { requirePermission } from "../permissions";
 
 const router = Router();
-router.use(requireAuth, requireRole("admin"));
+router.use(requireAuth, requirePermission("data-types"));
 
 const hardwareModelSchema = z.object({
   brandId: z.number().int("Le constructeur est requis."),
