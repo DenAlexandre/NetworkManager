@@ -23,6 +23,7 @@ interface Stats {
   equipment: number;
   equipmentLinks: number;
   variables: number;
+  mnemonics: number;
   plans: number;
 }
 
@@ -93,6 +94,10 @@ export function HomePage() {
             equipment: equipment.length,
             equipmentLinks: links.length,
             variables: variableSettings.reduce((sum, item) => sum + item.variables.length, 0),
+            mnemonics: variableSettings.reduce(
+              (sum, item) => sum + item.variables.filter((v) => v.mnemonic.trim() !== "").length,
+              0
+            ),
             plans: schemas.length,
           });
         }
@@ -160,6 +165,10 @@ export function HomePage() {
             <Link to="/variables" className="stat-card">
               <span className="stat-value">{stats.variables}</span>
               <span className="stat-label">Variables</span>
+            </Link>
+            <Link to="/variables" className="stat-card">
+              <span className="stat-value">{stats.mnemonics}</span>
+              <span className="stat-label">Mnémoniques</span>
             </Link>
             <Link to="/plans" className="stat-card">
               <span className="stat-value">{stats.plans}</span>
