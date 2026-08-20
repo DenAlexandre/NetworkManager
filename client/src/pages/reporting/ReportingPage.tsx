@@ -4,6 +4,8 @@ import { listEquipment } from "../../api/equipment";
 import type { Equipment } from "../../api/equipment";
 import { listAddressing } from "../../api/equipmentPortSettings";
 import type { AddressingPort } from "../../api/equipmentPortSettings";
+import { listEquipmentVariableSettings } from "../../api/equipmentVariableSettings";
+import type { VariableSetting } from "../../api/equipmentVariableSettings";
 import { listApis } from "../../api/apis";
 import type { Api } from "../../api/apis";
 import { listSwitchConfigs } from "../../api/switchConfigs";
@@ -32,6 +34,7 @@ interface ReportRow {
   switchConfig?: SwitchConfigSummary;
   mgateConfig?: MgateConfigSummary;
   link?: EquipmentLink;
+  variable?: VariableSetting;
 }
 
 type CellValue = string | number | boolean | null;
@@ -118,6 +121,11 @@ const COLUMNS: ReportColumn[] = [
     category: "Liaison",
     value: (r) => r.link?.configurationTypeName ?? null,
   },
+  { id: "var_name", label: "Nom", category: "Variables", value: (r) => r.variable?.name ?? null },
+  { id: "var_unit", label: "Unité", category: "Variables", value: (r) => r.variable?.unit ?? null },
+  { id: "var_register", label: "Registre", category: "Variables", value: (r) => r.variable?.register ?? null },
+  { id: "var_mnemonic", label: "Mnémonique", category: "Variables", value: (r) => r.variable?.mnemonic ?? null },
+  { id: "var_description", label: "Description", category: "Variables", value: (r) => r.variable?.description ?? null },
 ];
 
 const COLUMN_BY_ID = new Map(COLUMNS.map((c) => [c.id, c]));
@@ -156,6 +164,7 @@ export function ReportingPage() {
     new Map()
   );
   const [links, setLinks] = useState<EquipmentLink[]>([]);
+  const [variablesByEquipmentId, setVariablesByEquipmentId] = useState<Map<number, VariableSetting[]>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -189,16 +198,25 @@ export function ReportingPage() {
     async function load() {
       setLoading(true);
       try {
-        const [{ equipment: eq }, { equipment: addressing }, { apis }, { switchConfigs }, { mgateConfigs }, { configs }, { links: eqLinks }] =
-          await Promise.all([
-            listEquipment(),
-            listAddressing(),
-            listApis(),
-            listSwitchConfigs(),
-            listMgateConfigs(),
-            listReportConfigs(),
-            listEquipmentLinks(),
-          ]);
+        const [
+          { equipment: eq },
+          { equipment: addressing },
+          { apis },
+          { switchConfigs },
+          { mgateConfigs },
+          { configs },
+          { links: eqLinks },
+          { equipment: variableSettings },
+        ] = await Promise.all([
+          listEquipment(),
+          listAddressing(),
+          listApis(),
+          listSwitchConfigs(),
+          listMgateConfigs(),
+          listReportConfigs(),
+          listEquipmentLinks(),
+          listEquipmentVariableSettings(),
+        ]);
         setEquipment(eq);
         setPortsByEquipmentId(new Map(addressing.map((a) => [a.equipmentId, a.ports])));
         setApiById(new Map(apis.map((a) => [a.id, a])));
@@ -206,6 +224,7 @@ export function ReportingPage() {
         setMgateConfigByHardwareModelId(latestByHardwareModel(mgateConfigs));
         setReportConfigs(configs);
         setLinks(eqLinks);
+        setVariablesByEquipmentId(new Map(variableSettings.map((v) => [v.equipmentId, v.variables])));
       } catch (err) {
         setError(err instanceof ApiError ? err.message : "Erreur de chargement.");
       } finally {
@@ -221,6 +240,7 @@ export function ReportingPage() {
   );
   const hasAddressingColumn = displayedColumns.some((c) => c.category === "Adressage");
   const hasLinkColumn = displayedColumns.some((c) => c.category === "Liaison");
+  const hasVariableColumn = displayedColumns.some((c) => c.category === "Variables");
 
   function displayValue(column: ReportColumn, row: ReportRow) {
     return (column.format ?? formatDefault)(column.value(row));
@@ -301,6 +321,11 @@ export function ReportingPage() {
           const link = linkByPortKey.get(`${eq.id}:${port.hardwareModelPortId}`);
           out.push({ key: `${eq.id}:${port.hardwareModelPortId}`, equipment: eq, api, port, switchConfig, mgateConfig, link });
         }
+      } else if (hasVariableColumn) {
+        const variables = variablesByEquipmentId.get(eq.id) ?? [];
+        for (const variable of variables) {
+          out.push({ key: `${eq.id}:var:${variable.hardwareModelVariableId}`, equipment: eq, api, switchConfig, mgateConfig, variable });
+        }
       } else if (hasLinkColumn) {
         const eqLinks = linksByEquipmentId.get(eq.id) ?? [];
         for (const link of eqLinks) {
@@ -315,9 +340,11 @@ export function ReportingPage() {
     equipment,
     hasAddressingColumn,
     hasLinkColumn,
+    hasVariableColumn,
     portsByEquipmentId,
     linkByPortKey,
     linksByEquipmentId,
+    variablesByEquipmentId,
     apiById,
     switchConfigByHardwareModelId,
     mgateConfigByHardwareModelId,

@@ -524,6 +524,23 @@ a {
   white-space: pre-wrap;
 }
 
+.variables-config-table th:nth-child(4),
+.variables-config-table th:nth-child(5) {
+  width: 36%;
+}
+
+.variables-config-table input,
+.variables-config-table textarea {
+  width: 100%;
+  min-width: 420px;
+  font-size: 15px;
+}
+
+.variables-config-table textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
 .table tr:last-child td {
   border-bottom: none;
 }
@@ -762,6 +779,10 @@ button:disabled {
 
 .modal-dialog-wide {
   max-width: 820px;
+}
+
+.modal-dialog-xwide {
+  max-width: 1400px;
 }
 
 .modal-header {

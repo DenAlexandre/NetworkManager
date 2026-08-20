@@ -68,12 +68,12 @@ export function VariableSettingsConfigModal({ equipment, onClose }: VariableSett
   }
 
   return (
-    <Modal title={`Variables — ${equipment.equipmentName}`} onClose={onClose} wide>
+    <Modal title={`Variables — ${equipment.equipmentName}`} onClose={onClose} xwide>
       <p className="muted">
         {equipment.brandName} — {equipment.hardwareModel} · {equipment.siteName} / {equipment.zoneName} /{" "}
         {equipment.roomName}
       </p>
-      <table className="table">
+      <table className="table variables-config-table">
         <thead>
           <tr>
             <th>Nom</th>
@@ -99,8 +99,8 @@ export function VariableSettingsConfigModal({ equipment, onClose }: VariableSett
                   />
                 </td>
                 <td>
-                  <input
-                    type="text"
+                  <textarea
+                    rows={3}
                     value={draft.description}
                     onChange={(e) => updateDraft(variable.hardwareModelVariableId, "description", e.target.value)}
                   />
