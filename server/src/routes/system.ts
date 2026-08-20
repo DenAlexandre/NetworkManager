@@ -70,6 +70,15 @@ const JSON_COLUMNS: Record<string, string[]> = {
   report_configs: ["column_ids", "filters"],
 };
 
+// BYTEA columns (raw binary): node-postgres returns them as Buffers, but Buffer has a toJSON()
+// that JSON.stringify silently turns into {type:"Buffer",data:[...]} — parsing that back and
+// handing the plain object to pg as an insert parameter does NOT reconstruct a Buffer, so the
+// restored bytea would be corrupted. Base64-encode to a plain string for the backup file, and
+// decode back to a Buffer on restore.
+const BINARY_COLUMNS: Record<string, string[]> = {
+  mgate_configurations: ["raw_cfg"],
+};
+
 const restoreSchema = z.object({
   version: z.number(),
   tables: z.record(z.string(), z.array(z.record(z.string(), z.any()))),
@@ -79,7 +88,16 @@ router.get("/database/backup", async (_req, res) => {
   const tables: Record<string, unknown[]> = {};
   for (const table of TABLES) {
     const result = await pool.query(`SELECT * FROM ${table}`);
-    tables[table] = result.rows;
+    const binaryColumns = BINARY_COLUMNS[table] ?? [];
+    tables[table] = binaryColumns.length
+      ? result.rows.map((row) => {
+          const copy = { ...row };
+          for (const col of binaryColumns) {
+            if (copy[col] != null) copy[col] = (copy[col] as Buffer).toString("base64");
+          }
+          return copy;
+        })
+      : result.rows;
   }
   const payload = { version: 1, createdAt: new Date().toISOString(), tables };
   const filename = `networkmanager-backup-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
@@ -103,10 +121,15 @@ router.post("/database/restore", async (req, res) => {
     for (const table of TABLES) {
       const rows = tables[table] ?? [];
       const jsonColumns = JSON_COLUMNS[table] ?? [];
+      const binaryColumns = BINARY_COLUMNS[table] ?? [];
       for (const row of rows) {
         const columns = Object.keys(row);
         if (columns.length === 0) continue;
-        const values = columns.map((c) => (jsonColumns.includes(c) ? JSON.stringify(row[c]) : row[c]));
+        const values = columns.map((c) => {
+          if (jsonColumns.includes(c)) return JSON.stringify(row[c]);
+          if (binaryColumns.includes(c)) return row[c] == null ? null : Buffer.from(row[c] as string, "base64");
+          return row[c];
+        });
         const columnList = columns.map((c) => `"${c}"`).join(", ");
         const placeholders = columns.map((_, i) => `$${i + 1}`).join(", ");
         await client.query(`INSERT INTO ${table} (${columnList}) VALUES (${placeholders})`, values);

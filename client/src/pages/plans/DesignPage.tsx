@@ -219,6 +219,11 @@ async function fetchImageAsDataUrl(url: string): Promise<string> {
 export function DesignPage() {
   const navigate = useNavigate();
   const { canWrite } = usePermission("plans");
+  // "Modifier/Adresser le matériel" and "Éditer la liaison" deep-link into the Equipment section
+  // (equipment/equipmentLinks/equipmentPortSettings routes, all gated server-side by the
+  // "equipment" permission) — a plans write permission doesn't imply equipment write, so those
+  // context-menu actions must be gated on this instead of the page's own `canWrite`.
+  const { canWrite: canWriteEquipment } = usePermission("equipment");
   const [equipmentList, setEquipmentList] = useState<Equipment[]>([]);
   const [allPorts, setAllPorts] = useState<Port[]>([]);
   const [configurationTypes, setConfigurationTypes] = useState<ConfigurationType[]>([]);
@@ -1123,13 +1128,13 @@ export function DesignPage() {
   }
 
   function handleContextMenuEdit() {
-    if (!cardContextMenu) return;
+    if (!cardContextMenu || !canWriteEquipment) return;
     navigate(`/equipment?open=${cardContextMenu.equipmentId}&returnTo=/plans`);
     setCardContextMenu(null);
   }
 
   function handleContextMenuAddress() {
-    if (!cardContextMenu) return;
+    if (!cardContextMenu || !canWriteEquipment) return;
     navigate(`/equipment/addressing?open=${cardContextMenu.equipmentId}&returnTo=/plans`);
     setCardContextMenu(null);
   }
@@ -1149,7 +1154,7 @@ export function DesignPage() {
   }
 
   function handleLinkContextMenuEdit() {
-    if (!linkContextMenu) return;
+    if (!linkContextMenu || !canWriteEquipment) return;
     navigate(`/equipment/links?open=${linkContextMenu.linkId}&returnTo=/plans`);
     setLinkContextMenu(null);
   }
@@ -2332,18 +2337,22 @@ export function DesignPage() {
       </div>
       </div>
 
-      {cardContextMenu && (
+      {cardContextMenu && (canWriteEquipment || canWrite) && (
         <div
           className="design-context-menu"
           style={{ left: cardContextMenu.x, top: cardContextMenu.y }}
           onMouseDown={(e) => e.stopPropagation()}
         >
-          <button type="button" onClick={handleContextMenuEdit}>
-            Modifier le matériel
-          </button>
-          <button type="button" onClick={handleContextMenuAddress}>
-            Adresser le matériel
-          </button>
+          {canWriteEquipment && (
+            <button type="button" onClick={handleContextMenuEdit}>
+              Modifier le matériel
+            </button>
+          )}
+          {canWriteEquipment && (
+            <button type="button" onClick={handleContextMenuAddress}>
+              Adresser le matériel
+            </button>
+          )}
           {canWrite && (
             <button type="button" onClick={handleContextMenuDuplicate}>
               Dupliquer le matériel
@@ -2357,15 +2366,17 @@ export function DesignPage() {
         </div>
       )}
 
-      {linkContextMenu && (
+      {linkContextMenu && (canWriteEquipment || canWrite) && (
         <div
           className="design-context-menu"
           style={{ left: linkContextMenu.x, top: linkContextMenu.y }}
           onMouseDown={(e) => e.stopPropagation()}
         >
-          <button type="button" onClick={handleLinkContextMenuEdit}>
-            Éditer la liaison
-          </button>
+          {canWriteEquipment && (
+            <button type="button" onClick={handleLinkContextMenuEdit}>
+              Éditer la liaison
+            </button>
+          )}
           {canWrite && (
             <button type="button" className="danger" onClick={handleLinkContextMenuDelete}>
               Supprimer la liaison
