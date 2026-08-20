@@ -9,6 +9,7 @@ import { SortableHeader } from "../../components/SortableHeader";
 import { ColumnFilterCell } from "../../components/ColumnFilterCell";
 import { Pagination } from "../../components/Pagination";
 import { SimpleNameFormModal } from "../../components/SimpleNameFormModal";
+import { ReplaceDeviceTypeModal } from "./ReplaceDeviceTypeModal";
 
 const COLUMNS: FilterColumn<DeviceType>[] = [{ key: "name", getValue: (item) => item.name }];
 
@@ -21,6 +22,7 @@ export function DeviceTypesListPage() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [replacingId, setReplacingId] = useState<number | null>(null);
 
   useEffect(() => {
     load();
@@ -44,8 +46,17 @@ export function DeviceTypesListPage() {
       await deleteDeviceType(id);
       setItems((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
+      if (err instanceof ApiError && err.status === 409) {
+        setReplacingId(id);
+        return;
+      }
       alert(err instanceof ApiError ? err.message : "Erreur lors de la suppression.");
     }
+  }
+
+  function handleReplaced() {
+    setReplacingId(null);
+    load();
   }
 
   function openCreateModal() {
@@ -119,6 +130,14 @@ export function DeviceTypesListPage() {
           }}
           onClose={() => setModalOpen(false)}
           onSaved={handleSaved}
+        />
+      )}
+      {replacingId !== null && (
+        <ReplaceDeviceTypeModal
+          deviceType={items.find((item) => item.id === replacingId)!}
+          otherDeviceTypes={items.filter((item) => item.id !== replacingId)}
+          onClose={() => setReplacingId(null)}
+          onReplaced={handleReplaced}
         />
       )}
     </div>

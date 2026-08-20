@@ -34,3 +34,10 @@ export function updateDeviceType(id: number, input: DeviceTypeInput) {
 export function deleteDeviceType(id: number) {
   return apiFetch<void>(`/device-types/${id}`, { method: "DELETE" });
 }
+
+export function replaceDeviceType(id: number, replacementId: number) {
+  return apiFetch<void>(`/device-types/${id}/replace`, {
+    method: "POST",
+    body: JSON.stringify({ replacementId }),
+  });
+}

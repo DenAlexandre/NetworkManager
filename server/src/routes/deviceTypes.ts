@@ -101,4 +101,56 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+const replaceSchema = z.object({
+  replacementId: z.number().int("Le type de remplacement est requis."),
+});
+
+// Reassigns every hardware model and equipment record pointing at :id to replacementId, then
+// deletes :id — lets the client offer "replace instead of delete" when the 409 above fires.
+router.post("/:id/replace", async (req, res) => {
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ error: "Identifiant invalide." });
+  }
+  const parsed = replaceSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: parsed.error.issues[0].message });
+  }
+  const { replacementId } = parsed.data;
+  if (replacementId === id) {
+    return res.status(400).json({ error: "Choisissez un type de matériel différent." });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    const replacement = await client.query("SELECT id FROM device_types WHERE id = $1", [replacementId]);
+    if (!replacement.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Type de remplacement introuvable." });
+    }
+
+    await client.query("UPDATE hardware_models SET device_type_id = $1 WHERE device_type_id = $2", [
+      replacementId,
+      id,
+    ]);
+    await client.query("UPDATE equipment SET device_type_id = $1 WHERE device_type_id = $2", [replacementId, id]);
+
+    const deleted = await client.query("DELETE FROM device_types WHERE id = $1", [id]);
+    if (!deleted.rowCount) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Type de matériel introuvable." });
+    }
+
+    await client.query("COMMIT");
+    res.status(204).send();
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
+});
+
 export default router;
