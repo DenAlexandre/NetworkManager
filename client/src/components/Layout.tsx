@@ -13,6 +13,7 @@ const SIDEBAR_COLLAPSED_STORAGE_KEY = "layout.sidebarCollapsed";
 // Every section (all 10 menus besides Accueil) is part of the configurable role/permission matrix
 // — an admin decides via Gestion des droits which roles see which of these links.
 const SECTION_NAV_ITEMS: { to: string; icon: SidebarIconName; label: string; section: Section }[] = [
+  { to: "/rights", icon: "shield", label: "Gestion des droits", section: "rights" },
   { to: "/data-types", icon: "layers", label: "Type des données", section: "data-types" },
   { to: "/sites", icon: "pin", label: "Gestion des Sites", section: "sites" },
   { to: "/apis", icon: "exchange", label: "Gestion des API", section: "apis" },
@@ -22,7 +23,6 @@ const SECTION_NAV_ITEMS: { to: string; icon: SidebarIconName; label: string; sec
   { to: "/reporting", icon: "chart", label: "Reporting", section: "reporting" },
   { to: "/configurations", icon: "sliders", label: "Gestion des configurations", section: "configurations" },
   { to: "/system", icon: "database", label: "Système", section: "system" },
-  { to: "/rights", icon: "shield", label: "Gestion des droits", section: "rights" },
 ];
 
 function SectionNavLink({ item }: { item: (typeof SECTION_NAV_ITEMS)[number] }) {
