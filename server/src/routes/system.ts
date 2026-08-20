@@ -79,6 +79,14 @@ const BINARY_COLUMNS: Record<string, string[]> = {
   mgate_configurations: ["raw_cfg"],
 };
 
+// Columns that reference another row of the SAME table (e.g. equipment.linked_equipment_id).
+// Rows come back from `SELECT *` in id order, so a row can reference another row with a higher
+// id that hasn't been inserted yet — inserting straight through would violate the FK. Instead
+// insert with the column nulled out, then fix it up in a second pass once every row exists.
+const SELF_REFERENCING_COLUMNS: Record<string, string[]> = {
+  equipment: ["linked_equipment_id"],
+};
+
 const restoreSchema = z.object({
   version: z.number(),
   tables: z.record(z.string(), z.array(z.record(z.string(), z.any()))),
@@ -122,10 +130,12 @@ router.post("/database/restore", async (req, res) => {
       const rows = tables[table] ?? [];
       const jsonColumns = JSON_COLUMNS[table] ?? [];
       const binaryColumns = BINARY_COLUMNS[table] ?? [];
+      const selfReferencingColumns = SELF_REFERENCING_COLUMNS[table] ?? [];
       for (const row of rows) {
         const columns = Object.keys(row);
         if (columns.length === 0) continue;
         const values = columns.map((c) => {
+          if (selfReferencingColumns.includes(c)) return null;
           if (jsonColumns.includes(c)) return JSON.stringify(row[c]);
           if (binaryColumns.includes(c)) return row[c] == null ? null : Buffer.from(row[c] as string, "base64");
           return row[c];
@@ -133,6 +143,13 @@ router.post("/database/restore", async (req, res) => {
         const columnList = columns.map((c) => `"${c}"`).join(", ");
         const placeholders = columns.map((_, i) => `$${i + 1}`).join(", ");
         await client.query(`INSERT INTO ${table} (${columnList}) VALUES (${placeholders})`, values);
+      }
+      for (const column of selfReferencingColumns) {
+        for (const row of rows) {
+          if (row[column] != null) {
+            await client.query(`UPDATE ${table} SET "${column}" = $1 WHERE id = $2`, [row[column], row.id]);
+          }
+        }
       }
       // Restored rows keep their original ids, so each table's serial sequence must be
       // pushed forward past the highest restored id to avoid future collisions.
