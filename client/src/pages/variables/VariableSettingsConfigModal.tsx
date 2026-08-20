@@ -6,11 +6,12 @@ import { Modal } from "../../components/Modal";
 
 interface VariableFields {
   mnemonic: string;
+  uniqueId: string;
   description: string;
 }
 
 function fieldsFromVariable(v: VariableSetting): VariableFields {
-  return { mnemonic: v.mnemonic, description: v.description };
+  return { mnemonic: v.mnemonic, uniqueId: v.uniqueId, description: v.description };
 }
 
 interface VariableSettingsConfigModalProps {
@@ -45,6 +46,7 @@ export function VariableSettingsConfigModal({ equipment, onClose }: VariableSett
           equipmentId: equipment.equipmentId,
           hardwareModelVariableId: variable.hardwareModelVariableId,
           mnemonic: draft.mnemonic,
+          uniqueId: draft.uniqueId,
           description: draft.description,
         });
         setDrafts((prev) => ({ ...prev, [updated.hardwareModelVariableId]: fieldsFromVariable(updated) }));
@@ -80,6 +82,7 @@ export function VariableSettingsConfigModal({ equipment, onClose }: VariableSett
             <th>Unité</th>
             <th>Registre</th>
             <th>Mnémonique</th>
+            <th>ID Unique</th>
             <th>Description</th>
           </tr>
         </thead>
@@ -96,6 +99,13 @@ export function VariableSettingsConfigModal({ equipment, onClose }: VariableSett
                     type="text"
                     value={draft.mnemonic}
                     onChange={(e) => updateDraft(variable.hardwareModelVariableId, "mnemonic", e.target.value)}
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    value={draft.uniqueId}
+                    onChange={(e) => updateDraft(variable.hardwareModelVariableId, "uniqueId", e.target.value)}
                   />
                 </td>
                 <td>

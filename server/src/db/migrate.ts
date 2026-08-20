@@ -268,6 +268,9 @@ CREATE TABLE IF NOT EXISTS equipment_variable_settings (
   UNIQUE (equipment_id, hardware_model_variable_id)
 );
 
+-- Identifiant unique propre a cet equipement pour cette variable (meme format que le mnemonique).
+ALTER TABLE equipment_variable_settings ADD COLUMN IF NOT EXISTS unique_id VARCHAR(150) NOT NULL DEFAULT '';
+
 CREATE TABLE IF NOT EXISTS apis (
   id SERIAL PRIMARY KEY,
   name VARCHAR(200) NOT NULL,

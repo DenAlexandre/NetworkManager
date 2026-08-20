@@ -6,6 +6,7 @@ export interface VariableSetting {
   unit: string;
   register: string;
   mnemonic: string;
+  uniqueId: string;
   description: string;
 }
 
@@ -30,6 +31,7 @@ export interface EquipmentVariableSettingInput {
   equipmentId: number;
   hardwareModelVariableId: number;
   mnemonic: string;
+  uniqueId?: string;
   description: string;
 }
 

@@ -10,6 +10,7 @@ const settingSchema = z.object({
   equipmentId: z.number().int("Le matériel est requis."),
   hardwareModelVariableId: z.number().int("La variable est requise."),
   mnemonic: z.string().nullable().optional(),
+  uniqueId: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
 });
 
@@ -20,7 +21,8 @@ const VARIABLE_SETTING_SELECT = `
          e.api_id AS "apiId", a.name AS "apiName",
          e.linked_equipment_id AS "linkedEquipmentId", le.name AS "linkedEquipmentName",
          v.id AS "hardwareModelVariableId", v.name, v.unit, v.register,
-         COALESCE(st.mnemonic, '') AS mnemonic, COALESCE(st.description, '') AS description
+         COALESCE(st.mnemonic, '') AS mnemonic, COALESCE(st.unique_id, '') AS "uniqueId",
+         COALESCE(st.description, '') AS description
   FROM equipment e
   JOIN rooms r ON r.id = e.room_id
   JOIN zones z ON z.id = r.zone_id
@@ -87,6 +89,7 @@ router.get("/", async (req, res) => {
       unit: row.unit,
       register: row.register,
       mnemonic: row.mnemonic,
+      uniqueId: row.uniqueId,
       description: row.description,
     });
   }
@@ -99,15 +102,17 @@ router.put("/", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
-  const { equipmentId, hardwareModelVariableId, mnemonic, description } = parsed.data;
+  const { equipmentId, hardwareModelVariableId, mnemonic, uniqueId, description } = parsed.data;
 
   try {
+    // uniqueId is optional (e.g. the bulk CSV/xlsx import doesn't know about this column) — when
+    // omitted, COALESCE keeps whatever value is already stored instead of blanking it out.
     await pool.query(
-      `INSERT INTO equipment_variable_settings (equipment_id, hardware_model_variable_id, mnemonic, description)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO equipment_variable_settings (equipment_id, hardware_model_variable_id, mnemonic, unique_id, description)
+       VALUES ($1, $2, $3, COALESCE($4, ''), $5)
        ON CONFLICT (equipment_id, hardware_model_variable_id)
-       DO UPDATE SET mnemonic = $3, description = $4`,
-      [equipmentId, hardwareModelVariableId, mnemonic ?? "", description ?? ""]
+       DO UPDATE SET mnemonic = $3, unique_id = COALESCE($4, equipment_variable_settings.unique_id), description = $5`,
+      [equipmentId, hardwareModelVariableId, mnemonic ?? "", uniqueId ?? null, description ?? ""]
     );
     const result = await pool.query(`${VARIABLE_SETTING_SELECT} WHERE e.id = $1 AND v.id = $2`, [
       equipmentId,
@@ -124,6 +129,7 @@ router.put("/", async (req, res) => {
         unit: row.unit,
         register: row.register,
         mnemonic: row.mnemonic,
+        uniqueId: row.uniqueId,
         description: row.description,
       },
     });
