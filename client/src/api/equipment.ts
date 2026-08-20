@@ -18,6 +18,8 @@ export interface Equipment {
   apiId: number | null;
   apiName: string | null;
   isApiStartPoint: boolean;
+  linkedEquipmentId: number | null;
+  linkedEquipmentName: string | null;
 }
 
 export interface EquipmentInput {
@@ -27,6 +29,7 @@ export interface EquipmentInput {
   apiId: number | null;
   name: string;
   isApiStartPoint: boolean;
+  linkedEquipmentId?: number | null;
 }
 
 export function listEquipment(roomId?: number) {

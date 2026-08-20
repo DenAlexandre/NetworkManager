@@ -283,6 +283,12 @@ CREATE INDEX IF NOT EXISTS ix_equipment_api ON equipment(api_id);
 -- rattachement en dur au nom "FO-R406A").
 ALTER TABLE equipment ADD COLUMN IF NOT EXISTS is_api_start_point BOOLEAN NOT NULL DEFAULT false;
 
+-- Rattachement libre d'un materiel a un autre materiel de la meme API (hors liaison de port, ex.
+-- un onduleur associe a son disjoncteur amont). L'unicite "meme API" et "pas de lien vers soi-meme"
+-- est verifiee cote application (routes/equipment.ts) plutot qu'en base.
+ALTER TABLE equipment ADD COLUMN IF NOT EXISTS linked_equipment_id INTEGER REFERENCES equipment(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS ix_equipment_linked_equipment ON equipment(linked_equipment_id);
+
 -- Schema de cablage (plan Design) enregistre pour une API : disposition des cartes
 -- materiel sur le canevas et courbure des liaisons, un seul schema par API.
 CREATE TABLE IF NOT EXISTS design_schemas (

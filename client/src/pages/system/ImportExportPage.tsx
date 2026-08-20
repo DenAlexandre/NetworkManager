@@ -1,6 +1,7 @@
 import { ApisImportExport } from "./ApisImportExport";
 import { EquipmentImportExport } from "./EquipmentImportExport";
 import { RoomsImport } from "./RoomsImport";
+import { VariablesImportExport } from "./VariablesImportExport";
 
 export function ImportExportPage() {
   return (
@@ -12,6 +13,7 @@ export function ImportExportPage() {
       <EquipmentImportExport />
       <RoomsImport />
       <ApisImportExport />
+      <VariablesImportExport />
     </div>
   );
 }

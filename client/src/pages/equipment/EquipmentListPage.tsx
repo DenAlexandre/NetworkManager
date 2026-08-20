@@ -62,6 +62,7 @@ export function EquipmentListPage() {
         type: "select",
         options: apiOptions.map((name) => ({ value: name, label: name })),
       },
+      { key: "linkedEquipment", getValue: (item) => item.linkedEquipmentName ?? "" },
     ],
     [deviceTypeOptions, roomOptions, apiOptions]
   );
@@ -161,6 +162,7 @@ export function EquipmentListPage() {
             <th>Matériel</th>
             <th>Emplacement</th>
             <th>API</th>
+            <th>Matériel lié</th>
             <th></th>
           </tr>
           <tr className="filter-row">
@@ -184,6 +186,7 @@ export function EquipmentListPage() {
                 {item.zoneName} / {item.roomName}
               </td>
               <td>{item.apiName ?? "—"}</td>
+              <td>{item.linkedEquipmentName ?? "—"}</td>
               <td className="table-actions">
                 <button type="button" className="link" onClick={() => openEditModal(item.id)}>
                   Modifier

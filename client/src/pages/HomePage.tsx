@@ -8,6 +8,8 @@ import { listHardwareModels } from "../api/hardwareModels";
 import { listSites } from "../api/sites";
 import { listApis } from "../api/apis";
 import { listEquipment } from "../api/equipment";
+import { listEquipmentLinks } from "../api/equipmentLinks";
+import { listEquipmentVariableSettings } from "../api/equipmentVariableSettings";
 import { listDesignSchemas } from "../api/designSchemas";
 
 interface Stats {
@@ -19,6 +21,8 @@ interface Stats {
   apisTotal: number;
   apisCompleted: number;
   equipment: number;
+  equipmentLinks: number;
+  variables: number;
   plans: number;
 }
 
@@ -61,21 +65,38 @@ export function HomePage() {
       listSites(),
       listApis(),
       listEquipment(),
+      listEquipmentLinks(),
+      listEquipmentVariableSettings(),
       listDesignSchemas(),
     ])
-      .then(([{ deviceTypes }, { linkTypes }, { brands }, { hardwareModels }, { sites }, { apis }, { equipment }, { schemas }]) => {
-        setStats({
-          deviceTypes: deviceTypes.length,
-          linkTypes: linkTypes.length,
-          brands: brands.length,
-          hardwareModels: hardwareModels.length,
-          sites: sites.length,
-          apisTotal: apis.length,
-          apisCompleted: apis.filter((a) => a.completed).length,
-          equipment: equipment.length,
-          plans: schemas.length,
-        });
-      })
+      .then(
+        ([
+          { deviceTypes },
+          { linkTypes },
+          { brands },
+          { hardwareModels },
+          { sites },
+          { apis },
+          { equipment },
+          { links },
+          { equipment: variableSettings },
+          { schemas },
+        ]) => {
+          setStats({
+            deviceTypes: deviceTypes.length,
+            linkTypes: linkTypes.length,
+            brands: brands.length,
+            hardwareModels: hardwareModels.length,
+            sites: sites.length,
+            apisTotal: apis.length,
+            apisCompleted: apis.filter((a) => a.completed).length,
+            equipment: equipment.length,
+            equipmentLinks: links.length,
+            variables: variableSettings.reduce((sum, item) => sum + item.variables.length, 0),
+            plans: schemas.length,
+          });
+        }
+      )
       .catch(() => setStats(null));
   }, [user]);
 
@@ -132,20 +153,29 @@ export function HomePage() {
               <span className="stat-value">{stats.equipment}</span>
               <span className="stat-label">Matériel</span>
             </Link>
+            <Link to="/equipment/links" className="stat-card">
+              <span className="stat-value">{stats.equipmentLinks}</span>
+              <span className="stat-label">Liaisons</span>
+            </Link>
+            <Link to="/variables" className="stat-card">
+              <span className="stat-value">{stats.variables}</span>
+              <span className="stat-label">Variables</span>
+            </Link>
             <Link to="/plans" className="stat-card">
               <span className="stat-value">{stats.plans}</span>
               <span className="stat-label">Plans</span>
             </Link>
-            <Link to="/apis" className="stat-card stat-card-chart">
-              <DonutChart value={stats.apisCompleted} total={stats.apisTotal} />
-              <div className="stat-card-chart-text">
-                <span className="stat-value">
-                  {stats.apisCompleted}/{stats.apisTotal}
-                </span>
-                <span className="stat-label">APIs terminées</span>
-              </div>
-            </Link>
           </div>
+
+          <Link to="/apis" className="stat-card stat-card-chart stat-card-chart-featured">
+            <DonutChart value={stats.apisCompleted} total={stats.apisTotal} size={220} strokeWidth={28} />
+            <div className="stat-card-chart-text">
+              <span className="stat-value">
+                {stats.apisCompleted}/{stats.apisTotal}
+              </span>
+              <span className="stat-label">APIs terminées</span>
+            </div>
+          </Link>
         </>
       )}
     </div>

@@ -18,6 +18,7 @@ const VARIABLE_SETTING_SELECT = `
          dt.name AS "deviceType", hm.name AS "hardwareModel", b.name AS "brandName",
          e.room_id AS "roomId", s.name AS "siteName", z.name AS "zoneName", r.name AS "roomName",
          e.api_id AS "apiId", a.name AS "apiName",
+         e.linked_equipment_id AS "linkedEquipmentId", le.name AS "linkedEquipmentName",
          v.id AS "hardwareModelVariableId", v.name, v.unit, v.register,
          COALESCE(st.mnemonic, '') AS mnemonic, COALESCE(st.description, '') AS description
   FROM equipment e
@@ -28,6 +29,7 @@ const VARIABLE_SETTING_SELECT = `
   JOIN hardware_models hm ON hm.id = e.hardware_model_id
   JOIN brands b ON b.id = hm.brand_id
   LEFT JOIN apis a ON a.id = e.api_id
+  LEFT JOIN equipment le ON le.id = e.linked_equipment_id
   JOIN hardware_model_variables v ON v.hardware_model_id = e.hardware_model_id
   LEFT JOIN equipment_variable_settings st ON st.hardware_model_variable_id = v.id AND st.equipment_id = e.id
 `;
@@ -52,6 +54,8 @@ router.get("/", async (req, res) => {
       roomName: string;
       apiId: number | null;
       apiName: string | null;
+      linkedEquipmentId: number | null;
+      linkedEquipmentName: string | null;
       variables: unknown[];
     }
   >();
@@ -71,6 +75,8 @@ router.get("/", async (req, res) => {
         roomName: row.roomName,
         apiId: row.apiId,
         apiName: row.apiName,
+        linkedEquipmentId: row.linkedEquipmentId,
+        linkedEquipmentName: row.linkedEquipmentName,
         variables: [],
       };
       equipmentMap.set(row.equipmentId, entry);

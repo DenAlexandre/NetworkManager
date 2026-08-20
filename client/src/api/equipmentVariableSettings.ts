@@ -21,6 +21,8 @@ export interface EquipmentVariableSettings {
   roomName: string;
   apiId: number | null;
   apiName: string | null;
+  linkedEquipmentId: number | null;
+  linkedEquipmentName: string | null;
   variables: VariableSetting[];
 }
 

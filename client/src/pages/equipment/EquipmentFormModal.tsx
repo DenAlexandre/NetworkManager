@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import { createEquipment, getEquipment, updateEquipment } from "../../api/equipment";
+import { createEquipment, getEquipment, listEquipment, updateEquipment } from "../../api/equipment";
+import type { Equipment } from "../../api/equipment";
 import { listRooms } from "../../api/rooms";
 import type { Room } from "../../api/rooms";
 import { listDeviceTypes } from "../../api/deviceTypes";
@@ -31,29 +32,28 @@ export function EquipmentFormModal({ equipmentId, onClose, onSaved }: EquipmentF
   const [deviceTypes, setDeviceTypes] = useState<DeviceType[]>([]);
   const [hardwareModels, setHardwareModels] = useState<HardwareModel[]>([]);
   const [apis, setApis] = useState<Api[]>([]);
+  const [allEquipment, setAllEquipment] = useState<Equipment[]>([]);
   const [roomId, setRoomId] = useState<number | "">("");
   const [deviceTypeId, setDeviceTypeId] = useState<number | "">("");
   const [hardwareModelId, setHardwareModelId] = useState<number | "">("");
   const [apiId, setApiId] = useState<number | "">("");
   const [name, setName] = useState("");
   const [isApiStartPoint, setIsApiStartPoint] = useState(false);
+  const [linkedEquipmentId, setLinkedEquipmentId] = useState<number | "">("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     async function load() {
-      const [{ rooms: roomsRes }, { deviceTypes: dt }, { hardwareModels: hm }, { apis: apiList }] = await Promise.all([
-        listRooms(),
-        listDeviceTypes(),
-        listHardwareModels(),
-        listApis(),
-      ]);
+      const [{ rooms: roomsRes }, { deviceTypes: dt }, { hardwareModels: hm }, { apis: apiList }, { equipment: eqList }] =
+        await Promise.all([listRooms(), listDeviceTypes(), listHardwareModels(), listApis(), listEquipment()]);
       const r = sortRooms(roomsRes);
       setRooms(r);
       setDeviceTypes(dt);
       setHardwareModels(hm);
       setApis(apiList);
+      setAllEquipment(eqList);
       if (isEdit) {
         const { equipment } = await getEquipment(Number(equipmentId));
         setRoomId(equipment.roomId);
@@ -62,6 +62,7 @@ export function EquipmentFormModal({ equipmentId, onClose, onSaved }: EquipmentF
         setApiId(equipment.apiId ?? "");
         setName(equipment.name);
         setIsApiStartPoint(equipment.isApiStartPoint);
+        setLinkedEquipmentId(equipment.linkedEquipmentId ?? "");
       } else {
         if (r.length > 0) setRoomId(r[0].id);
       }
@@ -94,6 +95,22 @@ export function EquipmentFormModal({ equipmentId, onClose, onSaved }: EquipmentF
     });
   }
 
+  // Linking is only offered between equipment sharing the same API, so changing the API drops a
+  // link that's no longer valid rather than silently keeping a stale cross-API reference.
+  const linkableEquipment = useMemo(
+    () => (apiId === "" ? [] : allEquipment.filter((e) => e.apiId === apiId && e.id !== equipmentId)),
+    [allEquipment, apiId, equipmentId]
+  );
+
+  function handleApiChange(value: number | "") {
+    setApiId(value);
+    setLinkedEquipmentId((prev) => {
+      if (prev === "") return prev;
+      const stillValid = allEquipment.some((e) => e.id === prev && e.apiId === value);
+      return stillValid ? prev : "";
+    });
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (roomId === "" || deviceTypeId === "" || hardwareModelId === "") return;
@@ -107,6 +124,7 @@ export function EquipmentFormModal({ equipmentId, onClose, onSaved }: EquipmentF
         apiId: apiId === "" ? null : Number(apiId),
         name,
         isApiStartPoint,
+        linkedEquipmentId: linkedEquipmentId === "" ? null : Number(linkedEquipmentId),
       };
       if (isEdit) {
         await updateEquipment(Number(equipmentId), input);
@@ -173,7 +191,7 @@ export function EquipmentFormModal({ equipmentId, onClose, onSaved }: EquipmentF
           </label>
           <label>
             API liée
-            <select value={apiId} onChange={(e) => setApiId(e.target.value ? Number(e.target.value) : "")}>
+            <select value={apiId} onChange={(e) => handleApiChange(e.target.value ? Number(e.target.value) : "")}>
               <option value="">— Aucune —</option>
               {apis.map((api) => (
                 <option key={api.id} value={api.id}>
@@ -185,6 +203,22 @@ export function EquipmentFormModal({ equipmentId, onClose, onSaved }: EquipmentF
           <label className="checkbox-field">
             <input type="checkbox" checked={isApiStartPoint} onChange={(e) => setIsApiStartPoint(e.target.checked)} />
             Point de départ API
+          </label>
+          <label>
+            Lié à
+            <select
+              value={linkedEquipmentId}
+              onChange={(e) => setLinkedEquipmentId(e.target.value ? Number(e.target.value) : "")}
+              disabled={apiId === ""}
+            >
+              <option value="">— Aucun —</option>
+              {linkableEquipment.map((e) => (
+                <option key={e.id} value={e.id}>
+                  {e.name}
+                </option>
+              ))}
+            </select>
+            {apiId === "" && <span className="muted">Choisissez une API liée pour pouvoir lier du matériel.</span>}
           </label>
           {error && <p className="error">{error}</p>}
           <div className="form-actions">

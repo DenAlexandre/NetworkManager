@@ -364,6 +364,21 @@ a {
   flex-shrink: 0;
 }
 
+.stat-card-chart-featured {
+  margin-top: 16px;
+  padding: 48px;
+  gap: 40px;
+  justify-content: center;
+}
+
+.stat-card-chart-featured .stat-value {
+  font-size: 72px;
+}
+
+.stat-card-chart-featured .stat-label {
+  font-size: 20px;
+}
+
 /* tables */
 
 .table {
