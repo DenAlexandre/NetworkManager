@@ -73,10 +73,17 @@ export function EquipmentFormModal({ equipmentId, onClose, onSaved }: EquipmentF
     });
   }, [equipmentId, isEdit]);
 
-  const filteredHardwareModels = useMemo(
-    () => (deviceTypeId === "" ? hardwareModels : hardwareModels.filter((hm) => hm.deviceTypeId === deviceTypeId)),
-    [hardwareModels, deviceTypeId]
-  );
+  // Keeps the currently assigned hardware model visible even if it doesn't match the equipment's
+  // device type (can happen with legacy data — e.g. duplicate device types differing only by
+  // case), so the select never silently renders blank for an already-saved value.
+  const filteredHardwareModels = useMemo(() => {
+    const filtered = deviceTypeId === "" ? hardwareModels : hardwareModels.filter((hm) => hm.deviceTypeId === deviceTypeId);
+    if (hardwareModelId !== "" && !filtered.some((hm) => hm.id === hardwareModelId)) {
+      const current = hardwareModels.find((hm) => hm.id === hardwareModelId);
+      if (current) return [current, ...filtered];
+    }
+    return filtered;
+  }, [hardwareModels, deviceTypeId, hardwareModelId]);
 
   function handleDeviceTypeChange(value: number | "") {
     setDeviceTypeId(value);

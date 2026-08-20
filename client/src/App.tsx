@@ -23,6 +23,7 @@ import { EquipmentListPage } from "./pages/equipment/EquipmentListPage";
 import { EquipmentLinksPage } from "./pages/equipment/EquipmentLinksPage";
 import { ApisListPage } from "./pages/apis/ApisListPage";
 import { AddressingPage } from "./pages/addressing/AddressingPage";
+import { VariablesManagementPage } from "./pages/variables/VariablesManagementPage";
 import { DesignPage } from "./pages/plans/DesignPage";
 import { ConfigurationsLayout } from "./pages/configurations/ConfigurationsLayout";
 import { SwitchConfigPage } from "./pages/configurations/SwitchConfigPage";
@@ -88,6 +89,14 @@ function App() {
             element={
               <AdminRoute>
                 <ApisListPage />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="variables"
+            element={
+              <AdminRoute>
+                <VariablesManagementPage />
               </AdminRoute>
             }
           />

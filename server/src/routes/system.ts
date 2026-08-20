@@ -27,6 +27,7 @@ const TABLES = [
   "equipment",
   "equipment_links",
   "equipment_port_settings",
+  "equipment_variable_settings",
   "design_schemas",
   "switch_configurations",
   "switch_vlans",

@@ -9,7 +9,8 @@ export type SidebarIconName =
   | "sliders"
   | "network"
   | "chart"
-  | "database";
+  | "database"
+  | "tag";
 
 // Simple flat/line-style icons (single color, drawn from basic primitives), one per sidebar
 // section — self-contained so the sidebar never depends on an external icon set being reachable.
@@ -80,6 +81,12 @@ const ICON_CONTENT: Record<SidebarIconName, ReactNode> = {
       <ellipse cx="12" cy="6" rx="7" ry="3" />
       <path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6" />
       <path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6" />
+    </>
+  ),
+  tag: (
+    <>
+      <path d="M11 4h6a1 1 0 0 1 1 1v6a1 1 0 0 1-.3.7l-8 8a1 1 0 0 1-1.4 0l-6-6a1 1 0 0 1 0-1.4l8-8A1 1 0 0 1 11 4Z" />
+      <circle cx="15" cy="8" r="1.5" />
     </>
   ),
 };

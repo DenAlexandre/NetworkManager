@@ -257,6 +257,17 @@ CREATE TABLE IF NOT EXISTS equipment_port_settings (
   UNIQUE (equipment_id, hardware_model_port_id)
 );
 
+-- Reglages par instance de materiel pour chaque variable de son modele : mnemonique et
+-- description propres a cet equipement, distincts de la variable catalogue elle-meme.
+CREATE TABLE IF NOT EXISTS equipment_variable_settings (
+  id SERIAL PRIMARY KEY,
+  equipment_id INTEGER NOT NULL REFERENCES equipment(id) ON DELETE CASCADE,
+  hardware_model_variable_id INTEGER NOT NULL REFERENCES hardware_model_variables(id) ON DELETE CASCADE,
+  mnemonic VARCHAR(150) NOT NULL DEFAULT '',
+  description VARCHAR(255) NOT NULL DEFAULT '',
+  UNIQUE (equipment_id, hardware_model_variable_id)
+);
+
 CREATE TABLE IF NOT EXISTS apis (
   id SERIAL PRIMARY KEY,
   name VARCHAR(200) NOT NULL,
