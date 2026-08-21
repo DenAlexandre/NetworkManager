@@ -1,5 +1,3 @@
-import fs from "fs";
-import path from "path";
 import { Response, Router } from "express";
 import multer from "multer";
 import archiver from "archiver";
@@ -8,11 +6,11 @@ import { z } from "zod";
 import { pool } from "../db/pool";
 import { requireAuth } from "../middleware/auth";
 import { requirePermission } from "../permissions";
+import { uploadStorage } from "../services/uploadStorage";
 
 const router = Router();
 router.use(requireAuth, requirePermission("system"));
 
-const UPLOADS_DIR = path.resolve(process.cwd(), "uploads");
 const filesUpload = multer({ storage: multer.memoryStorage() });
 
 // Gestion des droits (comptes + rôles/permissions) : sauvegardée/restaurée séparément de la
@@ -204,10 +202,9 @@ router.post("/database/restore-rights", async (req, res) => {
 });
 
 // Fichiers uploadés (photos de matériel, fiches techniques matériel/sites) : sauvegarde/
-// restauration séparées de la sauvegarde base de données ci-dessus, car ce sont des fichiers
-// binaires servis depuis le disque (`uploads/`), pas des lignes de table. Zippe/dézippe le
-// dossier `uploads/` tel quel, donc couvre aussi tout futur type de fichier uploadé sans
-// modification ici.
+// restauration séparées de la sauvegarde base de données ci-dessus. Passe par `uploadStorage`
+// (disque local ou bucket Supabase selon STORAGE_DRIVER) plutôt que par le disque directement, donc
+// fonctionne à l'identique quel que soit le déploiement.
 router.get("/database/backup-files", async (_req, res) => {
   const filename = `backup-files-${new Date().toISOString().replace(/[:.]/g, "-")}.zip`;
   res.setHeader("Content-Type", "application/zip");
@@ -218,8 +215,8 @@ router.get("/database/backup-files", async (_req, res) => {
     throw err;
   });
   archive.pipe(res);
-  if (fs.existsSync(UPLOADS_DIR)) {
-    archive.directory(UPLOADS_DIR, false);
+  for (const relativePath of await uploadStorage.listAllFiles()) {
+    archive.append(await uploadStorage.readFile(relativePath), { name: relativePath });
   }
   await archive.finalize();
 });
@@ -238,13 +235,11 @@ router.post("/database/restore-files", filesUpload.single("file"), async (req, r
 
   // Full replace, matching /database/restore's TRUNCATE-then-insert semantics: clear the
   // existing uploads before extracting so the result exactly matches the backup's contents.
-  // UPLOADS_DIR itself is a Docker volume mount point in the compose deployment, so only its
-  // contents can be removed (rmdir-ing the mount point itself fails with EBUSY).
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-  for (const entry of fs.readdirSync(UPLOADS_DIR)) {
-    fs.rmSync(path.join(UPLOADS_DIR, entry), { recursive: true, force: true });
+  await uploadStorage.clearAll();
+  for (const entry of zip.getEntries()) {
+    if (entry.isDirectory) continue;
+    await uploadStorage.writeFile(entry.entryName, entry.getData());
   }
-  zip.extractAllTo(UPLOADS_DIR, true);
 
   res.json({ success: true });
 });

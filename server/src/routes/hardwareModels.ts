@@ -1,4 +1,3 @@
-import fs from "fs";
 import path from "path";
 import { Router } from "express";
 import multer from "multer";
@@ -6,6 +5,7 @@ import { z } from "zod";
 import { pool } from "../db/pool";
 import { requireAuth } from "../middleware/auth";
 import { requirePermission } from "../permissions";
+import { uploadStorage } from "../services/uploadStorage";
 
 const router = Router();
 router.use(requireAuth, requirePermission("data-types"));
@@ -27,7 +27,7 @@ const HARDWARE_MODEL_SELECT = `
   JOIN device_types dt ON dt.id = hm.device_type_id
 `;
 
-const IMAGE_UPLOAD_DIR = path.resolve(process.cwd(), "uploads", "hardware-models");
+const IMAGE_DIR = "hardware-models";
 const IMAGE_MIME_EXTENSIONS: Record<string, string> = {
   "image/png": ".png",
   "image/jpeg": ".jpg",
@@ -36,16 +36,7 @@ const IMAGE_MIME_EXTENSIONS: Record<string, string> = {
 };
 
 const imageUpload = multer({
-  storage: multer.diskStorage({
-    destination: (_req, _file, cb) => {
-      fs.mkdirSync(IMAGE_UPLOAD_DIR, { recursive: true });
-      cb(null, IMAGE_UPLOAD_DIR);
-    },
-    filename: (req, file, cb) => {
-      const ext = IMAGE_MIME_EXTENSIONS[file.mimetype];
-      cb(null, `${req.params.id}-${Date.now()}${ext}`);
-    },
-  }),
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (!IMAGE_MIME_EXTENSIONS[file.mimetype]) {
@@ -58,26 +49,16 @@ const imageUpload = multer({
 
 function deleteImageFile(imagePath: string | null | undefined) {
   if (!imagePath) return;
-  const filePath = path.join(IMAGE_UPLOAD_DIR, path.basename(imagePath));
-  fs.rm(filePath, { force: true }, () => {});
+  uploadStorage.remove(IMAGE_DIR, path.basename(imagePath));
 }
 
-const DATASHEET_UPLOAD_DIR = path.resolve(process.cwd(), "uploads", "hardware-model-datasheets");
+const DATASHEET_DIR = "hardware-model-datasheets";
 const DATASHEET_MIME_EXTENSIONS: Record<string, string> = {
   "application/pdf": ".pdf",
 };
 
 const datasheetUpload = multer({
-  storage: multer.diskStorage({
-    destination: (_req, _file, cb) => {
-      fs.mkdirSync(DATASHEET_UPLOAD_DIR, { recursive: true });
-      cb(null, DATASHEET_UPLOAD_DIR);
-    },
-    filename: (req, file, cb) => {
-      const ext = DATASHEET_MIME_EXTENSIONS[file.mimetype];
-      cb(null, `${req.params.id}-${Date.now()}${ext}`);
-    },
-  }),
+  storage: multer.memoryStorage(),
   limits: { fileSize: 20 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (!DATASHEET_MIME_EXTENSIONS[file.mimetype]) {
@@ -90,8 +71,7 @@ const datasheetUpload = multer({
 
 function deleteDatasheetFile(datasheetPath: string | null | undefined) {
   if (!datasheetPath) return;
-  const filePath = path.join(DATASHEET_UPLOAD_DIR, path.basename(datasheetPath));
-  fs.rm(filePath, { force: true }, () => {});
+  uploadStorage.remove(DATASHEET_DIR, path.basename(datasheetPath));
 }
 
 function parseId(raw: string) {
@@ -204,12 +184,13 @@ router.post("/:id/image", (req, res, next) => {
     if (!req.file) {
       return res.status(400).json({ error: "Aucune image fournie." });
     }
+    const filename = `${id}-${Date.now()}${IMAGE_MIME_EXTENSIONS[req.file.mimetype]}`;
     const existing = await pool.query("SELECT image_path FROM hardware_models WHERE id = $1", [id]);
     if (!existing.rowCount) {
-      deleteImageFile(req.file.filename);
       return res.status(404).json({ error: "Matériel introuvable." });
     }
-    await pool.query("UPDATE hardware_models SET image_path = $1 WHERE id = $2", [req.file.filename, id]);
+    await uploadStorage.save(req.file.buffer, IMAGE_DIR, filename);
+    await pool.query("UPDATE hardware_models SET image_path = $1 WHERE id = $2", [filename, id]);
     deleteImageFile(existing.rows[0].image_path);
     const result = await pool.query(`${HARDWARE_MODEL_SELECT} WHERE hm.id = $1`, [id]);
     res.json({ hardwareModel: result.rows[0] });
@@ -243,12 +224,13 @@ router.post("/:id/datasheet", (req, res, next) => {
     if (!req.file) {
       return res.status(400).json({ error: "Aucun fichier fourni." });
     }
+    const filename = `${id}-${Date.now()}${DATASHEET_MIME_EXTENSIONS[req.file.mimetype]}`;
     const existing = await pool.query("SELECT datasheet_path FROM hardware_models WHERE id = $1", [id]);
     if (!existing.rowCount) {
-      deleteDatasheetFile(req.file.filename);
       return res.status(404).json({ error: "Matériel introuvable." });
     }
-    await pool.query("UPDATE hardware_models SET datasheet_path = $1 WHERE id = $2", [req.file.filename, id]);
+    await uploadStorage.save(req.file.buffer, DATASHEET_DIR, filename);
+    await pool.query("UPDATE hardware_models SET datasheet_path = $1 WHERE id = $2", [filename, id]);
     deleteDatasheetFile(existing.rows[0].datasheet_path);
     const result = await pool.query(`${HARDWARE_MODEL_SELECT} WHERE hm.id = $1`, [id]);
     res.json({ hardwareModel: result.rows[0] });

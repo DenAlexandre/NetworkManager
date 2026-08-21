@@ -1,5 +1,9 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 export const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
+// Overridable so uploaded files (hardware photos/datasheets) can be served from a remote object
+// store (e.g. a Supabase Storage bucket on the Cloudflare Pages + Render deployment) instead of
+// the backend's own /uploads static mount.
+export const UPLOADS_BASE_URL = import.meta.env.VITE_UPLOADS_BASE_URL || `${API_ORIGIN}/uploads`;
 
 export class ApiError extends Error {
   status: number;

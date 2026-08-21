@@ -11,6 +11,7 @@
     "seed": "tsx src/db/seed.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.112.3",
     "adm-zip": "^0.6.0",
     "archiver": "^7.0.1",
     "bcrypt": "^5.1.1",

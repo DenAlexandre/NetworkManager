@@ -26,10 +26,14 @@ const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+// Cross-site deployments (e.g. Cloudflare Pages frontend + Render backend, different domains) need
+// sameSite "none" for the browser to send the cookie at all, which in turn requires "secure" (both
+// sides are HTTPS there). Same-origin/Docker deployments keep the stricter "lax" default.
+const CROSS_SITE = process.env.COOKIE_CROSS_SITE === "true";
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  sameSite: "lax" as const,
-  secure: process.env.NODE_ENV === "production",
+  sameSite: CROSS_SITE ? ("none" as const) : ("lax" as const),
+  secure: CROSS_SITE || process.env.NODE_ENV === "production",
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 

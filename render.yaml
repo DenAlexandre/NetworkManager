@@ -1,0 +1,47 @@
+# Render Blueprint for the NetworkManager backend (free Web Service, no Docker).
+# See docs/deploiement-gratuit.md for the full deployment walkthrough (Supabase + Cloudflare Pages).
+services:
+  - type: web
+    name: networkmanager-backend
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm ci && npm run build
+    startCommand: npm run migrate && npm run seed && npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 4000
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_SSL
+        value: "true"
+      - key: COOKIE_CROSS_SITE
+        value: "true"
+      - key: STORAGE_DRIVER
+        value: supabase
+      # Secrets / per-deployment values: fill in from the Render dashboard on first deploy.
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        sync: false
+      - key: SEED_ADMIN_USERNAME
+        sync: false
+      - key: SEED_ADMIN_FIRST_NAME
+        sync: false
+      - key: SEED_ADMIN_LAST_NAME
+        sync: false
+      - key: SEED_ADMIN_EMAIL
+        sync: false
+      - key: SEED_ADMIN_PHONE
+        sync: false
+      - key: SEED_ADMIN_PASSWORD
+        sync: false

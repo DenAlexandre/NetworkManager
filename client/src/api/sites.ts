@@ -1,4 +1,4 @@
-import { API_ORIGIN, apiFetch, apiUpload } from "./client";
+import { UPLOADS_BASE_URL, apiFetch, apiUpload } from "./client";
 
 export interface Site {
   id: number;
@@ -11,7 +11,7 @@ export interface SiteInput {
 }
 
 export function siteDatasheetUrl(datasheetPath: string) {
-  return `${API_ORIGIN}/uploads/site-datasheets/${datasheetPath}`;
+  return `${UPLOADS_BASE_URL}/site-datasheets/${datasheetPath}`;
 }
 
 export function listSites() {

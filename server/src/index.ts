@@ -44,6 +44,9 @@ app.use(express.json({ limit: "200mb" }));
 app.use(cookieParser());
 app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
+// Used by Render's health check (no auth, no DB dependency — just confirms the process is up).
+app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
+
 app.use("/api/auth", authRoutes);
 app.use("/api/device-types", deviceTypeRoutes);
 app.use("/api/link-types", linkTypeRoutes);

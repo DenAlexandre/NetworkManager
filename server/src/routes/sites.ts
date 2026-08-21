@@ -1,4 +1,3 @@
-import fs from "fs";
 import path from "path";
 import { Router } from "express";
 import multer from "multer";
@@ -6,6 +5,7 @@ import { z } from "zod";
 import { pool } from "../db/pool";
 import { requireAuth } from "../middleware/auth";
 import { requirePermission } from "../permissions";
+import { uploadStorage } from "../services/uploadStorage";
 
 const router = Router();
 router.use(requireAuth, requirePermission("sites"));
@@ -16,22 +16,13 @@ const siteSchema = z.object({
 
 const SITE_SELECT = `SELECT id, name, datasheet_path AS "datasheetPath" FROM sites`;
 
-const DATASHEET_UPLOAD_DIR = path.resolve(process.cwd(), "uploads", "site-datasheets");
+const DATASHEET_DIR = "site-datasheets";
 const DATASHEET_MIME_EXTENSIONS: Record<string, string> = {
   "application/pdf": ".pdf",
 };
 
 const datasheetUpload = multer({
-  storage: multer.diskStorage({
-    destination: (_req, _file, cb) => {
-      fs.mkdirSync(DATASHEET_UPLOAD_DIR, { recursive: true });
-      cb(null, DATASHEET_UPLOAD_DIR);
-    },
-    filename: (req, file, cb) => {
-      const ext = DATASHEET_MIME_EXTENSIONS[file.mimetype];
-      cb(null, `${req.params.id}-${Date.now()}${ext}`);
-    },
-  }),
+  storage: multer.memoryStorage(),
   limits: { fileSize: 20 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (!DATASHEET_MIME_EXTENSIONS[file.mimetype]) {
@@ -44,8 +35,7 @@ const datasheetUpload = multer({
 
 function deleteDatasheetFile(datasheetPath: string | null | undefined) {
   if (!datasheetPath) return;
-  const filePath = path.join(DATASHEET_UPLOAD_DIR, path.basename(datasheetPath));
-  fs.rm(filePath, { force: true }, () => {});
+  uploadStorage.remove(DATASHEET_DIR, path.basename(datasheetPath));
 }
 
 function parseId(raw: string) {
@@ -131,12 +121,13 @@ router.post("/:id/datasheet", (req, res, next) => {
     if (!req.file) {
       return res.status(400).json({ error: "Aucun fichier fourni." });
     }
+    const filename = `${id}-${Date.now()}${DATASHEET_MIME_EXTENSIONS[req.file.mimetype]}`;
     const existing = await pool.query("SELECT datasheet_path FROM sites WHERE id = $1", [id]);
     if (!existing.rowCount) {
-      deleteDatasheetFile(req.file.filename);
       return res.status(404).json({ error: "Site introuvable." });
     }
-    await pool.query("UPDATE sites SET datasheet_path = $1 WHERE id = $2", [req.file.filename, id]);
+    await uploadStorage.save(req.file.buffer, DATASHEET_DIR, filename);
+    await pool.query("UPDATE sites SET datasheet_path = $1 WHERE id = $2", [filename, id]);
     deleteDatasheetFile(existing.rows[0].datasheet_path);
     const result = await pool.query(`${SITE_SELECT} WHERE id = $1`, [id]);
     res.json({ site: result.rows[0] });

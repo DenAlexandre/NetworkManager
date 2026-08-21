@@ -1,4 +1,4 @@
-import { API_ORIGIN, apiFetch, apiUpload } from "./client";
+import { UPLOADS_BASE_URL, apiFetch, apiUpload } from "./client";
 
 export interface HardwareModel {
   id: number;
@@ -13,11 +13,11 @@ export interface HardwareModel {
 }
 
 export function hardwareModelImageUrl(imagePath: string) {
-  return `${API_ORIGIN}/uploads/hardware-models/${imagePath}`;
+  return `${UPLOADS_BASE_URL}/hardware-models/${imagePath}`;
 }
 
 export function hardwareModelDatasheetUrl(datasheetPath: string) {
-  return `${API_ORIGIN}/uploads/hardware-model-datasheets/${datasheetPath}`;
+  return `${UPLOADS_BASE_URL}/hardware-model-datasheets/${datasheetPath}`;
 }
 
 export interface HardwareModelInput {
