@@ -9,6 +9,7 @@ import {
 } from "../../api/system";
 import { ApiError } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
+import { RightsBackupCard } from "./RightsBackupCard";
 
 export function DatabasePage() {
   const { logout } = useAuth();
@@ -145,19 +146,19 @@ export function DatabasePage() {
       </div>
 
       <div className="card card-compact-top">
-        <h2>Sauvegarde</h2>
+        <h2>Données</h2>
         <p className="muted">
-          Télécharge un fichier contenant l'intégralité des données de l'application (hors fichiers images et PDF,
-          sauvegardés séparément ci-dessous).
+          Télécharge un fichier contenant l'intégralité des données de l'application, hors Gestion des droits
+          (comptes/rôles/droits, sauvegardés séparément ci-dessous) et fichiers images/PDF (sauvegardés
+          séparément plus bas).
         </p>
         <button type="button" className="btn" onClick={handleBackup} disabled={backingUp}>
           {backingUp ? "Préparation..." : "Télécharger la sauvegarde"}
         </button>
         {backupError && <p className="error">{backupError}</p>}
-      </div>
 
-      <div className="card card-compact-top">
-        <h2>Restauration</h2>
+        <hr />
+
         <p className="error">
           Attention : la restauration remplace intégralement les données actuelles par celles du fichier choisi.
           Cette action est irréversible et déconnectera tous les utilisateurs.
@@ -179,6 +180,8 @@ export function DatabasePage() {
         </div>
         {restoreError && <p className="error">{restoreError}</p>}
       </div>
+
+      <RightsBackupCard />
 
       <div className="card card-compact-top">
         <h2>Fichiers (photos et fiches techniques)</h2>

@@ -23,6 +23,17 @@ export function restoreDatabase(payload: unknown) {
   });
 }
 
+export function downloadRightsBackup() {
+  return downloadBlob("/system/database/backup-rights");
+}
+
+export function restoreRights(payload: unknown) {
+  return apiFetch<{ success: boolean }>("/system/database/restore-rights", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 export function downloadFilesBackup() {
   return downloadBlob("/system/database/backup-files");
 }

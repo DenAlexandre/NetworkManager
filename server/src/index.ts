@@ -32,7 +32,11 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 
-app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }));
+// exposedHeaders: Content-Disposition isn't in the default CORS-safelisted response headers, so
+// without this, fetch()'s res.headers.get("Content-Disposition") on the client returns null for
+// cross-origin requests (e.g. the local dev setup, client:5173 -> server:4000) and download
+// filenames (backups, exports) silently fall back to a generic name.
+app.use(cors({ origin: CLIENT_ORIGIN, credentials: true, exposedHeaders: ["Content-Disposition"] }));
 // Higher limit than the default 100kb: a full database backup/restore payload can exceed it, and
 // keeps growing as more equipment/switch/moxa data is added — 25mb was already too tight (a real
 // backup hit ~27mb) so this leaves generous headroom rather than needing another bump soon.

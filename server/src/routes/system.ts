@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { Router } from "express";
+import { Response, Router } from "express";
 import multer from "multer";
 import archiver from "archiver";
 import AdmZip from "adm-zip";
@@ -15,15 +15,19 @@ router.use(requireAuth, requirePermission("system"));
 const UPLOADS_DIR = path.resolve(process.cwd(), "uploads");
 const filesUpload = multer({ storage: multer.memoryStorage() });
 
+// Gestion des droits (comptes + rôles/permissions) : sauvegardée/restaurée séparément de la
+// sauvegarde "Données" ci-dessous via /database/backup-rights et /database/restore-rights.
+// `roles` doit précéder `users` (FK `users.role_id`) et `role_permissions` (FK `role_id`).
+const RIGHTS_TABLES = ["roles", "role_permissions", "users"];
+
 // Order matters: parents before children, so restore can insert rows without violating
 // foreign-key constraints. Matches the FK relationships in db/migrate.ts (note that although
 // `equipment` is created before `apis` in the schema, `equipment.api_id` references `apis`,
-// so `apis` must be restored first). `roles` must precede `users` since `users.role_id`
-// references it.
-const TABLES = [
-  "roles",
-  "role_permissions",
-  "users",
+// so `apis` must be restored first). Note that `switch_configurations.imported_by_id` and
+// `mgate_configurations.imported_by_id` reference `users(id)` — restoring this list onto a
+// database whose `users` don't have matching ids yet (e.g. before a Gestion des droits restore)
+// will fail; restore Gestion des droits first when rebuilding from scratch.
+const DATA_TABLES = [
   "device_types",
   "brands",
   "link_types",
@@ -65,11 +69,9 @@ const CATALOG_TABLES = [
   "hardware_model_variables",
   "hardware_model_port_aliases",
 ];
-// roles/role_permissions define access for the accounts the reset keeps, so they must survive
-// it too — truncating `roles` with CASCADE would otherwise also wipe `users` (FK `role_id`).
-const RESET_TABLES = TABLES.filter(
-  (t) => t !== "users" && t !== "roles" && t !== "role_permissions" && !CATALOG_TABLES.includes(t)
-);
+// Gestion des droits (users/roles/role_permissions) survit à la réinitialisation au même titre
+// que le catalogue — ce sont les comptes existants et leurs droits, pas des données d'instance.
+const RESET_TABLES = DATA_TABLES.filter((t) => !CATALOG_TABLES.includes(t));
 
 // Columns that hold JSONB data and must be re-stringified before being sent back as an
 // INSERT parameter (node-postgres returns them already parsed as JS objects from SELECT).
@@ -100,9 +102,9 @@ const restoreSchema = z.object({
   tables: z.record(z.string(), z.array(z.record(z.string(), z.any()))),
 });
 
-router.get("/database/backup", async (_req, res) => {
+async function backupTables(tableList: string[]) {
   const tables: Record<string, unknown[]> = {};
-  for (const table of TABLES) {
+  for (const table of tableList) {
     const result = await pool.query(`SELECT * FROM ${table}`);
     const binaryColumns = BINARY_COLUMNS[table] ?? [];
     tables[table] = binaryColumns.length
@@ -115,26 +117,23 @@ router.get("/database/backup", async (_req, res) => {
         })
       : result.rows;
   }
-  const payload = { version: 1, createdAt: new Date().toISOString(), tables };
-  const filename = `networkmanager-backup-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+  return { version: 1, createdAt: new Date().toISOString(), tables };
+}
+
+function sendBackup(res: Response, payload: unknown, filenamePrefix: string) {
+  const filename = `${filenamePrefix}-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
   res.send(JSON.stringify(payload, null, 2));
-});
+}
 
-router.post("/database/restore", async (req, res) => {
-  const parsed = restoreSchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({ error: "Fichier de sauvegarde invalide." });
-  }
-  const { tables } = parsed.data;
-
+async function restoreTables(tableList: string[], tables: Record<string, Record<string, unknown>[]>) {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    await client.query(`TRUNCATE ${TABLES.join(", ")} RESTART IDENTITY CASCADE`);
+    await client.query(`TRUNCATE ${tableList.join(", ")} RESTART IDENTITY CASCADE`);
 
-    for (const table of TABLES) {
+    for (const table of tableList) {
       const rows = tables[table] ?? [];
       const jsonColumns = JSON_COLUMNS[table] ?? [];
       const binaryColumns = BINARY_COLUMNS[table] ?? [];
@@ -174,7 +173,33 @@ router.post("/database/restore", async (req, res) => {
   } finally {
     client.release();
   }
+}
 
+router.get("/database/backup", async (_req, res) => {
+  sendBackup(res, await backupTables(DATA_TABLES), "backup-data");
+});
+
+router.post("/database/restore", async (req, res) => {
+  const parsed = restoreSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Fichier de sauvegarde invalide." });
+  }
+  await restoreTables(DATA_TABLES, parsed.data.tables);
+  res.json({ success: true });
+});
+
+// Gestion des droits (Utilisateurs/Rôle/Droits) : sauvegarde/restauration séparées de la
+// sauvegarde "Données" ci-dessus.
+router.get("/database/backup-rights", async (_req, res) => {
+  sendBackup(res, await backupTables(RIGHTS_TABLES), "backup-rights");
+});
+
+router.post("/database/restore-rights", async (req, res) => {
+  const parsed = restoreSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Fichier de sauvegarde invalide." });
+  }
+  await restoreTables(RIGHTS_TABLES, parsed.data.tables);
   res.json({ success: true });
 });
 
@@ -184,7 +209,7 @@ router.post("/database/restore", async (req, res) => {
 // dossier `uploads/` tel quel, donc couvre aussi tout futur type de fichier uploadé sans
 // modification ici.
 router.get("/database/backup-files", async (_req, res) => {
-  const filename = `networkmanager-fichiers-${new Date().toISOString().replace(/[:.]/g, "-")}.zip`;
+  const filename = `backup-files-${new Date().toISOString().replace(/[:.]/g, "-")}.zip`;
   res.setHeader("Content-Type", "application/zip");
   res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
 
