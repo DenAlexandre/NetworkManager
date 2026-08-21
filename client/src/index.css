@@ -539,21 +539,24 @@ a {
   white-space: pre-wrap;
 }
 
-.variables-config-table th:nth-child(4),
-.variables-config-table th:nth-child(5) {
-  width: 36%;
+.variables-config-table-wrapper {
+  overflow-x: auto;
+}
+
+.variables-config-table {
+  width: 100%;
+  min-width: 1500px;
 }
 
 .variables-config-table input,
 .variables-config-table textarea {
   width: 100%;
-  min-width: 420px;
+  min-width: 340px;
   font-size: 15px;
 }
 
-.variables-config-table textarea {
-  min-height: 72px;
-  resize: vertical;
+.variables-config-table td:nth-child(6) input {
+  min-width: 420px;
 }
 
 .table tr:last-child td {
@@ -797,7 +800,7 @@ button:disabled {
 }
 
 .modal-dialog-xwide {
-  max-width: 1400px;
+  max-width: 2000px;
 }
 
 .modal-header {
