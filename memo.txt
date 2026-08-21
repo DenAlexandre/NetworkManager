@@ -32,6 +32,9 @@ Demo123
 
 
 
+https://networkmanager-backend.onrender.com
+https://networkmanager.dalexandre-semeru.workers.dev/
+
 
 
 
