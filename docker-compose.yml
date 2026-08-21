@@ -1,0 +1,44 @@
+# All-in-one deployment: client + server + PostgreSQL in a single container
+# (docker/allinone/Dockerfile). This is independent of the day-to-day dev
+# workflow (scripts/start-db.ps1 + run-dev.ps1 + the "networkmanager-db"
+# container), which is unaffected by this file.
+#
+# Quick start:
+#   cp .env.example .env      # edit JWT_SECRET / SEED_ADMIN_PASSWORD / etc.
+#   docker compose up -d --build
+#   -> http://localhost:8080
+#
+# Or use ./scripts/run-allinone.ps1, which does the above (and can recreate it).
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/allinone/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    container_name: networkmanager-allinone
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:80"
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-networkmanager}
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-postgres}@127.0.0.1:5432/${POSTGRES_DB:-networkmanager}
+      JWT_SECRET: ${JWT_SECRET:?Definissez JWT_SECRET dans .env (voir .env.example)}
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:8080}
+      SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-admin}
+      SEED_ADMIN_FIRST_NAME: ${SEED_ADMIN_FIRST_NAME:-Admin}
+      SEED_ADMIN_LAST_NAME: ${SEED_ADMIN_LAST_NAME:-Admin}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@example.com}
+      SEED_ADMIN_PHONE: ${SEED_ADMIN_PHONE:-0000000000}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?Definissez SEED_ADMIN_PASSWORD dans .env (voir .env.example)}
+    volumes:
+      - networkmanager-allinone-pgdata:/var/lib/postgresql/data
+      - networkmanager-allinone-uploads:/app/server/uploads
+
+volumes:
+  networkmanager-allinone-pgdata:
+    name: networkmanager-allinone-pgdata
+  networkmanager-allinone-uploads:
+    name: networkmanager-allinone-uploads
