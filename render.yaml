@@ -6,7 +6,9 @@ services:
     runtime: node
     plan: free
     rootDir: server
-    buildCommand: npm ci && npm run build
+    # --include=dev: NODE_ENV=production below would otherwise make npm skip devDependencies
+    # (typescript, @types/*), which the build needs even though the app runs in production.
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm run migrate && npm run seed && npm run start
     healthCheckPath: /api/health
     envVars:
