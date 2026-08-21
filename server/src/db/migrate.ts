@@ -70,10 +70,15 @@ WHERE NOT EXISTS (SELECT 1 FROM roles WHERE is_default_registration_role = true)
 ALTER TABLE users ADD COLUMN IF NOT EXISTS role_id INTEGER REFERENCES roles(id);
 -- "role" is dropped below once migrated, so a later re-run of this script (once
 -- every existing database has already gone through this transition) would
--- otherwise fail with "column role does not exist" on these UPDATEs.
+-- otherwise fail with "column role does not exist" on these UPDATEs. Must be scoped to the
+-- "public" schema: on Supabase, "auth.users" also has a "role" column (Postgres RLS role, unrelated
+-- to ours), so an unscoped lookup here always finds a match and never lets this guard turn off.
 DO $$
 BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'role') THEN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'role'
+  ) THEN
     UPDATE users SET role_id = (SELECT id FROM roles WHERE is_admin = true)
       WHERE role_id IS NULL AND role = 'admin';
     UPDATE users SET role_id = (SELECT id FROM roles WHERE is_default_registration_role = true)
