@@ -1,6 +1,12 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { downloadDatabaseBackup, resetDatabaseKeepDataTypes, restoreDatabase } from "../../api/system";
+import {
+  downloadDatabaseBackup,
+  downloadFilesBackup,
+  resetDatabaseKeepDataTypes,
+  restoreDatabase,
+  restoreFilesBackup,
+} from "../../api/system";
 import { ApiError } from "../../api/client";
 import { useAuth } from "../../context/AuthContext";
 
@@ -19,6 +25,15 @@ export function DatabasePage() {
   const [resetting, setResetting] = useState(false);
   const [resetError, setResetError] = useState<string | null>(null);
   const [resetSuccess, setResetSuccess] = useState(false);
+
+  const [filesBackingUp, setFilesBackingUp] = useState(false);
+  const [filesBackupError, setFilesBackupError] = useState<string | null>(null);
+
+  const [restoreFilesArchive, setRestoreFilesArchive] = useState<File | null>(null);
+  const [restoringFiles, setRestoringFiles] = useState(false);
+  const [restoreFilesError, setRestoreFilesError] = useState<string | null>(null);
+  const [restoreFilesSuccess, setRestoreFilesSuccess] = useState(false);
+  const filesInputRef = useRef<HTMLInputElement>(null);
 
   async function handleBackup() {
     setBackupError(null);
@@ -63,6 +78,43 @@ export function DatabasePage() {
     }
   }
 
+  async function handleFilesBackup() {
+    setFilesBackupError(null);
+    setFilesBackingUp(true);
+    try {
+      await downloadFilesBackup();
+    } catch (err) {
+      setFilesBackupError(err instanceof ApiError ? err.message : "Erreur lors de la sauvegarde des fichiers.");
+    } finally {
+      setFilesBackingUp(false);
+    }
+  }
+
+  async function handleRestoreFiles() {
+    if (!restoreFilesArchive) return;
+    if (
+      !window.confirm(
+        "Cette action va remplacer TOUS les fichiers actuels (photos de matériel, fiches techniques) par ceux de " +
+          "l'archive choisie. Cette action est irréversible. Continuer ?"
+      )
+    ) {
+      return;
+    }
+    setRestoreFilesError(null);
+    setRestoreFilesSuccess(false);
+    setRestoringFiles(true);
+    try {
+      await restoreFilesBackup(restoreFilesArchive);
+      setRestoreFilesArchive(null);
+      if (filesInputRef.current) filesInputRef.current.value = "";
+      setRestoreFilesSuccess(true);
+    } catch (err) {
+      setRestoreFilesError(err instanceof ApiError ? err.message : "Erreur lors de la restauration des fichiers.");
+    } finally {
+      setRestoringFiles(false);
+    }
+  }
+
   async function handleReset() {
     if (
       !window.confirm(
@@ -96,7 +148,7 @@ export function DatabasePage() {
         <h2>Sauvegarde</h2>
         <p className="muted">
           Télécharge un fichier contenant l'intégralité des données de l'application (hors fichiers images et PDF,
-          qui restent sur le serveur).
+          sauvegardés séparément ci-dessous).
         </p>
         <button type="button" className="btn" onClick={handleBackup} disabled={backingUp}>
           {backingUp ? "Préparation..." : "Télécharger la sauvegarde"}
@@ -126,9 +178,50 @@ export function DatabasePage() {
           </button>
         </div>
         {restoreError && <p className="error">{restoreError}</p>}
+      </div>
+
+      <div className="card card-compact-top">
+        <h2>Fichiers (photos et fiches techniques)</h2>
+        <p className="muted">
+          Télécharge une archive contenant toutes les photos de matériel et fiches techniques (matériel et sites)
+          actuellement stockées sur le serveur.
+        </p>
+        <button type="button" className="btn" onClick={handleFilesBackup} disabled={filesBackingUp}>
+          {filesBackingUp ? "Préparation..." : "Télécharger les fichiers"}
+        </button>
+        {filesBackupError && <p className="error">{filesBackupError}</p>}
 
         <hr />
 
+        <p className="error">
+          Attention : la restauration remplace intégralement les fichiers actuels par ceux de l'archive choisie.
+          Cette action est irréversible.
+        </p>
+        <div className="inline-form">
+          <label>
+            Archive de fichiers
+            <input
+              type="file"
+              accept="application/zip,.zip"
+              ref={filesInputRef}
+              onChange={(e) => setRestoreFilesArchive(e.currentTarget.files?.[0] ?? null)}
+              disabled={restoringFiles}
+            />
+          </label>
+          <button
+            type="button"
+            className="danger"
+            onClick={handleRestoreFiles}
+            disabled={!restoreFilesArchive || restoringFiles}
+          >
+            {restoringFiles ? "Restauration..." : "Restaurer"}
+          </button>
+        </div>
+        {restoreFilesError && <p className="error">{restoreFilesError}</p>}
+        {restoreFilesSuccess && <p className="success">Les fichiers ont été restaurés.</p>}
+      </div>
+
+      <div className="card card-compact-top">
         <h3>Réinitialisation (RAZ)</h3>
         <p className="error">
           Attention : cette action supprime toutes les données (sites, matériel, API, configurations switch/moxa,

@@ -1,4 +1,9 @@
+import fs from "fs";
+import path from "path";
 import { Router } from "express";
+import multer from "multer";
+import archiver from "archiver";
+import AdmZip from "adm-zip";
 import { z } from "zod";
 import { pool } from "../db/pool";
 import { requireAuth } from "../middleware/auth";
@@ -6,6 +11,9 @@ import { requirePermission } from "../permissions";
 
 const router = Router();
 router.use(requireAuth, requirePermission("system"));
+
+const UPLOADS_DIR = path.resolve(process.cwd(), "uploads");
+const filesUpload = multer({ storage: multer.memoryStorage() });
 
 // Order matters: parents before children, so restore can insert rows without violating
 // foreign-key constraints. Matches the FK relationships in db/migrate.ts (note that although
@@ -166,6 +174,52 @@ router.post("/database/restore", async (req, res) => {
   } finally {
     client.release();
   }
+
+  res.json({ success: true });
+});
+
+// Fichiers uploadés (photos de matériel, fiches techniques matériel/sites) : sauvegarde/
+// restauration séparées de la sauvegarde base de données ci-dessus, car ce sont des fichiers
+// binaires servis depuis le disque (`uploads/`), pas des lignes de table. Zippe/dézippe le
+// dossier `uploads/` tel quel, donc couvre aussi tout futur type de fichier uploadé sans
+// modification ici.
+router.get("/database/backup-files", async (_req, res) => {
+  const filename = `networkmanager-fichiers-${new Date().toISOString().replace(/[:.]/g, "-")}.zip`;
+  res.setHeader("Content-Type", "application/zip");
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+
+  const archive = archiver("zip", { zlib: { level: 9 } });
+  archive.on("error", (err: Error) => {
+    throw err;
+  });
+  archive.pipe(res);
+  if (fs.existsSync(UPLOADS_DIR)) {
+    archive.directory(UPLOADS_DIR, false);
+  }
+  await archive.finalize();
+});
+
+router.post("/database/restore-files", filesUpload.single("file"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "Aucun fichier reçu." });
+  }
+
+  let zip: AdmZip;
+  try {
+    zip = new AdmZip(req.file.buffer);
+  } catch {
+    return res.status(400).json({ error: "Fichier de sauvegarde invalide (zip attendu)." });
+  }
+
+  // Full replace, matching /database/restore's TRUNCATE-then-insert semantics: clear the
+  // existing uploads before extracting so the result exactly matches the backup's contents.
+  // UPLOADS_DIR itself is a Docker volume mount point in the compose deployment, so only its
+  // contents can be removed (rmdir-ing the mount point itself fails with EBUSY).
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  for (const entry of fs.readdirSync(UPLOADS_DIR)) {
+    fs.rmSync(path.join(UPLOADS_DIR, entry), { recursive: true, force: true });
+  }
+  zip.extractAllTo(UPLOADS_DIR, true);
 
   res.json({ success: true });
 });
