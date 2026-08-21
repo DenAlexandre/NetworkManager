@@ -11,3 +11,8 @@ postgres
 
 
 
+A la creation du docker :
+http://localhost:8080
+
+
+
