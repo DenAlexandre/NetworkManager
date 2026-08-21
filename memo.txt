@@ -35,6 +35,8 @@ Demo123
 https://networkmanager-backend.onrender.com
 https://networkmanager.dalexandre-semeru.workers.dev/
 
+https://dxpiqlrnkoxiegyuloxo.storage.supabase.co/storage/v1/s3
+
 
 
 
