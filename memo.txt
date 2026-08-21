@@ -16,13 +16,30 @@ scripts/ .\run-docker.ps1
 
 http://localhost:8080
 admin
+
+
+
 changeme123
+
+
+
+
+
+
+
 
 A la restauration du backup
 Admin
 Admin123
 
+Editeur
+Demo123
 
+Lecteur
+Demo123
+
+Utilisateur
+Demo123
 
 
 

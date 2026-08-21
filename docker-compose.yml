@@ -24,8 +24,19 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-networkmanager}
     volumes:
       - networkmanager-pgdata:/var/lib/postgresql/data
+      # Only runs once, when the data directory is empty (fresh volume): loads a
+      # snapshot of this project's schema + reference data + rights setup
+      # (roles/permissions, admin + demo accounts) so a new deployment starts
+      # from the same state instead of an empty database. See
+      # docker/postgres-init/README.md to refresh this snapshot.
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      # -h 127.0.0.1 forces a TCP check. Without it, pg_isready defaults to the
+      # unix socket, which postgres accepts on briefly during first-init (while
+      # running docker/postgres-init/*.sql) before it restarts to listen on TCP
+      # — reporting "healthy" too early and racing the backend's first
+      # migration attempt (ECONNREFUSED).
+      test: ["CMD-SHELL", "pg_isready -U postgres -h 127.0.0.1"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -44,7 +55,7 @@ services:
       DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-networkmanager}
       JWT_SECRET: ${JWT_SECRET:?Definissez JWT_SECRET dans .env (voir .env.example)}
       CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:8080}
-      SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-admin}
+      SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-Admin}
       SEED_ADMIN_FIRST_NAME: ${SEED_ADMIN_FIRST_NAME:-Admin}
       SEED_ADMIN_LAST_NAME: ${SEED_ADMIN_LAST_NAME:-Admin}
       SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@example.com}
