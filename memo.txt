@@ -8,11 +8,22 @@ networkmanager
 postgres
 postgres
 
-
+**************************************
 
 
 A la creation du docker :
+scripts/ .\run-docker.ps1
+
 http://localhost:8080
+admin
+changeme123
+
+A la restauration du backup
+Admin
+Admin123
+
+
+
 
 
 
