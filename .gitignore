@@ -1,2 +1,2 @@
 .env
-docker/allinone/certs/*.crt
+docker/certs/*.crt

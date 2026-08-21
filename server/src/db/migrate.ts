@@ -68,10 +68,18 @@ WHERE NOT EXISTS (SELECT 1 FROM roles WHERE is_default_registration_role = true)
 -- Mise a niveau des bases existantes : remplace l'ancienne colonne role (admin/user) par un
 -- rattachement a un role de Gestion des droits.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS role_id INTEGER REFERENCES roles(id);
-UPDATE users SET role_id = (SELECT id FROM roles WHERE is_admin = true)
-  WHERE role_id IS NULL AND role = 'admin';
-UPDATE users SET role_id = (SELECT id FROM roles WHERE is_default_registration_role = true)
-  WHERE role_id IS NULL AND role = 'user';
+-- "role" is dropped below once migrated, so a later re-run of this script (once
+-- every existing database has already gone through this transition) would
+-- otherwise fail with "column role does not exist" on these UPDATEs.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'role') THEN
+    UPDATE users SET role_id = (SELECT id FROM roles WHERE is_admin = true)
+      WHERE role_id IS NULL AND role = 'admin';
+    UPDATE users SET role_id = (SELECT id FROM roles WHERE is_default_registration_role = true)
+      WHERE role_id IS NULL AND role = 'user';
+  END IF;
+END $$;
 ALTER TABLE users ALTER COLUMN role_id SET NOT NULL;
 ALTER TABLE users DROP COLUMN IF EXISTS role;
 

@@ -1,30 +1,47 @@
-# All-in-one deployment: client + server + PostgreSQL in a single container
-# (docker/allinone/Dockerfile). This is independent of the day-to-day dev
-# workflow (scripts/start-db.ps1 + run-dev.ps1 + the "networkmanager-db"
-# container), which is unaffected by this file.
+# 3-container deployment: postgres, backend (API) and frontend (nginx +
+# built client), one service each. Independent of the day-to-day dev workflow
+# (scripts/start-db.ps1 + run-dev.ps1 + the "networkmanager-db" container),
+# which is unaffected by this file.
 #
 # Quick start:
 #   cp .env.example .env      # edit JWT_SECRET / SEED_ADMIN_PASSWORD / etc.
 #   docker compose up -d --build
 #   -> http://localhost:8080
 #
-# Or use ./scripts/run-allinone.ps1, which does the above (and can recreate it).
+# Or use ./scripts/run-docker.ps1, which does the above (and can recreate it).
+#
+# If the build fails on `npm ci` with a certificate error, see
+# docker/certs/README.md (common behind an SSL-inspecting corporate proxy).
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: docker/allinone/Dockerfile
-      args:
-        VITE_API_URL: ${VITE_API_URL:-/api}
-    container_name: networkmanager-allinone
+  postgres:
+    image: postgres:16-alpine
+    container_name: networkmanager-postgres
     restart: unless-stopped
-    ports:
-      - "${APP_PORT:-8080}:80"
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-networkmanager}
-      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-postgres}@127.0.0.1:5432/${POSTGRES_DB:-networkmanager}
+    volumes:
+      - networkmanager-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    container_name: networkmanager-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: 4000
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-networkmanager}
       JWT_SECRET: ${JWT_SECRET:?Definissez JWT_SECRET dans .env (voir .env.example)}
       CLIENT_ORIGIN: ${CLIENT_ORIGIN:-http://localhost:8080}
       SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-admin}
@@ -34,11 +51,23 @@ services:
       SEED_ADMIN_PHONE: ${SEED_ADMIN_PHONE:-0000000000}
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?Definissez SEED_ADMIN_PASSWORD dans .env (voir .env.example)}
     volumes:
-      - networkmanager-allinone-pgdata:/var/lib/postgresql/data
-      - networkmanager-allinone-uploads:/app/server/uploads
+      - networkmanager-uploads:/app/uploads
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+    container_name: networkmanager-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${APP_PORT:-8080}:80"
 
 volumes:
-  networkmanager-allinone-pgdata:
-    name: networkmanager-allinone-pgdata
-  networkmanager-allinone-uploads:
-    name: networkmanager-allinone-uploads
+  networkmanager-pgdata:
+    name: networkmanager-pgdata
+  networkmanager-uploads:
+    name: networkmanager-uploads

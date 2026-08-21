@@ -1,34 +1,34 @@
 <#
 .SYNOPSIS
-    Construit et (re)lance le conteneur tout-en-un (client + serveur + PostgreSQL)
-    defini par docker-compose.yml / docker/allinone/.
+    Construit et (re)lance les 3 conteneurs (postgres, backend, frontend)
+    defini par docker-compose.yml / docker/backend, docker/frontend.
 
 .DESCRIPTION
     N'affecte pas le workflow de dev habituel (scripts/start-db.ps1, run-dev.ps1,
-    conteneur "networkmanager-db") : ce script pilote un conteneur separe,
-    "networkmanager-allinone".
+    conteneur "networkmanager-db") : ce script pilote 3 conteneurs separes,
+    "networkmanager-postgres", "networkmanager-backend", "networkmanager-frontend".
 
     Copie .env.example vers .env au premier lancement si besoin.
 
 .PARAMETER Recreate
-    Force la recreation du conteneur (docker compose up --force-recreate), utile
-    apres un changement de code pour etre sur de repartir d'une image fraiche.
+    Force la recreation des conteneurs (docker compose up --force-recreate),
+    utile apres un changement de code pour etre sur de repartir d'images fraiches.
 
 .PARAMETER Down
-    Arrete et supprime le conteneur au lieu de le demarrer.
+    Arrete et supprime les conteneurs au lieu de les demarrer.
 
 .PARAMETER Wipe
     Utilise avec -Down : supprime aussi les volumes (donnees Postgres + uploads
     perdues). Ignore sans -Down.
 
 .EXAMPLE
-    ./run-allinone.ps1                # build + up -d
+    ./run-docker.ps1                # build + up -d
 .EXAMPLE
-    ./run-allinone.ps1 -Recreate      # rebuild l'image et recree le conteneur
+    ./run-docker.ps1 -Recreate      # rebuild les images et recree les conteneurs
 .EXAMPLE
-    ./run-allinone.ps1 -Down          # arrete le conteneur (garde les donnees)
+    ./run-docker.ps1 -Down          # arrete les conteneurs (garde les donnees)
 .EXAMPLE
-    ./run-allinone.ps1 -Down -Wipe    # arrete et efface aussi les donnees
+    ./run-docker.ps1 -Down -Wipe    # arrete et efface aussi les donnees
 #>
 
 param(
@@ -88,10 +88,10 @@ Push-Location $RepoRoot
 try {
     if ($Down) {
         if ($Wipe) {
-            Write-Host "Arret du conteneur et suppression des volumes (donnees perdues)..." -ForegroundColor Yellow
+            Write-Host "Arret des conteneurs et suppression des volumes (donnees perdues)..." -ForegroundColor Yellow
             Invoke-Docker @("compose", "-f", $ComposeFile, "down", "-v")
         } else {
-            Write-Host "Arret du conteneur (donnees conservees)..." -ForegroundColor Cyan
+            Write-Host "Arret des conteneurs (donnees conservees)..." -ForegroundColor Cyan
             Invoke-Docker @("compose", "-f", $ComposeFile, "down")
         }
         return
@@ -108,7 +108,7 @@ try {
         $upArgs += "--force-recreate"
     }
 
-    Write-Host "Construction et demarrage du conteneur tout-en-un..." -ForegroundColor Cyan
+    Write-Host "Construction et demarrage des conteneurs (postgres, backend, frontend)..." -ForegroundColor Cyan
     Invoke-Docker $upArgs
 
     $appPort = "8080"
@@ -118,9 +118,9 @@ try {
     }
 
     Write-Host ""
-    Write-Host "Conteneur 'networkmanager-allinone' demarre." -ForegroundColor Green
+    Write-Host "Conteneurs 'networkmanager-postgres', 'networkmanager-backend', 'networkmanager-frontend' demarres." -ForegroundColor Green
     Write-Host "Application disponible sur http://localhost:$appPort (le demarrage initial peut prendre quelques secondes : postgres s'initialise puis les migrations/seed tournent)."
-    Write-Host "Logs : docker logs -f networkmanager-allinone" -ForegroundColor DarkGray
+    Write-Host "Logs : docker compose -f docker-compose.yml logs -f" -ForegroundColor DarkGray
 } finally {
     Pop-Location
 }
