@@ -1,0 +1,184 @@
+{
+  "version": 1,
+  "createdAt": "2026-08-21T09:43:11.828Z",
+  "tables": {
+    "roles": [
+      {
+        "id": 1,
+        "name": "Admin",
+        "is_system": true,
+        "is_admin": true,
+        "is_default_registration_role": false,
+        "created_at": "2026-08-20T14:10:20.259Z"
+      },
+      {
+        "id": 2,
+        "name": "Utilisateur",
+        "is_system": true,
+        "is_admin": false,
+        "is_default_registration_role": true,
+        "created_at": "2026-08-20T14:10:20.259Z"
+      },
+      {
+        "id": 3,
+        "name": "Lecteur",
+        "is_system": false,
+        "is_admin": false,
+        "is_default_registration_role": false,
+        "created_at": "2026-08-20T15:01:47.051Z"
+      },
+      {
+        "id": 4,
+        "name": "Editeur",
+        "is_system": false,
+        "is_admin": false,
+        "is_default_registration_role": false,
+        "created_at": "2026-08-20T15:01:54.567Z"
+      }
+    ],
+    "role_permissions": [
+      {
+        "id": 1,
+        "role_id": 2,
+        "section": "apis",
+        "access_level": "read"
+      },
+      {
+        "id": 2,
+        "role_id": 2,
+        "section": "plans",
+        "access_level": "read"
+      },
+      {
+        "id": 3,
+        "role_id": 3,
+        "section": "sites",
+        "access_level": "read"
+      },
+      {
+        "id": 4,
+        "role_id": 3,
+        "section": "equipment",
+        "access_level": "read"
+      },
+      {
+        "id": 5,
+        "role_id": 3,
+        "section": "variables",
+        "access_level": "read"
+      },
+      {
+        "id": 6,
+        "role_id": 3,
+        "section": "apis",
+        "access_level": "read"
+      },
+      {
+        "id": 7,
+        "role_id": 3,
+        "section": "plans",
+        "access_level": "read"
+      },
+      {
+        "id": 8,
+        "role_id": 3,
+        "section": "reporting",
+        "access_level": "read"
+      },
+      {
+        "id": 9,
+        "role_id": 4,
+        "section": "data-types",
+        "access_level": "write"
+      },
+      {
+        "id": 10,
+        "role_id": 4,
+        "section": "sites",
+        "access_level": "write"
+      },
+      {
+        "id": 11,
+        "role_id": 4,
+        "section": "equipment",
+        "access_level": "write"
+      },
+      {
+        "id": 12,
+        "role_id": 4,
+        "section": "variables",
+        "access_level": "write"
+      },
+      {
+        "id": 13,
+        "role_id": 4,
+        "section": "apis",
+        "access_level": "write"
+      },
+      {
+        "id": 14,
+        "role_id": 4,
+        "section": "plans",
+        "access_level": "write"
+      },
+      {
+        "id": 15,
+        "role_id": 4,
+        "section": "reporting",
+        "access_level": "write"
+      },
+      {
+        "id": 16,
+        "role_id": 4,
+        "section": "configurations",
+        "access_level": "write"
+      }
+    ],
+    "users": [
+      {
+        "id": 1,
+        "username": "Admin",
+        "first_name": "Admin",
+        "last_name": "Admin",
+        "email": "admin@example.com",
+        "phone": "0000000000",
+        "password_hash": "$2b$10$WQ/j4JculCcbs5dJDAJLJumI8WoRW0OmDw6uRGU9U59VCSmiLkFMi",
+        "created_at": "2026-08-14T09:41:15.948Z",
+        "role_id": 1
+      },
+      {
+        "id": 7,
+        "username": "Editeur",
+        "first_name": "Editeur",
+        "last_name": "Editeur",
+        "email": "Editeur@Editeur.com",
+        "phone": "0608229900",
+        "password_hash": "$2b$10$mlpOXEpRdgk.fXVTy3uycOt2aezkYV3ejMVJoi69OBZlzETA.DfEC",
+        "created_at": "2026-08-20T15:07:40.441Z",
+        "role_id": 4
+      },
+      {
+        "id": 8,
+        "username": "Lecteur",
+        "first_name": "Lecteur",
+        "last_name": "Lecteur",
+        "email": "Lecteur@Lecteur.com",
+        "phone": "0608229900",
+        "password_hash": "$2b$10$ww0EP79THZma1Xn/AeWnjuHf7HEGy9QC8UxMdJDwhJEIrJszM5T3C",
+        "created_at": "2026-08-20T15:08:21.077Z",
+        "role_id": 3
+      },
+      {
+        "id": 9,
+        "username": "Utilisateur",
+        "first_name": "Utilisateur",
+        "last_name": "Utilisateur",
+        "email": "Utilisateur@Utilisateur.com",
+        "phone": "0608229900",
+        "password_hash": "$2b$10$y3WqtqceKBgw1Rx/mep7GuaWRIUK4BGa7edLdEbkAqmrg6ZENvAZO",
+        "created_at": "2026-08-20T15:09:05.302Z",
+        "role_id": 2
+      }
+    ]
+  }
+}
