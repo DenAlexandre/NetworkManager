@@ -1,0 +1,12 @@
+{
+  // Cloudflare Workers Static Assets config for the frontend build (client/dist). Replaces a
+  // _redirects-based SPA fallback: on this platform, a "/* -> /index.html" _redirects rule
+  // conflicts with Cloudflare's own asset-serving normalization and is rejected at deploy time
+  // as an infinite redirect loop. not_found_handling is the supported way to do SPA fallback here.
+  "name": "networkmanager",
+  "compatibility_date": "2026-08-21",
+  "assets": {
+    "directory": "./dist/",
+    "not_found_handling": "single-page-application"
+  }
+}

@@ -84,6 +84,12 @@ réveil prend 30-60s).
      (URL publique du bucket Supabase de l'étape 1)
 4. Déployer. Noter l'URL Cloudflare Pages (`https://<project>.pages.dev` ou domaine personnalisé).
 
+Le routage SPA (recharger une page sur `/equipment`, etc. sans 404) est géré par
+`client/wrangler.jsonc` (`assets.not_found_handling: "single-page-application"`) — Cloudflare
+déploie désormais ce type de projet sur son infrastructure Workers, où un fichier `_redirects` avec
+une règle `/* -> /index.html` est rejeté au déploiement ("infinite redirect loop") car il entre en
+conflit avec cette gestion native ; ne pas réintroduire de `_redirects` pour ce besoin.
+
 ## 4. Recroiser les URLs
 
 Retourner dans Render et régler `CLIENT_ORIGIN` sur l'URL Cloudflare Pages de l'étape 3, puis
